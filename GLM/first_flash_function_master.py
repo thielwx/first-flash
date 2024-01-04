@@ -3,8 +3,11 @@
 
 # In[1]:
 
-
-#This script is a hub for all major functions used during the first-flash project
+#=================================================================================
+#This script is a hub for all major GLM functions used during the first-flash project
+# Author: Kevin Thiel (kevin.thiel@ou.edu)
+# Created: October 2023
+#=================================================================================
 
 
 # In[2]:
@@ -27,7 +30,7 @@ def datetime_converter(time):
     This function takes in a datetime object and returns strings of time features
     PARAMS:
         time: input time (datetime object)
-    Returns
+    RETURNS:
         y: year (4 digit number as str)
         doy: day of year (3 digit number as str)
         hr: hour of day (2 digit number as str)

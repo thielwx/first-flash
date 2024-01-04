@@ -1,9 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+#==================================================================================
 # A third attempt at writing out the GLM first flash raw files into a netCDF format containing all of the necessary flash, group, and event data.
-# 
 # I still want to use the idea of creating the file, and recursively filling it with the data, but I really need to understand what I am doing
+# Author: Kevin Thiel (kevin.thiel@ou.edu)
+# Created: November 2023
+#
+# Inputs:
+#      start time YYYYmmdd
+#      end time YYYYmmdd
+#      GLM number
+#      'land' or 'all'
+#=================================================================================
 
 # In[1]:
 
@@ -24,6 +33,18 @@ import global_land_mask as globe
 
 
 def raw_finder(start_time, glm_sat, data_loc, search_r, search_m, ver):
+    '''
+    This function takes in the data-specific info, finds the associated RAW GLM files, and compiles them into a dataframe
+    PARAMS:
+        time: start date and time (datetime object)
+        glm_sat: glm number (e.g. 16) (int)
+        data_loc: file location of the raw files (str)
+        search_r: radius of search of the raw files (int)
+        search_m: time spand of serach of the raw files (int)
+        ver: version of the raw files (int)
+    RETURNS:
+        ff_df: A dataframe of the compiled raw GLM data from the csv files (DataFrame)
+    '''
     #data_loc = '../../test-data/' #Dev Mode
     
     #converting the datetime objects to string pieces
@@ -55,6 +76,13 @@ def raw_finder(start_time, glm_sat, data_loc, search_r, search_m, ver):
 
 
 def dset_land_points(df):
+    '''
+    This function removes all of the points that are not on land from the compiled raw GLM dataframe
+    PARAMS:
+        df: A dataframe of the compiled raw GLM data (DataFrame)
+    RETURNS:
+        ff_land: A dataframe of the compiled raw GLM data on land (DataFrame)
+    '''
     #Getting the lat and lon values from the dataframe
     pre_lat = df['lat'].values
     pre_lon = df['lon'].values
@@ -72,6 +100,19 @@ def dset_land_points(df):
 
 
 def output_file_str_create(start_time, end_time, glm_sat, ver, data_loc):
+    '''
+    This function takes in the data-specific info, finds the associated RAW GLM files, and compiles them into a dataframe
+    PARAMS:
+        start_time: start date and time (datetime object)
+        end_time: end date and time (datetime object)
+        glm_sat: glm number (e.g. 16) (int)
+        ver: version of the raw files (int)
+        data_loc: file location of the output files (str))
+    RETURNS:
+        file_save_str: output string of netCDF file (string)
+        file_loc_str: output string of directory location (string)
+        cur_time: current datetime used in the netCDF file (datetime object)
+    '''
     #Formatting the file strings
     y, m, d, doy, hr, mi = ff.datetime_converter(start_time)
     file_start_str = 's'+y+m+d+hr+mi
@@ -97,6 +138,20 @@ def output_file_str_create(start_time, end_time, glm_sat, ver, data_loc):
 
 
 def meta_create_v2():
+    '''
+    This function creates the meta data that gets used when formatting the netCDF file.
+    Yes it's a mess, but it's my mess
+    PARAMS:
+        None
+    RETURNS:
+        meta_dict: A dictionary containing the meta-data that formats the netCDF file (dictionary)
+        f_keys: The flash-level keys used in the meta-dict dictionary (list of strings)
+        g_keys: The group-level keys used in the meta-dict dictionary (list of strings)
+        e_keys: The event-level keys used in the meta-dict dictionary (list of strings)
+        aux_keys1: The first set of auxilary keys used in the meta-dict dictionary (list of strings)
+        aux_keys2: The second set of auxilary keys used in the meta-dict dictionary (list of strings)
+        compress_dict: The dictionary that contains the information for compressing the data (not used but may be useful someday) (dictionary)
+    '''
 
     f_keys = ['flash_id','flash_time_offset_of_first_event','flash_time_offset_of_last_event','flash_lat','flash_lon','flash_area','flash_energy','flash_quality_flag']
     g_keys = ['group_id','group_time_offset','group_lat','group_lon','group_area','group_energy','group_parent_flash_id','group_quality_flag']
@@ -176,6 +231,15 @@ def meta_create_v2():
 
 
 def output_netcdf_setup(out,meta_dict,compress_dict):
+    '''
+    This function removes all of the points that are not on land from the compiled raw GLM dataframe
+    PARAMS:
+        out: The output netCDF file in write mode (netCDF)
+        meta_dict: A dictionary containing the meta-data that formats the netCDF file (dictionary)
+        compress_dict: The dictionary that contains the information for compressing the data (not used but may be useful someday) (dictionary)
+    RETURNS:
+        out: The output netCDF file in write mode with the correct format (netCDF)
+    '''
 
     #Creating dimensions
     flash_num = out.createDimension('number_of_flashes', None)
@@ -230,6 +294,23 @@ def output_netcdf_setup(out,meta_dict,compress_dict):
 
 
 def netcdf_filler(out, f_keys, g_keys, e_keys, aux_keys1, aux_keys2, meta_dict, dset, flash_id, ff_df, file):
+    '''
+    This function removes all of the points that are not on land from the compiled raw GLM dataframe
+    PARAMS:
+        out: The output netCDF file in append mode (netCDF file)
+        f_keys: The flash-level keys used in the meta-dict dictionary (dictionary)
+        g_keys: The group-level keys used in the meta-dict dictionary (dictionary)
+        e_keys: The event-level keys used in the meta-dict dictionary (dictionary)
+        aux_keys1: The first set of auxilary keys used in the meta-dict dictionary (list of strings)
+        aux_keys2: The second set of auxilary keys used in the meta-dict dictionary (list of strings)
+        meta_dict: A dictionary containing the meta-data that formats the netCDF file (dictionary)
+        dset: The netCDF file we are currently extracting data from (netCDF file)
+        flash_id: The flash_id of the current falsh being extracted from the file (int)
+        ff_df: A dataframe of the compiled raw GLM data on land (DataFrame)
+        file: The file string of the netCDF file we're extracting from (string)
+    RETURNS:
+        out: The output netCDF file in write mode with the correct format (netCDF)
+    '''
     
     #Getting the flash, group, and event locations within the GLM L2 file
     flash_locs = np.where(dset.variables['flash_id'][:]==flash_id)[0]
@@ -275,7 +356,6 @@ def netcdf_filler(out, f_keys, g_keys, e_keys, aux_keys1, aux_keys2, meta_dict, 
         rev_index = i*-1
         out.variables[aux_keys2[1]][rev_index-1] = new_g_files[rev_index-1]
 
-
     #Events: Looping through each event, and inside its variables in the GLML2 file and putting them into the netCDF
     for a in range(len(event_locs)): #Outer loop so we're going through each event
         for b in range(len(e_keys)): #Inner loop so we're going throgh each variable of the event
@@ -285,6 +365,7 @@ def netcdf_filler(out, f_keys, g_keys, e_keys, aux_keys1, aux_keys2, meta_dict, 
                 out.variables[cur_var][dim_len] = dset.variables[cur_var][:].data[event_locs[a]] #Using the dimension length as the new INDEX for the new data
             else:
                 out.variables[cur_var][dim_len-1] = dset.variables[cur_var][:].data[event_locs[a]] #Using the dimension length (-1) as the current  INDEX for the new data
+   
     #Putting all of the file names for the groups together 
     for i in range(len(new_e_files)):
         rev_index = i*-1
@@ -298,8 +379,6 @@ def netcdf_filler(out, f_keys, g_keys, e_keys, aux_keys1, aux_keys2, meta_dict, 
         aux_key1 = aux_keys1[i]
         dim_len = out.dimensions[meta_dict[aux_key1][2][0]].size #getting the current dimension length
         out.variables[aux_key1][dim_len-1] = ff_df.loc[(ff_df['fstart']==file)&(ff_df['flash_id']==flash_id),df_key] #Using the dimension length as the new INDEX for the new data
-
-
 
 
     return out
