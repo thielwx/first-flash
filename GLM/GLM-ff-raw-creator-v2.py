@@ -35,7 +35,6 @@ import multiprocessing as mp
 import os
 from glob import glob
 
-
 # # Input variables
 
 # In[3]:
@@ -162,12 +161,4 @@ print ('DataFrame Created')
 
 first_flash_multiprocessor(start_time, end_time)
 
-now_update3 = datetime.now()
 print ('First Flashes Found')
-
-
-# In[ ]:
-
-
-
-

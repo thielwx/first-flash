@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Base code to work with ENI data
+#=================================================================================
+#This script is a hub for all major ENI functions used during the first-flash project
+# Author: Kevin Thiel (kevin.thiel@ou.edu)
+# Created: Janaury 2024
+#=================================================================================
 
-# In[24]:
 
 
 import pandas as pd
@@ -12,6 +15,8 @@ from datetime import datetime
 from datetime import timedelta
 from glob import glob
 import global_land_mask as globe
+import json
+from sklearn.neighbors import BallTree
 
 
 def datetime_converter(time):
@@ -37,8 +42,6 @@ def datetime_converter(time):
     return y, m, d, doy, hr, mi
 
 
-# In[15]:
-
 
 def latlon_bounds(flash_lats, flash_lons):
     '''
@@ -61,8 +64,6 @@ def latlon_bounds(flash_lats, flash_lons):
     return latlon_locs
 
 
-# In[2]:
-
 
 def dset_land_points(flash_lats,flash_lons):
     '''
@@ -79,8 +80,6 @@ def dset_land_points(flash_lats,flash_lons):
     return land_index
 
 
-# In[28]:
-
 
 def eni_loader(start_time, end_time, input_loc):
     '''
@@ -96,7 +95,7 @@ def eni_loader(start_time, end_time, input_loc):
     time_list = pd.date_range(start=start_time, end=end_time,freq='1min').to_list()
     
     #Empty DataFrame that we'll fill
-    df = pd.DataFrame(columns=('Lightning_Time_String','Latitude','Longitude','Height','Flash_Type','Amplitude','Flash_Solution','Confidence'))
+    df = pd.DataFrame(columns=('Lightning_Time_String','Latitude','Longitude','Height','Flash_Type','Amplitude','Flash_Solution','Confidence','File_String'))
     
     #Looping through the list of available times
     for cur_time in time_list:
@@ -118,15 +117,111 @@ def eni_loader(start_time, end_time, input_loc):
             print ('ERROR: NO FILE FOUND')
             continue
         
+        cfile_str = collected_file[0]
+
         #Reading in the collected file
-        new_df = pd.read_csv(collected_file[0])
-        
+        new_df = pd.read_csv(cfile_str)
+
         #Removing the data outside of the domain of study
         bound_index = latlon_bounds(new_df['Latitude'].values, new_df['Longitude'].values)
         new_df = new_df.iloc[bound_index,:]
-        
+
+        #Adding the current file string to the new dataframe so we can find it more easily later
+        file_str_list = np.full(new_df.shape[0], y + m + d + '/'+ file_str)
+        new_df['File_String'] = file_str_list
+
         #Appending the new DataFrame to the combined one
         df = pd.concat((df,new_df),axis=0)
         
     return df
         
+
+def time_str_converter(time_str):
+    '''
+    Converts an array of time strings into an array of datetimes
+    PARAMS:
+        time_str: Array of strings that represent the times from ENI datasets (str). EX: df['Lightning_Time_String'].values
+    RETURNS:
+        time_array: An array of datetime objects from the original time_str (datetime)
+    '''
+    time_array = [pd.to_datetime(time_str[i]) for i in range(len(time_str))]
+    
+    return time_array
+
+
+def json_data_loader(df, var):
+    '''
+    Extracts data from the json files hidden in the dataframe
+    INPUTS:
+        df: eni dataframe with the Flash_Solution variable
+        var: which variable you would like to extract
+    RETURNS:
+        out_data: Array of values from all jsons within the dataset
+    '''
+    #Making an array that we'll fill with the real data
+    out_data = np.empty(df.shape[0], dtype=object)
+    
+    #Grabbing the data we'll be transforming
+    f_soln_str = df['Flash_Solution'].values
+    
+    #Looping through each flash in the dataset
+    for i in range(len(f_soln_str)):
+        out_data[i] = json.loads(f_soln_str[i])[var]
+        
+    return out_data
+
+
+def eni_ff_hunter(df, search_start_time, search_end_time, search_r, search_m):
+    '''
+    Funciton used to identify first flash events. Using the Ball Tree from scikitlearn
+    https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
+    Adapted from first-flash/GLM/first_flash_funtion_master.py:ff_hunter
+    PARAMS:
+        df: Dataframe containing the start_time, lat, lon, lat_rad, lon_rad
+        search_start_time: start time used to depict which flashes are being investigated
+        search_end_time: end time used to depict which flashes are being investigated
+        search_r: Search radius of the ball tree (km)
+        search_m: Time window to search in (minutes)
+    RETURNS:
+        ff_df: A dataframe containing only the first flash events
+    '''
+    R = 6371.0087714 #Earths radius in km
+    
+    #Need to institute this below
+    t_delta = timedelta(minutes=search_m)
+
+    ff_df = pd.DataFrame()
+    
+    #Pruning our indicies to only the ones that are after the current search timeframe
+    start_time = json_data_loader(df, 'st') #Adding the flash start times to the dataframe
+    df['start_time'] = time_str_converter(start_time)
+    df_search = df.loc[(df['start_time'] >= search_start_time) & (df['start_time'] <= search_end_time)]
+    
+    #This loop goes through based upon the index of the provided dataframe and finds the first flashes
+    #The output is a dataframe of first flash events 
+    for i in df_search.index.values:
+        #Getting the current lat, lon, and index
+        c_pt = df.loc[i][['lat_rad','lon_rad']].values
+        c_stime = df.loc[i][['start_time']].values[0]
+
+        #Removing the flashes that happened 30 min before and anything after the current flash from consideration
+        time_prev = df.loc[i]['start_time'] - t_delta #Finding the time from the previous 30 minutes
+        df_cut = df.loc[(df.loc[i][['start_time']].values[0] >= df['start_time']) & 
+                         (df['start_time'] >= time_prev)]
+        
+        #Making a smaller tree to reduce the required memory (and increase speed) of the ball tree
+        dx = 0.5 #Change in latitude max. Using a blanket benchmark to reduce the number of distance calculations made
+        df_cut = df_cut.loc[(df_cut['Latitude'] <= (df_search.loc[i])['Latitude']+dx) &
+                           (df_cut['Latitude'] >= (df_search.loc[i]['Latitude']-dx)) &
+                           (df_cut['Longitude'] <= (df_search.loc[i]['Longitude']+dx)) &
+                           (df_cut['Longitude'] >= (df_search.loc[i]['Longitude']-dx))]
+
+        #Setting up and running a ball tree
+        btree = BallTree(df_cut[['lat_rad','lon_rad']].values, leaf_size=2, metric='haversine')
+        indicies = btree.query_radius([c_pt], r = search_r/R)
+
+        #If only the point itself is returned within the search distance, then
+        if len(indicies[0])==1:
+            ff_df = pd.concat((ff_df,df.loc[df.index==i]),axis=0)
+            
+    return ff_df
