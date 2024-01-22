@@ -23,20 +23,30 @@ import numpy as np
 # In[ ]:
 
 
-def lma_file_finder(time, data_loc):
+def lma_file_finder(time, data_loc, lma_string):
     '''
     Finding the lma files for a given date
     PARAMS:
         time: The date of interest (DateTime)
-        data_loc: 
+        data_loc: The base file string that contains the data (str)
+        lma_string: The specified lma
     RETURNS:
-        None
+        collected_files: A list of collected strings from the glob function with the data (str)
     '''
     y, m, d, doy, hr, mi = lma_kit.datetime_converter(time) #Get current date as string
-    
-    file_loc_end = y + '/' + m + '/' + d +'/'
+    if (lma_string == 'OK-LMA') or (lma_string == 'LEE-LMA'):
+        file_loc_end = y + '/' + m + '/' + d +'/'
+    elif (lma_string == 'NGA-LMA') or (lma_string == 'NAL-LMA'):
+        file_loc_end = y + m + d + '/'
+    elif (lma_string == 'perils-LMA'):
+        file_loc_end = y[-2:] + m + d + '/'
+    else:
+        print ('ERROR: Undefined file_loc_end')
+        exit()
+
+
     file_loc_str = data_loc+file_loc_end + '*.h5'
-    
+    #print (file_loc_str)
     collected_files = glob(file_loc_str)
     
     return collected_files
@@ -138,7 +148,7 @@ def file_output_creator(t_start_dt, n_source_min, output_data_loc, lma_string, d
 datetime_start = datetime.now()
 
 #==========================
-# Run like this python GLM-ff-controller 20220501 20220502 16
+# Run like this python lma-sorted-flash-loader_v2.py 20220501 20220502 OK-LMA
 #==========================
 
 #args = ['','20220504', '20220505', 'OK-LMA']
@@ -154,9 +164,25 @@ t_end_dt = datetime.strptime(t_end, '%Y%m%d') #Converting into datetimes
 time_list = pd.date_range(start=t_start_dt, end=t_end_dt, freq='D').to_list()
 
 #Variables 
-data_loc = '/raid/lng1/flashsort/h5_files/' #Source of the flash sorted LMA files
 n_source_min = 10 # Minimum number of sources
 output_data_loc = '/localdata/first-flash/data/'+lma_string+'-RAW/'
+
+#Source of the flash sorted LMA files
+#If not running on a local machine you will have to change these
+#to point to your local directory
+if lma_string == 'OK-LMA':
+    data_loc = '/raid/lng1/flashsort/h5_files/'
+elif lma_string == 'perils-LMA':
+    data_loc = '/raid/lng1/analyzed_data_v10/deployments/flashsort/h5_files/'
+elif lma_string == 'LEE-LMA':
+    data_loc = '/raid/lng1/analyzed_data_v10/deployments/flashsort/h5_files/'
+elif lma_string == 'NAL-LMA':
+    data_loc = '/localdata/first-flash/data/NAL-LMA-h5_files/'
+elif lma_string == 'NGA-LMA':
+    data_loc =  '/localdata/first-flash/data/NGA-LMA-h5_files/'
+else:
+    print('ERROR: Invalid lma network entered, pick from the following:/n OK-LMA / perils-LMA / LEE-LMA / NAL-LMA / NGA-LMA')
+    exit()
 
 
 # In[ ]:
@@ -167,7 +193,7 @@ for i in range(len(time_list)-1): #Looping through the files on a daily basis
     flash_df = pd.DataFrame() #Empty dataframe that we're filling with the flashes
     event_df = pd.DataFrame() #Empty dataframe that we're filling with the sources (events)
 
-    lma_files = lma_file_finder(time_list[i], data_loc) #Getting the list of file strings to then read them in
+    lma_files = lma_file_finder(time_list[i], data_loc, lma_string) #Getting the list of file strings to then read them in
     
     if len(lma_files) == 0: #A check that we actually have data, if not then skip this date
         print ('NO FILES FOUND: '+str(time_list[i]))
