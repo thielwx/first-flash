@@ -1,4 +1,7 @@
 __pycache__/
 ENI/__pycache__/
+ENI/nohup.out
 GLM/__pycache__/
+GLM/nohup.out
 LMA/__pycache__/
+LMA/nohup.out
