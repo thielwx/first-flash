@@ -38,8 +38,8 @@ import os
 # In[2]:
 
 
-#args = sys.argv
-args = ['BLANK','202203200100','202203200200'] #casename,start date, end date, glm name #DEV MODE
+args = sys.argv
+#args = ['BLANK','202203200100','202203200200'] #casename,start date, end date, glm name #DEV MODE
 
 start_time_str = args[1]
 end_time_str = args[2]
@@ -55,8 +55,8 @@ ver = 1
 delta_t = timedelta(minutes=search_m)
 
 #Data Location String
-data_loc = '../../test-data/ENI-test/' #DEVMODE
-#data_loc = '/raid/' #NEED TO FILL OUT BEFORE RUNNING ON DEVLAB4
+#data_loc = '../../test-data/ENI-test/' #DEVMODE
+data_loc = '/raid/lightning-archive/ENI_CSV/flash/' #NEED TO FILL OUT BEFORE RUNNING ON DEVLAB4
 
 
 # In[3]:
@@ -98,10 +98,12 @@ def eni_ff_driver(s_time , e_time):
     global eni_df
     global delta_t
     
-    #Finding the first flash events over the given time period
-    ff_df = efm.eni_ff_hunter(eni_df, s_time, e_time, search_r, search_m)
-    #Saving that file as a csv
-    ff_raw_saver(ff_df, s_time, e_time, ver, search_r, search_m)   
+    #Making sure we actually have data to search for. If not then we skip it!
+    if eni_df.shape[0]:
+        #Finding the first flash events over the given time period
+        ff_df = efm.eni_ff_hunter(eni_df, s_time, e_time, search_r, search_m)
+        #Saving that file as a csv
+        ff_raw_saver(ff_df, s_time, e_time, ver, search_r, search_m)   
 
 
 # In[5]:
@@ -140,7 +142,7 @@ def ff_raw_saver(ff_df, s_time, e_time, version, search_r, search_m):
     save_str = front_string+'_'+stime_str+'_'+etime_str+'_'+ctime_str+'.csv'
     
     save_loc = '/localdata/first-flash/data/ENI_ffRAW_v'+str(version)+'/'+output_date_str+'/'
-    save_loc = './' #devmode
+    #save_loc = './' #devmode
     
     #We only need to save out a subset of the data so we can extact it later
     ff_df = ff_df[['Lightning_Time_String','Latitude','Longitude','File_String']]
@@ -187,11 +189,8 @@ print ('File List Created')
 eni_df = df_formatter(eni_df)
 
 
-# In[9]:
-
-
-eni_ff_driver(start_time, end_time) #DEVMODE
-#first_flash_multiprocessor(start_time, end_time)
+#eni_ff_driver(start_time, end_time) #DEVMODE
+first_flash_multiprocessor(start_time, end_time)
 print ('First Flashes Found')
 
 

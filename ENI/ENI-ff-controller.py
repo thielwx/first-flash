@@ -55,7 +55,7 @@ for i in range(len(time_list)-1):
     y, m, d, doy, hr, mi = efm.datetime_converter(time_list[i+1])
     end_time_str = y+m+d+hr+mi
     
-    cmd = 'python /localdata/PyScripts/first-flash/ENI/ENI-ff-raw-creator-v2.py '+start_time_str+' '+end_time_str
+    cmd = 'python /localdata/PyScripts/first-flash/ENI/eni_ff_raw_creator_v1.py '+start_time_str+' '+end_time_str
     print (cmd)
     
     p = sp.Popen(cmd,shell=True)
