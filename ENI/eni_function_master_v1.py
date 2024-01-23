@@ -204,7 +204,7 @@ def eni_ff_hunter(df, search_start_time, search_end_time, search_r, search_m):
     #Need to institute this below
     t_delta = timedelta(minutes=search_m)
 
-    ff_df = pd.DataFrame()
+    ff_df = pd.DataFrame(columns=('Lightning_Time_String','Latitude','Longitude','Height','Flash_Type','Amplitude','Flash_Solution','Confidence','File_String','start_time','lat_rad','lon_rad'))
     
     #Pruning our indicies to only the ones that are after the current search timeframe
     start_time = json_data_loader(df, 'st') #Adding the flash start times to the dataframe

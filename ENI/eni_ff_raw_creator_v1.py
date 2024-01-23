@@ -99,11 +99,13 @@ def eni_ff_driver(s_time , e_time):
     global delta_t
     
     #Making sure we actually have data to search for. If not then we skip it!
-    if eni_df.shape[0]:
-        #Finding the first flash events over the given time period
-        ff_df = efm.eni_ff_hunter(eni_df, s_time, e_time, search_r, search_m)
-        #Saving that file as a csv
-        ff_raw_saver(ff_df, s_time, e_time, ver, search_r, search_m)   
+    #if eni_df.shape[0]>0:
+    #Finding the first flash events over the given time period
+    ff_df = efm.eni_ff_hunter(eni_df, s_time, e_time, search_r, search_m)
+        
+    #    if ff_df.shape[0]>0:
+    #Saving that file as a csv
+    ff_raw_saver(ff_df, s_time, e_time, ver, search_r, search_m)   
 
 
 # In[5]:
