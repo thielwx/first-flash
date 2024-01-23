@@ -103,7 +103,7 @@ def eni_loader(start_time, end_time, input_loc):
         
         #Specifying the folder by date
         file_loc = input_loc + y + m + d + '/'
-        file_loc = input_loc #DEVMODE
+        #file_loc = input_loc #DEVMODE
         
         #Creating the file string we'll use in the glob function
         file_str = y + m + d + 'T' + hr + mi + '.csv'
