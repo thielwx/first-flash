@@ -103,7 +103,7 @@ def eni_loader(start_time, end_time, input_loc):
         
         #Specifying the folder by date
         file_loc = input_loc + y + m + d + '/'
-        #file_loc = input_loc #DEVMODE
+        file_loc = input_loc #DEVMODE
         
         #Creating the file string we'll use in the glob function
         file_str = y + m + d + 'T' + hr + mi + '.csv'
@@ -112,23 +112,37 @@ def eni_loader(start_time, end_time, input_loc):
         collected_file = sorted(glob(file_loc+file_str))
         
         if len(collected_file)==0:
-            print (cur_time)
             print (file_loc+file_str)
             print ('ERROR: NO FILE FOUND')
-            continue
-        
-        cfile_str = collected_file[0]
+            #No file found means a data gap. To ensure data quality we need a dummy entry that we can
+            # use in ENI_ff_hunter later
+            fake_dictionary = {
+                'Lightning_Time_String': [cur_time.strftime('%Y-%m-%dT%H:%M:%S.000000000')],
+                'Latitude':[0],
+                'Longitude':[0],
+                'Height':[-1],
+                'Flash_Type':[4],
+                'Amplitude':[0],
+                'Flash_Solution':[r'{"st": "'+cur_time.strftime('%Y-%m-%dT%H:%M:%S.000000000')+r'"}'],
+                'Confidence':[-1],
+                'File_String':[ y + m + d + '/'+ file_str]
+            }
+            new_df = pd.DataFrame(data=fake_dictionary) #Fake dataframe that will be appened to file
 
-        #Reading in the collected file
-        new_df = pd.read_csv(cfile_str)
+        #When there's actually data, we load it
+        else:
+            cfile_str = collected_file[0]
 
-        #Removing the data outside of the domain of study
-        bound_index = latlon_bounds(new_df['Latitude'].values, new_df['Longitude'].values)
-        new_df = new_df.iloc[bound_index,:]
+            #Reading in the collected file
+            new_df = pd.read_csv(cfile_str)
 
-        #Adding the current file string to the new dataframe so we can find it more easily later
-        file_str_list = np.full(new_df.shape[0], y + m + d + '/'+ file_str)
-        new_df['File_String'] = file_str_list
+            #Removing the data outside of the domain of study
+            bound_index = latlon_bounds(new_df['Latitude'].values, new_df['Longitude'].values)
+            new_df = new_df.iloc[bound_index,:]
+
+            #Adding the current file string to the new dataframe so we can find it more easily later
+            file_str_list = np.full(new_df.shape[0], y + m + d + '/'+ file_str)
+            new_df['File_String'] = file_str_list
 
         #Appending the new DataFrame to the combined one
         df = pd.concat((df,new_df),axis=0)
@@ -200,14 +214,28 @@ def eni_ff_hunter(df, search_start_time, search_end_time, search_r, search_m):
     #This loop goes through based upon the index of the provided dataframe and finds the first flashes
     #The output is a dataframe of first flash events 
     for i in df_search.index.values:
+
+        #A first check that the current flash is not a fake flash (see eni_loader)
+        if (df_search.loc[i]['Latitude']==0) & (df_search.loc[i]['Longitude']==0):
+            # print ('Check1')
+            # print (df_search.loc[i])
+            continue
+
         #Getting the current lat, lon, and index
         c_pt = df.loc[i][['lat_rad','lon_rad']].values
         c_stime = df.loc[i][['start_time']].values[0]
 
-        #Removing the flashes that happened 30 min before and anything after the current flash from consideration
+        #Removing the flashes that happened 30+ min before and anything after the current flash from consideration
         time_prev = df.loc[i]['start_time'] - t_delta #Finding the time from the previous 30 minutes
         df_cut = df.loc[(df.loc[i][['start_time']].values[0] >= df['start_time']) & 
                          (df['start_time'] >= time_prev)]
+        
+        #A second check that there were not any fake flashes (missing files) in the last 30 minutes
+        df_fake_check = df_cut.loc[(df_cut['Longitude']==0) & (df_cut['Latitude']==0)]
+        if df_fake_check.shape[0]>0:
+            # print ('Check2')
+            # print (c_stime)
+            continue
         
         #Making a smaller tree to reduce the required memory (and increase speed) of the ball tree
         dx = 0.5 #Change in latitude max. Using a blanket benchmark to reduce the number of distance calculations made
