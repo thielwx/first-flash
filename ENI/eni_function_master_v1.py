@@ -350,7 +350,7 @@ def eni_ff_hunter_v2(df, search_start_time, search_end_time, search_r, search_m)
           
         #Making a smaller tree to reduce the required memory (and increase speed) of the ball tree
         dx = 0.5 #Change in latitude max. Using a blanket benchmark to reduce the number of distance calculations made
-        df_cut = df_cut.loc[(df_cut['Latitude'] <= (df_search.loc[i])['latitude']+dx) &
+        df_cut = df_cut.loc[(df_cut['latitude'] <= (df_search.loc[i])['latitude']+dx) &
                            (df_cut['latitude'] >= (df_search.loc[i]['latitude']-dx)) &
                            (df_cut['longitude'] <= (df_search.loc[i]['longitude']+dx)) &
                            (df_cut['longitude'] >= (df_search.loc[i]['longitude']-dx))]
