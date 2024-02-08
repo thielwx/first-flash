@@ -177,10 +177,15 @@ def eni_loader_v2(start_time, end_time, input_loc):
         file_str = 'eni_flash_flash'+y + m + d + '.csv'
         
         print (file_loc+file_str)
-        
+
         #Collecting the files on the given day
         collected_file = sorted(glob(file_loc+file_str))
         
+        if len(collected_filie)==0:
+            print ('ERROR: File Missing')
+            print (file_loc+file_str)
+            continue
+
         cfile_str = collected_file[0]
 
         #Reading in the collected file
