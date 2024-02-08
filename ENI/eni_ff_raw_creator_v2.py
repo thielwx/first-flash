@@ -56,7 +56,7 @@ delta_t = timedelta(minutes=search_m)
 
 #Data Location String
 #data_loc = '../../test-data/ENI-test/' #DEVMODE
-data_loc = '/raid/lightning-archive/ENI_CSV/flash/' #NEED TO FILL OUT BEFORE RUNNING ON DEVLAB4
+data_loc = '/localdata/first-flash/data/ENI-base-stock/' #NEED TO FILL OUT BEFORE RUNNING ON DEVLAB4
 
 
 # In[3]:
