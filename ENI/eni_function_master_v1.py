@@ -170,11 +170,13 @@ def eni_loader_v2(start_time, end_time, input_loc):
         y,m,d,doy,hr,mi = datetime_converter(cur_time) #Turning the current time into a string
         
         #Specifying the folder by date
-        file_loc = input_loc + y + m + d + '/'
+        file_loc = input_loc
         #file_loc = input_loc #DEVMODE
         
         #Creating the file string we'll use in the glob function
         file_str = 'eni_flash_flash'+y + m + d + '.csv'
+        
+        print (file_loc+file_str)
         
         #Collecting the files on the given day
         collected_file = sorted(glob(file_loc+file_str))
