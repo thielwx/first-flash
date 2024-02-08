@@ -181,7 +181,7 @@ def eni_loader_v2(start_time, end_time, input_loc):
         #Collecting the files on the given day
         collected_file = sorted(glob(file_loc+file_str))
         
-        if len(collected_filie)==0:
+        if len(collected_file)==0:
             print ('ERROR: File Missing')
             print (file_loc+file_str)
             continue
