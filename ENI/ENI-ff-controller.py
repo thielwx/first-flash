@@ -5,8 +5,9 @@
 
 
 #=====================================
-# This is the code that controls GLM-ff-raw-creator-v2.py
+# This is the code that controls eni_ff_raw_creator_v2.py
 # and allows us to run over multiple days
+# Note: Can also run with eni_ff_raw_creator_v1.py if using NSSL realtime archive
 #
 # Author: Kevin Thiel
 # Date: January 2024
@@ -55,7 +56,7 @@ for i in range(len(time_list)-1):
     y, m, d, doy, hr, mi = efm.datetime_converter(time_list[i+1])
     end_time_str = y+m+d+hr+mi
     
-    cmd = 'python /localdata/PyScripts/first-flash/ENI/eni_ff_raw_creator_v1.py '+start_time_str+' '+end_time_str
+    cmd = 'python /localdata/PyScripts/first-flash/ENI/eni_ff_raw_creator_v2.py '+start_time_str+' '+end_time_str
     print (cmd)
     
     p = sp.Popen(cmd,shell=True)
