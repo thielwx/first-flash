@@ -5,13 +5,13 @@
 
 
 #=================================================================================================
-# This script takes in ENI files (24.5 hrs) and finds the first ENI flashes 
+# This script takes in ENI files (the currently data and day before) and finds the first ENI flashes 
 # based on distance and time (30 minutes, 30 km). Data is output as csv files 
 # as 'raw' data to be compiled later (so we can capture all the group and event data)
-# Note: Script was adapted from GLM-ff-raw-creator-v2.py
+# Note: Script was adapted from GLM-ff-raw-creator-v2.py, and then updated from eni_ff_raw_creator.py
 #
 # Author: Kevin Thiel
-# Created: January 2024
+# Created: February 2024
 # Email: kevin.thiel@ou.edu
 # 
 #
@@ -51,7 +51,7 @@ end_time = datetime.strptime(end_time_str, '%Y%m%d%H%M')
 #Search criterion
 search_r = 30 #km
 search_m = 30 #minutes
-ver = 1
+ver = 2
 delta_t = timedelta(minutes=search_m)
 
 #Data Location String
@@ -67,8 +67,8 @@ def df_formatter(df):
     A funciton that formats the data as we need
     '''
     #Adding radian data and a coutner as the index
-    df['lat_rad'] = df['Latitude'].values * np.pi/180
-    df['lon_rad'] = df['Longitude'].values * np.pi/180
+    df['lat_rad'] = df['latitude'].values * np.pi/180
+    df['lon_rad'] = df['longitude'].values * np.pi/180
     df['counter'] = np.arange(0,df.shape[0])
     df = df.set_index('counter')
     
@@ -101,7 +101,7 @@ def eni_ff_driver(s_time , e_time):
     #Making sure we actually have data to search for. If not then we skip it!
     #if eni_df.shape[0]>0:
     #Finding the first flash events over the given time period
-    ff_df = efm.eni_ff_hunter(eni_df, s_time, e_time, search_r, search_m)
+    ff_df = efm.eni_ff_hunter_v2(eni_df, s_time, e_time, search_r, search_m)
         
     #    if ff_df.shape[0]>0:
     #Saving that file as a csv
@@ -147,7 +147,7 @@ def ff_raw_saver(ff_df, s_time, e_time, version, search_r, search_m):
     #save_loc = './' #devmode
     
     #We only need to save out a subset of the data so we can extact it later
-    ff_df = ff_df[['Lightning_Time_String','Latitude','Longitude','File_String']]
+    ff_df = ff_df[['timestamp','latitude','longitude','File_String']]
     
     #Time to save the dataframe!
     print (save_loc+save_str)
@@ -184,7 +184,7 @@ def first_flash_multiprocessor(start_time, end_time):
 
 
 #Loading in the data
-eni_df = efm.eni_loader(start_time-delta_t, end_time, data_loc)
+eni_df = efm.eni_loader_v2(start_time-delta_t, end_time, data_loc)
 print ('File List Created')
 
 #Formatting the data with some extra data
