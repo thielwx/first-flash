@@ -264,6 +264,11 @@ def eni_ff_hunter(df, search_start_time, search_end_time, search_r, search_m):
     #Pruning our indicies to only the ones that are after the current search timeframe
     start_time = json_data_loader(df, 'st') #Adding the flash start times to the dataframe
     df['start_time'] = time_str_converter(start_time)
+
+    print (df['start_time'])
+    print ('----------')
+    print (search_start_time)
+
     df_search = df.loc[(df['start_time'] >= search_start_time) & (df['start_time'] <= search_end_time)]
     
     #This loop goes through based upon the index of the provided dataframe and finds the first flashes
@@ -333,7 +338,7 @@ def eni_ff_hunter_v2(df, search_start_time, search_end_time, search_r, search_m)
     #Pruning our indicies to only the ones that are after the current search timeframe
     start_time = df['starttime'].values #Adding the flash start times (as datetime objects) to the dataframe
     df['start_time'] = time_str_converter(start_time)
-    df_search = df.loc[(df['start_time'].values >= search_start_time) & (df['start_time'] <= search_end_time)]
+    df_search = df.loc[(df['start_time'] >= search_start_time) & (df['start_time'] <= search_end_time)]
     
     #This loop goes through based upon the index of the provided dataframe and finds the first flashes
     #The output is a dataframe of first flash events 
