@@ -52,7 +52,6 @@ end_time = datetime.strptime(end_time_str, '%Y%m%d%H%M')
 
 
 #Constants
-dt = timedelta(minutes=search_m)
 ver = 1
 
 
@@ -103,11 +102,11 @@ def ff_raw_saver(df, s_time, e_time, version, glm_sat):
 # In[8]:
 
 #Loading the data
-file_list = ff.data_loader_list(start_time=start_time-dt, end_time=end_time+dt, glm_sat=glm_sat)
+file_list = ff.data_loader_list(start_time=start_time, end_time=end_time, glm_sat=glm_sat)
 print ('File List Created')
 
 df = ff.data_loader(file_list)
 print ('DataFrame Created')
 
 #Saving the data
-ff_raw_saver(s_time, e_time, ver, glm_sat)
+ff_raw_saver(df=df, s_time=start_time, e_time=end_time, version=ver, glm_sat=glm_sat)
