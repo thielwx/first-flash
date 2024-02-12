@@ -433,8 +433,10 @@ for stime in date_list:
     new_df = raw_finder(stime, glm_sat, data_loc, search_r, search_m, ver)
     ff_df = pd.concat((new_df,ff_df))
 
-#Setting the index as unique flash ids to hopefully put them in order    
+#Setting the index as unique flash ids to hopefully put them in order
+ff_df.rename(columns={ff_df.columns[0]: 'fistart_flid'}, inplace=True) #A workaround because not all files have 'fistart_flid' as a column name (whoops!)   
 ff_df = ff_df.set_index('fistart_flid').sort_index()
+
 
 #Removing the points over land if determined by the land_only variable
 if land_only == True:
