@@ -147,7 +147,10 @@ def ff_raw_saver(ff_df, s_time, e_time, version, search_r, search_m):
     #save_loc = './' #devmode
     
     #We only need to save out a subset of the data so we can extact it later
-    ff_df = ff_df[['timestamp','latitude','longitude','File_String']]
+    
+    raw_columns = ['timestamp','latitude','longitude','File_String']
+    #ff_df = ff_df[raw_columns]
+    ff_df = ff_df.reindex(columns=raw_columns)
     
     #Time to save the dataframe!
     print (save_loc+save_str)
