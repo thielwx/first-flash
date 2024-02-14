@@ -1,3 +1,11 @@
+# =====================================================================
+# This script contains functions that are deemed useful across multiple scripts
+#
+# Author: Kevin Thiel (kevin.thiel@ou.edu)
+# Created: December 2023
+#
+#======================================================================
+
 from datetime import datetime
 
 def datetime_converter(time):
@@ -21,3 +29,24 @@ def datetime_converter(time):
     m = datetime.strftime(time,'%m') #Month
     
     return y, m, d, doy, hr, mi
+
+def lma_data_puller(f, key):
+    '''
+    A function to pull data from the open h5 file into a DataFrame
+    PARAMS:
+        f: The opened h5 file
+        key: A key to the dictionary (of the dataset, in this case events and flashes) (str)
+    RETURNS:
+        df: DataFrame of the extracted data set
+    '''
+
+    #Getting the dataset within the file as specified by the key
+    dset = f[key]
+    
+    #Getting the root name for the dataset
+    root_name = list(dset)[0]
+    
+    #Converting the datasets to pandas dataframes
+    df = pd.DataFrame(np.array(dset[root_name]))
+    
+    return df
