@@ -1,0 +1,31 @@
+#=====================================================
+# File: full-animation-settings.yaml
+# Version 1.0.0
+# Author: Kevin Thiel
+# Creation Date: February 2024
+# Description:
+# This settings file is meant to be adaptable for any case
+# study that needs an animation of the entire case
+# 
+# Change log:
+#  
+#=====================================================
+
+available-cases: ['20220322-perils']
+
+20220322-perils:
+    #Case specific variables
+    start_time: '202203221600'
+    end_time: '202203230800'
+    bounds: [-90.0,-86.5,31,35]
+    cmip_data_switch: True
+    case_name: 'PERiLS LMA'
+    
+    #Data locations
+    cmip_loc: '/localdata/first-flash/data/ABI16-CMIPM13-2/'
+    glm_east_ff_loc: '/localdata/first-flash/data/GLM16-ff-processed/GLM16_first-flash-data-land_v2_s202203220000_e202203240000_c202401191535.nc'
+    glm_west_ff_loc: '/localdata/first-flash/data/GLM17-ff-processed/GLM17_first-flash-data-land_v2_s202203220000_e202203240000_c202401191540.nc'
+    glm_east_all_loc: '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202203221600_s202203230800_c202402131406.csv'
+    glm_west_all_loc: '/localdata/first-flash/data/GLM17-cases-allflash/GLM17allflashes_v1_s202203221600_s202203230800_c202402131410.csv'
+    lma_station_loc: '/localdata/first-flash/data/LMA-clusters/perils-LMA-20220322-stations.csv'
+    output_loc: '/localdata/first-flash/figures/cases/20220322-perils/full-animation-1/'
