@@ -51,8 +51,8 @@ lma_station_loc = sfile[case]['lma_station_loc']
 eni_loc = sfile[case][fl_num]['eni_loc']
 
 #Output locations
-out_data_loc = sfile[case]['out_data_loc']
-out_plot_loc = sfile[case]['out_plot_loc']
+out_data_loc = sfile['out_data_loc']
+out_plot_loc = sfile['out_plot_loc']
 
 #Getting the time variables established
 start_time = np.datetime64(stime_str)
@@ -110,6 +110,28 @@ def time_space_cutdown(lats, lons, times, start_time, end_time, extent):
     #Getting the indicies of the flashes
     locs = np.where((lats<=lat_max)&(lats>=lat_min)&(lons<=lon_max)&(lons>=lon_min)&
             (times<=end_time)&(times>=start_time))[0]
+    
+    return locs
+
+def space_cutdown(lats, lons, extent):
+    '''
+    Takes in the flash latitudes and longitudes determines which ones are within the domain
+    PARAMS:
+        lats: array of flash latitudes (floats)
+        lons: array of flash longitudes (floats)
+        extent: bounds of the search spatially (list of floats)
+    RETURNS:
+        locs: Indicies of the flashes within those bounds
+    '''
+    
+    #Getting the bounds into something more readable...
+    lat_max = extent[3]
+    lat_min = extent[2]
+    lon_max = extent[1]
+    lon_min = extent[0]
+    
+    #Getting the indicies of the flashes
+    locs = np.where((lats<=lat_max)&(lats>=lat_min)&(lons<=lon_max)&(lons>=lon_min))[0]
     
     return locs
 
@@ -275,6 +297,7 @@ def flash_classification_tool(pk_current, ic_ht):
     return fl_type
 
 
+
 # In[12]:
 
 
@@ -284,13 +307,21 @@ eni_dset = pd.read_csv(eni_loc)
 #Getting the spatial and temporal info
 eni_lat = eni_dset['latitude'].values
 eni_lon = eni_dset['longitude'].values
-eni_time = time_str_converter(eni_dset['timestamp'])
+
+eni_space_locs = space_cutdown(eni_lat, eni_lon, search_bounds)
+eni_pre_cut = eni_dset.iloc[eni_space_locs,:]
+
+eni_time = time_str_converter(eni_pre_cut['timestamp'].values)
+eni_lat = eni_pre_cut['latitude'].values
+eni_lon = eni_pre_cut['longitude'].values
+
+
 
 #Finding the data that sit within the bounds
 eni_locs = time_space_cutdown(eni_lat, eni_lon, eni_time, np.datetime64(start_time), np.datetime64(end_time), search_bounds)
 
 #Cutting down the dataset
-eni_cut = eni_dset.iloc[eni_locs,:]
+eni_cut = eni_pre_cut.iloc[eni_locs,:]
 
 #Getting the flash type
 eni_cut['type'] = flash_classification_tool(eni_cut['peakcurrent'].values, eni_cut['icheight'].values)
@@ -402,7 +433,7 @@ tick_mark_str = [i.strftime('%S.%f')[:-5] for i in tick_marks]
 
 
 #Establishing the save string and the file location
-plot_save_str = output_plot_loc'/'+case+'/'
+plot_save_str = out_plot_loc+'/'+case+'/'
 
 if not os.path.exists(plot_save_str):
     os.makedirs(plot_save_str)
@@ -536,7 +567,7 @@ plt.savefig(plot_save_str+case+'-'+fl_num+'summary.png')
 
 
 #Establishing the save string and the file location
-save_str = output_data_loc'/'+case+'-'+fl_num'/'
+save_str = out_data_loc+'/'+case+'-'+fl_num+'/'
 
 if not os.path.exists(save_str):
     os.makedirs(save_str)
