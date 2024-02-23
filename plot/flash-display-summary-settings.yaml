@@ -1,0 +1,54 @@
+#=====================================================
+# File: falsh-display-summary-settings.yaml
+# Version 1.0.0
+# Author: Kevin Thiel
+# Creation Date: February 2024
+# Description:
+# This settings file is meant to be adaptable for any case
+# study that needs a plot of the entire first flash event
+# 
+# Change log:
+#  
+#=====================================================
+
+
+available-cases: ['20220322-perils']
+
+#Output Data Locations
+out_data_loc: '/localdata/first-flash/data/cases/'
+out_plot_loc: '/localdata/first-flash/figures/cases/'
+
+
+20220322-perils:
+    
+    case_name: 'PERiLS'
+    #Input Data Locations
+    glm_east_ff_loc: '/localdata/first-flash/data/GLM16-ff-processed/GLM16_first-flash-data-land_v2_s202203220000_e202203240000_c202401191535.nc'
+    glm_west_ff_loc: '/localdata/first-flash/data/GLM17-ff-processed/GLM17_first-flash-data-land_v2_s202203220000_e202203240000_c202401191540.nc'
+    lma_flash_loc: '/localdata/first-flash/data/perils-LMA-RAW/20220322/perils-LMA_RAW-flash_202203220000_c202401191517_source-min-10.csv'
+    lma_event_loc: '/localdata/first-flash/data/perils-LMA-RAW/20220322/perils-LMA_RAW-event_202203220000_c202401191517_source-min-10.csv'
+    lma_station_loc: '/localdata/first-flash/data/LMA-clusters/perils-LMA-20220322-stations.csv'
+    
+    
+    1: #Case Number
+        
+        #Search-specific data
+        start_time: '2022-03-22T20:06:44.2'
+        end_time: '2022-03-22T20:06:47.1'
+        search_bounds: [-89.0,-87.5,32.7,34.2] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        plot_bounds: [-90.0,-86,31,35] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        
+        #The correct ENI data
+        eni_loc: '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220322.csv'
+       
+    2: #Case Number
+        
+        #Search-specific data
+        start_time: '2022-03-23T02:43:00.0'
+        end_time: '2022-03-23T02:44:00.0'
+        search_bounds: [-90.0,-86,31,35] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        plot_bounds: [-90.0,-86,31,35] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        
+        #The correct ENI data
+        eni_loc: '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220323.csv'
+      
