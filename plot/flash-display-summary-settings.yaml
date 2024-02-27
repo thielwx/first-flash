@@ -44,11 +44,44 @@ out_plot_loc: '/localdata/first-flash/figures/cases/'
     f2: #Case Number
         
         #Search-specific data
-        start_time: '2022-03-23T02:43:17.0'
-        end_time: '2022-03-23T02:43:20.0'
-        search_bounds: [-89.0,-87.5,32.5,34] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        start_time: '2022-03-23T02:43:18.8'
+        end_time: '2022-03-23T02:43:19.3'
+        search_bounds: [-88.3,-88.0,33.0,33.3] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
         plot_bounds: [-90.0,-86,31,35] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
         
         #The correct ENI data
         eni_loc: '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220323.csv'
+
+    f3.1: #Case Number
+        
+        #Search-specific data
+        start_time: '2022-03-23T02:06:37.7'
+        end_time: '2022-03-23T02:06:37.9'
+        search_bounds: [-88.8,-88.5,32.3,32.6] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        plot_bounds: [-90.0,-86,31,35] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        
+        #The correct ENI data
+        eni_loc: '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220323.csv'
+
+    f3.2: #Case Number
+        
+        #Search-specific data
+        start_time: '2022-03-23T02:14:06.8'
+        end_time: '2022-03-23T02:14:07.2'
+        search_bounds: [-88.9,-88.3,32.2,32.8] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        plot_bounds: [-90.0,-86,31,35] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        
+        #The correct ENI data
+        eni_loc: '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220323.csv'
+
+    f4: #Case Number
+        
+        #Search-specific data
+        start_time: '2022-03-22T22:38:22.3'
+        end_time: '2022-03-22T22:38:26.3'
+        search_bounds: [-89.6,-87.9,32.8,34.5] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        plot_bounds: [-90.0,-86,31,35] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        
+        #The correct ENI data
+        eni_loc: '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220322.csv'
       

@@ -442,7 +442,7 @@ if not os.path.exists(plot_save_str):
 # In[17]:
 
 
-fig = plt.figure(constrained_layout=True, figsize=(12,16))
+fig = plt.figure(constrained_layout=True, figsize=(15,20))
 fig.patch.set_facecolor('silver')
 gs = fig.add_gridspec(nrows=16,ncols=13)
 fig.suptitle(case_name + ' Case ' + fl_num + ', ' + str(start_time)+' - '+str(end_time), fontsize=16)
@@ -474,7 +474,7 @@ ax2.set_facecolor('black')
 
 ax2.scatter(x=lma_e_time, y=lma_ecut_df['power'], c=lma_e_time, cmap=plt.cm.rainbow, s=dot_size, label='LMA Sources')
 ax2.set_xlim(start_time, end_time)
-ax2.set_ylim(0,50)
+ax2.set_ylim(-20,50)
 ax2.set_ylabel('Source Energy (dBW)')
 ax2.grid(visible=True, axis='y',color='gray',linewidth=1,alpha=0.5)
 ax2.set_xticks(ticks=tick_marks, labels=tick_mark_str, fontsize=8)
@@ -501,8 +501,8 @@ ax3.grid(visible=True, axis='y',color='gray',linewidth=1, alpha=0.5)
 ax3.grid(visible=True, axis='x',color='gray',linestyle='--',linewidth=2, alpha=0.5)
 
 ax3_tw = ax3.twinx()
-ax3_tw.hist(x=glm_e_group_df['group_lon'], bins=np.arange(lon_min,lon_max+0.1,0.1), zorder=1, alpha=0.4, color='r')
-ax3_tw.hist(x=glm_w_group_df['group_lon'], bins=np.arange(lon_min,lon_max+0.1,0.1), zorder=1, alpha=0.4, color='b')
+ax3_tw.hist(x=glm_e_group_df['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='r')
+ax3_tw.hist(x=glm_w_group_df['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='b')
 ax3_tw.set_ylabel('GLM Group Density')
 #ax3_tw.set_ylim(0,80)
 
@@ -510,6 +510,8 @@ ax3_tw.set_ylabel('GLM Group Density')
 ax4 = fig.add_subplot(gs[4:6,10:13], projection=ccrs.PlateCarree())
 ax4.set_facecolor('black')
 ax4.scatter(x=lma_stations['lon'], y=lma_stations['lat'], color='white', label='LMA Stations', marker='^', s=dot_size)
+ax4.scatter(x=glm_e_flash_df['flash_lon'], y=glm_e_flash_df['flash_lat'], color='r', s=dot_size)
+ax4.scatter(x=glm_w_flash_df['flash_lon'], y=glm_w_flash_df['flash_lat'], color='b', s=dot_size)
 ax4.set_xlim(plot_bounds[0], plot_bounds[1])
 ax4.set_ylim(plot_bounds[2], plot_bounds[3])
 ax4.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
@@ -548,8 +550,8 @@ ax6.set_xlim(0,20)
 ax6.set_xlabel('Altitude (km)')
 
 ax6_tw = ax6.twiny()
-ax6_tw.hist(x=glm_e_group_df['group_lat'], bins=np.arange(lat_min,lat_max+0.1,0.1), zorder=1, alpha=0.4, color='r', orientation='horizontal')
-ax6_tw.hist(x=glm_w_group_df['group_lat'], bins=np.arange(lat_min,lat_max+0.1,0.1), zorder=1, alpha=0.4, color='b', orientation='horizontal')
+ax6_tw.hist(x=glm_e_group_df['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='r', orientation='horizontal')
+ax6_tw.hist(x=glm_w_group_df['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='b', orientation='horizontal')
 ax6_tw.set_xlabel('GLM Group Density')
 #ax6_tw.set_xlim(0,80)
 
