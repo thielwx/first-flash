@@ -196,8 +196,12 @@ def eni_loader_v2(start_time, end_time, input_loc):
         new_df = new_df.iloc[bound_index,:]
 
         #Adding the current file string to the new dataframe so we can find it more easily later
-        file_str_list = np.full(new_df.shape[0], file_str)
-        new_df['File_String'] = file_str_list
+        
+        if new_df.shape[0]>0:
+            file_str_list = np.full(new_df.shape[0], file_str)
+            new_df['File_String'] = file_str_list
+        else:
+            new_df['File_String'] = None
 
         #Appending the new DataFrame to the combined one
         df = pd.concat((df,new_df),axis=0)

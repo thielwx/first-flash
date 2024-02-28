@@ -19,6 +19,7 @@ from glob import glob
 import matplotlib.patches as mpatches
 import yaml
 import sys
+import os
 
 
 # User input time!
@@ -52,7 +53,8 @@ lma_station_loc = sfile[case]['lma_station_loc']
 
 #Output location
 output_loc = sfile[case]['output_loc']
-
+if not os.path.exists(output_loc):
+    os.makedirs(output_loc)
 #Other case variables
 stime_str = sfile[case]['start_time']
 etime_str = sfile[case]['end_time']
