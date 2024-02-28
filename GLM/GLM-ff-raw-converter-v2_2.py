@@ -434,7 +434,9 @@ for stime in date_list:
     ff_df = pd.concat((new_df,ff_df))
 
 #Setting the index as unique flash ids to hopefully put them in order
-ff_df.rename(columns={ff_df.columns[0]: 'fistart_flid'}, inplace=True) #A workaround because not all files have 'fistart_flid' as a column name (whoops!)   
+if ff_df.columns[0] != 'fistart_flid':
+    ff_df.rename(columns={ff_df.columns[0]: 'fistart_flid'}, inplace=True) #A workaround because not all files have 'fistart_flid' as a column name (whoops!)   
+
 ff_df = ff_df.set_index('fistart_flid').sort_index()
 
 
