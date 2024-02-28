@@ -143,6 +143,8 @@ def ff_driver(s_time, e_time):
     
     ff_df = ff.ff_next_flashes(df, ff_df, s_time, e_time, search_r, search_m)
     
+    ff_df.index.names['fistart_flid'] #Trying to force the index to take on the correct names before saving it
+
     ff_raw_saver(ff_df, s_time, e_time, ver, glm_sat, search_r, search_m)
 
 

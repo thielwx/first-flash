@@ -233,7 +233,7 @@ def index_creator(df,time):
     flash_ids = [str(a).zfill(5) for a in df['flash_id'].values]
     
     if len(flash_ids)>0:
-        #Combining the two strings together element by index to make a bigger one
+        #Combining the two strings together element by element to make a bigger one
         new_index = np.char.add(fstart_time_array, flash_ids)
 
         #Adding the new index to the array based on fi(le)start and fl(ash)id and making it the index
