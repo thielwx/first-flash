@@ -124,8 +124,8 @@ tick_mark_str = [i.strftime('%S.%f')[:-5] for i in tick_marks]
 
 #Creating where the files will be saved to
 plot_save_str = plot_loc + case + '/' + case + '-' + fl_num + '-v1/'
-# if not os.path.exists(plot_save_str):
-#     os.makedirs(plot_save_str)
+if not os.path.exists(plot_save_str):
+    os.makedirs(plot_save_str)
 
 
 # In[84]:
