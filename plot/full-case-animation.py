@@ -187,14 +187,14 @@ def latlon_bounds_custom(flash_lats, flash_lons, extent):
 # In[30]:
 
 
-def CMIP_loader(cur_time, loc, conus_checker):
-    CMI = [np.nan]
-    x = [np.nan]
-    y = [np.nan]
-    extent = [np.nan]
-    sat_h = [np.nan]
-    sat_lon = [np.nan]
-    geo_crs = [np.nan]
+def CMIP_loader(cur_time, loc, conus_checker, cmip_data_temp):
+    CMI = np.nan
+    x = np.nan
+    y = np.nan
+    extent = np.nan
+    sat_h = np.nan
+    sat_lon = np.nan
+    geo_crs = np.nan
     
     
     #If the conus check is false, then you have mesoscale scene data and can go down to the minute
@@ -226,9 +226,11 @@ def CMIP_loader(cur_time, loc, conus_checker):
         
     else:
         print ('ERROR: DATA MISSING')
+        print (file_loc)
+        cmip_data_temp = False
     
     
-    return CMI, x, y, extent, sat_h, sat_lon, geo_crs
+    return CMI, x, y, extent, sat_h, sat_lon, geo_crs, cmip_data_temp
 
 
 # # Processing and plotting
@@ -293,7 +295,7 @@ for t in time_list:
     
     if cmip_data==True:
         #Getting the ABI data
-        cmi, x, y, extent, sat_h, sat_lon, geo_crs = CMIP_loader(t, cmip_loc, conus_checker)
+        cmi, x, y, extent, sat_h, sat_lon, geo_crs, cmip_data_temp = CMIP_loader(t, cmip_loc, conus_checker, cmip_data_temp)
     
     pltcar_crs = ccrs.PlateCarree()    
     
@@ -308,7 +310,10 @@ for t in time_list:
     #Plot Time!
     fig = plt.figure(figsize=(8,8))
     fig.patch.set_facecolor('white')
-    ax = plt.axes(projection=geo_crs)
+    if cmip_data_temp == True:
+        ax = plt.axes(projection=geo_crs)
+    else:
+        ax = plt.axes(projection=pltcar_crs)
     
     if (cmip_data==True) & (cmip_data_temp==True):
         ax.imshow(cmi,extent=extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.4, vmin=180, vmax=300, zorder=0)
