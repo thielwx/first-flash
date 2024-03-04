@@ -61,6 +61,7 @@ etime_str = sfile[case]['end_time']
 bounds_extent = sfile[case]['bounds']
 cmip_data = sfile[case]['cmip_data_switch']
 case_name = sfile[case]['case_name']
+conus_checker = sfile[case]['conus_check']
 
 #Getting the time variables established
 start_time = datetime.strptime(stime_str, '%Y%m%d%H%M')
@@ -186,7 +187,7 @@ def latlon_bounds_custom(flash_lats, flash_lons, extent):
 # In[30]:
 
 
-def CMIP_loader(cur_time, loc):
+def CMIP_loader(cur_time, loc, conus_checker):
     CMI = [np.nan]
     x = [np.nan]
     y = [np.nan]
@@ -195,8 +196,18 @@ def CMIP_loader(cur_time, loc):
     sat_lon = [np.nan]
     geo_crs = [np.nan]
     
-    y, m, d, doy, hr, mi = datetime_converter(t)
-    file_loc = loc + y+m+d + '/' + '*s'+ y+doy+hr+mi+ '*.nc'
+    
+    #If the conus check is false, then you have mesoscale scene data and can go down to the minute
+    if conus_checker==False:
+        y, m, d, doy, hr, mi = datetime_converter(cur_time)
+        file_loc = loc + y+m+d + '/' + '*s'+ y+doy+hr+mi+ '*.nc'
+
+    else:
+        dt_int = int(t.strftime('%M'))%5 #Using the mod operator to tell us how much to adjust the time
+        adjusted_time = cur_time - timedelta(minutes=dt_int-1)
+        y, m, d, doy, hr, mi = datetime_converter(adjusted_time)
+        file_loc = loc + y+m+d + '/' + '*s'+ y+doy+hr+mi+ '*.nc'
+
     collected_files = glob(file_loc)
     
     if len(collected_files)>0:
@@ -213,7 +224,6 @@ def CMIP_loader(cur_time, loc):
         y = dset.variables['y'][:] * sat_h
         extent = (np.min(x), np.max(x), np.min(y), np.max(y))
         
- 
     else:
         print ('ERROR: DATA MISSING')
     
@@ -283,7 +293,7 @@ for t in time_list:
     
     if cmip_data==True:
         #Getting the ABI data
-        cmi, x, y, extent, sat_h, sat_lon, geo_crs = CMIP_loader(t, cmip_loc)
+        cmi, x, y, extent, sat_h, sat_lon, geo_crs = CMIP_loader(t, cmip_loc, conus_checker)
     
     pltcar_crs = ccrs.PlateCarree()    
     
