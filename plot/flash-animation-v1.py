@@ -83,6 +83,7 @@ case_name = sfile[case]['case_name']
 data_loc = sfile['out_data_loc']
 plot_loc = sfile['out_plot_loc']
 lma_station_loc = sfile[case]['lma_station_loc']
+hist_max = sfile[case][fl_num]['hist_max']
 
 data_str = data_loc+'/'+case+'-'+fl_num+'/'
 
@@ -192,7 +193,7 @@ for i in range(len(time_list)):
     fig = plt.figure(constrained_layout=True, figsize=(15,20))
     fig.patch.set_facecolor('silver')
     gs = fig.add_gridspec(nrows=16,ncols=13)
-    fig.suptitle(case_name + ' Case ' + fl_num + ', ' + str(start_time)+' - '+str(cur_time), fontsize=16)
+    fig.suptitle(case_name + ' Case ' + fl_num + ', ' + np.datetime_as_string(start_time) + ' - ' + np.datetime_as_string(cur_time), fontsize=16)
     dot_size = 5
     glm_tri = 40
     glm_sq = 100
@@ -261,7 +262,7 @@ for i in range(len(time_list)):
     ax3_tw.hist(x=ge_gr_cut['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='r')
     ax3_tw.hist(x=gw_gr_cut['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='b')
     ax3_tw.set_ylabel('GLM Group Density')
-    #ax3_tw.set_ylim(0,80)
+    ax3_tw.set_ylim(0,hist_max)
 
     #Plot 4, Overview Map of Plot Area
     ax4 = fig.add_subplot(gs[4:6,10:13], projection=ccrs.PlateCarree())
@@ -317,7 +318,7 @@ for i in range(len(time_list)):
     ax6_tw.hist(x=ge_gr_cut['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='r', orientation='horizontal')
     ax6_tw.hist(x=gw_gr_cut['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='b', orientation='horizontal')
     ax6_tw.set_xlabel('GLM Group Density')
-    #ax6_tw.set_xlim(0,80)
+    ax6_tw.set_xlim(0,hist_max)
 
     ax6.grid(visible=True, axis='y',color='gray',linestyle='--',linewidth=2, alpha=0.5)
     ax6.grid(visible=True, axis='x',color='gray',linewidth=1, alpha=0.5)
