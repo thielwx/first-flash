@@ -193,7 +193,7 @@ for i in range(len(time_list)):
     fig = plt.figure(constrained_layout=True, figsize=(15,20))
     fig.patch.set_facecolor('silver')
     gs = fig.add_gridspec(nrows=16,ncols=13)
-    fig.suptitle(case_name + ' Case ' + fl_num + ', ' + start_time.strftime('%F %T.%f')[:-3] + ' - ' + cur_time.strftime('%F %T.%f')[:-3], fontsize=16)
+    fig.suptitle(case_name + ' Case ' + fl_num + ', ' + np.datetime_as_string(start_time) + ' - ' + cur_time.strftime('%F %T.%f')[:-3], fontsize=16)
     dot_size = 5
     glm_tri = 40
     glm_sq = 100
