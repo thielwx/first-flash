@@ -335,4 +335,4 @@ for i in range(len(time_list)):
     ax6.tick_params(left = False, right = True , labelleft = False, labelright=True) 
 
     plt.savefig(plot_save_str + case + '-' + cur_time.strftime('%Y%m%d-%H%M%S-%f') + '.png')
-
+    plt.close()
