@@ -176,16 +176,18 @@ for i in range(len(time_list)):
     cur_time = time_list[i] #Getting the current time
     
     #Cutting down the data by time
-    ge_gr_cut = time_cutdown(ge_gr,start_time,cur_time)
-    ge_ev_cut = time_cutdown(ge_ev,start_time,cur_time)
-    gw_gr_cut = time_cutdown(gw_gr,start_time,cur_time)
-    gw_ev_cut = time_cutdown(gw_ev,start_time,cur_time)
+    if ge_fl.shape[0]>0:
+        ge_gr_cut = time_cutdown(ge_gr,start_time,cur_time)
+        ge_ev_cut = time_cutdown(ge_ev,start_time,cur_time)
+        ge_ev_new = time_cutdown(ge_ev,cur_time-dt,cur_time)
+    if gw_fl.shape[0]>0:
+        gw_gr_cut = time_cutdown(gw_gr,start_time,cur_time)
+        gw_ev_cut = time_cutdown(gw_ev,start_time,cur_time)
+        gw_ev_new = time_cutdown(gw_ev,cur_time-dt,cur_time)
     eni_cut = time_cutdown(eni, start_time,cur_time)
     lma_e_cut = time_cutdown(lma_e,start_time,cur_time)
     
-    #The most recent activity to also plot
-    ge_ev_new = time_cutdown(ge_ev,cur_time-dt,cur_time)
-    gw_ev_new = time_cutdown(gw_ev,cur_time-dt,cur_time)
+    #The most recent activity to also plot (GLM E/W above in conditionals)
     eni_new = time_cutdown(eni,cur_time-dt,cur_time)
     lma_e_new = time_cutdown(lma_e,cur_time-dt,cur_time)
     
@@ -237,8 +239,10 @@ for i in range(len(time_list)):
     ax2.set_xticks(ticks=tick_marks, labels=tick_mark_str, fontsize=8)
 
     ax2_tw = ax2.twinx()
-    ax2_tw.scatter(x=ge_gr_cut['ptime'], y=ge_gr_cut['group_energy']*1e15, color='r', s=glm_tri, marker='^', label='GOES-East GLM Groups')
-    ax2_tw.scatter(x=gw_gr_cut['ptime'], y=gw_gr_cut['group_energy']*1e15, color='b', s=glm_tri, marker='^', label='GOES-West GLM Groups')
+    if ge_fl.shape[0]>0:
+        ax2_tw.scatter(x=ge_gr_cut['ptime'], y=ge_gr_cut['group_energy']*1e15, color='r', s=glm_tri, marker='^', label='GOES-East GLM Groups')
+    if gw_fl.shape[0]>0:
+        ax2_tw.scatter(x=gw_gr_cut['ptime'], y=gw_gr_cut['group_energy']*1e15, color='b', s=glm_tri, marker='^', label='GOES-West GLM Groups')
     ax2_tw.set_ylim(1,10000)
     ax2_tw.set_yscale('log')
     ax2_tw.set_ylabel('Group Energy (fJ)')
@@ -259,8 +263,10 @@ for i in range(len(time_list)):
     ax3.grid(visible=True, axis='x',color='gray',linestyle='--',linewidth=2, alpha=0.5)
 
     ax3_tw = ax3.twinx()
-    ax3_tw.hist(x=ge_gr_cut['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='r')
-    ax3_tw.hist(x=gw_gr_cut['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='b')
+    if ge_fl.shape[0]>0:
+        ax3_tw.hist(x=ge_gr_cut['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='r')
+    if gw_fl.shape[0]>0:
+        ax3_tw.hist(x=gw_gr_cut['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='b')
     ax3_tw.set_ylabel('GLM Group Density')
     ax3_tw.set_ylim(0,hist_max)
 
@@ -280,10 +286,12 @@ for i in range(len(time_list)):
     ax5 = fig.add_subplot(gs[6:16,0:10], projection=ccrs.PlateCarree())
     ax5.set_facecolor('black')
 
-    ax5.scatter(x=ge_ev_cut['event_lon'], y=ge_ev_cut['event_lat'], color='r', s=glm_sq, marker='s', label='GOES-East GLM Events')
-    ax5.scatter(x=gw_ev_cut['event_lon'], y=gw_ev_cut['event_lat'], color='b', s=glm_sq, marker='s', label='GOES-West GLM Events')
-    ax5.scatter(x=ge_ev_new['event_lon'], y=ge_ev_new['event_lat'], color='r', s=glm_sq*2, marker='s', edgecolors='white', linewidth=3)
-    ax5.scatter(x=gw_ev_new['event_lon'], y=gw_ev_new['event_lat'], color='b', s=glm_sq*2, marker='s', edgecolors='white', linewidth=3)
+    if ge_fl.shape[0]>0:
+        ax5.scatter(x=ge_ev_cut['event_lon'], y=ge_ev_cut['event_lat'], color='r', s=glm_sq, marker='s', label='GOES-East GLM Events')
+        ax5.scatter(x=ge_ev_new['event_lon'], y=ge_ev_new['event_lat'], color='r', s=glm_sq*2, marker='s', edgecolors='white', linewidth=3)
+    if gw_fl.shape[0]>0:
+        ax5.scatter(x=gw_ev_cut['event_lon'], y=gw_ev_cut['event_lat'], color='b', s=glm_sq, marker='s', label='GOES-West GLM Events')
+        ax5.scatter(x=gw_ev_new['event_lon'], y=gw_ev_new['event_lat'], color='b', s=glm_sq*2, marker='s', edgecolors='white', linewidth=3)
     
     ax5.scatter(x=lma_e_cut['lon'], y=lma_e_cut['lat'], c=lma_e_cut['ptime'], cmap=lma_color, s=dot_size, zorder=10, label='LMA Sources')
     ax5.scatter(x=lma_e_new['lon'], y=lma_e_new['lat'], c='white', s=dot_size*4, zorder=10)
@@ -315,8 +323,10 @@ for i in range(len(time_list)):
     ax6.set_xlabel('Altitude (km)')
 
     ax6_tw = ax6.twiny()
-    ax6_tw.hist(x=ge_gr_cut['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='r', orientation='horizontal')
-    ax6_tw.hist(x=gw_gr_cut['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='b', orientation='horizontal')
+    if ge_fl.shape[0]>0:
+        ax6_tw.hist(x=ge_gr_cut['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='r', orientation='horizontal')
+    if gw_fl.shape[0]>0:
+        ax6_tw.hist(x=gw_gr_cut['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='b', orientation='horizontal')
     ax6_tw.set_xlabel('GLM Group Density')
     ax6_tw.set_xlim(0,hist_max)
 
