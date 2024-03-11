@@ -164,7 +164,7 @@ df = ff.data_loader_gridsearch(file_list)
 print ('DataFrame Created')
 
 #Looping through each combination of search criterion
-for i in search_combos.index:
+for i in search_combos.index[25:26]:
     search_m = search_combos['minutes'][i]
     search_r = search_combos['simple_radius'][i]
     search_flash_r = search_combos['flash_area_radius'][i]
