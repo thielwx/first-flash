@@ -215,6 +215,63 @@ def data_loader(file_list):
         dset.close()
     
     return df
+
+
+def data_loader_gridsearch(file_list):
+    '''
+    PARAMS:
+        file_list: The list of files returned from the data_loader_list function
+    RETURNS:
+        df: A dataframe of all the files within that list
+    
+    '''
+    df = pd.DataFrame()
+    
+    for i in range(len(file_list)):
+        dset = nc.Dataset(file_list[i],'r')
+        
+        #Grabbing basic info to sort our flashes within a specificed domain (rectangular in lat/lon space)
+        flash_lats = dset.variables['flash_lat'][:]
+        flash_lons = dset.variables['flash_lon'][:]
+        flash_areas = dset.variables['flash_area'][:]
+
+        flash_locs, flash_lats, flash_lons = latlon_bounds(flash_lats,flash_lons)
+        #NOTE: You'll need to constrain all calculations to point within these bounds (using flash_locs)
+
+        flash_lats_rad = flash_lats * (np.pi/180)
+        flash_lons_rad = flash_lons * (np.pi/180)
+        
+        #Grabbing the flash start time and flash end times (time=np.timedelta64('ns'))
+        flash_start_times = GLM_LCFA_times(dset.time_coverage_start, dset.variables['flash_time_offset_of_first_event'][flash_locs])
+        flash_ids = dset.variables['flash_id'][flash_locs]
+        
+        file_start_time = file_list[i][-50:-34]
+        fstart_time_array = np.full(len(flash_lats),file_start_time)
+        
+        #Creating a dictionary
+        d = {'start_time':flash_start_times,
+            'lat':flash_lats,
+            'lon':flash_lons,
+            'lat_rad':flash_lats_rad,
+            'lon_rad':flash_lons_rad,
+            'flash_id':flash_ids,
+            'fstart':fstart_time_array,
+            'flash_area':flash_areas
+            }
+        
+        #Putting it into a dataframe
+        df_new = pd.DataFrame.from_dict(d)
+        
+        #Creating the index for the file so it's unique to each value
+        df_new = index_creator(df_new,file_list[i])
+        
+        #Adding the data to the file
+        df = pd.concat((df, df_new), axis=0)
+        
+        #closing the file
+        dset.close()
+    
+    return df
 # In[ ]:
 
 def index_creator(df,time):
@@ -387,6 +444,65 @@ def ff_hunter(df, search_start_time, search_end_time, search_r, search_m):
         #Setting up and running a ball tree
         btree = BallTree(df_cut[['lat_rad','lon_rad']].values, leaf_size=2, metric='haversine')
         indicies = btree.query_radius([c_pt], r = search_r/R)
+
+        #If only the point itself is returned within the search distance, then
+        if len(indicies[0])==1:
+            ff_df = pd.concat((ff_df,df.loc[df.index==i]),axis=0)
+            
+    return ff_df
+
+def ff_hunter_gridsearch(df, search_start_time, search_end_time, search_r, search_m, search_flash_r):
+    '''
+    Funciton used to identify first flash events. Using the Ball Tree from scikitlearn
+    https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
+    PARAMS:
+        df: Dataframe containing the start_time, lat, lon, lat_rad, lon_rad
+        search_start_time: start time used to depict which flashes are being investigated
+        search_end_time: end time used to depict which flashes are being investigated
+        search_r: Search radius of the ball tree (km)
+        search_m: Time window to search in (minutes)
+    RETURNS
+        ff_df: A dataframe containing only the first flash events
+    '''
+    R = 6371.0087714 #Earths radius in km
+    
+    #Need to institute this below
+    t_delta = timedelta(minutes=search_m)
+
+    ff_df = pd.DataFrame()
+    
+    #Pruning our indicies to only the ones that are after the current search timeframe
+    df_search = df.loc[(df['start_time'] >= search_start_time) & (df['start_time'] <= search_end_time)]
+    
+    #This loop goes through based upon the index of the provided dataframe and finds the first flashes
+    #The output is a dataframe of first flash events 
+    for i in df_search.index.values:
+        #Getting the current lat, lon, and index
+        c_pt = df.loc[i][['lat_rad','lon_rad']].values
+        c_stime = df.loc[i][['start_time']].values[0]
+
+        #Removing the flashes that happened 30 min before and anything after the current flash from consideration
+        time_prev = df.loc[i]['start_time'] - t_delta #Finding the time from the previous t minutes
+        df_cut = df.loc[(df.loc[i][['start_time']].values[0] >= df['start_time']) & 
+                         (df['start_time'] >= time_prev)]
+        
+        #Making a smaller tree to reduce the required memory (and increase speed) of the ball tree
+        dx = 1.0 #Change in latitude max. Using a blanket benchmark to reduce the number of distance calculations made
+        df_cut = df_cut.loc[(df_cut['lat'] <= (df_search.loc[i])['lat']+dx) &
+                           (df_cut['lat'] >= (df_search.loc[i]['lat']-dx)) &
+                           (df_cut['lon'] <= (df_search.loc[i]['lon']+dx)) &
+                           (df_cut['lon'] >= (df_search.loc[i]['lon']-dx))]
+
+        #Setting up and running a ball tree
+        btree = BallTree(df_cut[['lat_rad','lon_rad']].values, leaf_size=2, metric='haversine')
+        
+        if search_flash_r == 0: #If there's no value for the flash radius value, then use the traditional radius values
+            indicies = btree.query_radius([c_pt], r = search_r/R)
+        elif search_r == 0: #If the traditional radius value is zero, then use the circular radius of the flash area plus a buffer
+            c_area = df.loc[i][['flash_areas']].values
+            flash_r_from_area = np.sqrt((c_area/1000000)/np.pi) #Getting the radius (km) from the flash area in sq meters
+            indicies = btree.query_radius([c_pt], r = (search_flash_r + flash_r_from_area)/R)
+
 
         #If only the point itself is returned within the search distance, then
         if len(indicies[0])==1:
