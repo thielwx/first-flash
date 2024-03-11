@@ -168,6 +168,6 @@ for i in search_combos.index:
     search_m = search_combos['minutes'][i]
     search_r = search_combos['simple_radius'][i]
     search_flash_r = search_combos['flash_area_radius'][i]
-    first_flash_multiprocessor(start_time, end_time, search_m, search_r, search_flash_r, i)
+    first_flash_multiprocessor(start_time, end_time)
 
 print ('First Flashes Found')
