@@ -233,7 +233,6 @@ def data_loader_gridsearch(file_list):
         #Grabbing basic info to sort our flashes within a specificed domain (rectangular in lat/lon space)
         flash_lats = dset.variables['flash_lat'][:]
         flash_lons = dset.variables['flash_lon'][:]
-        flash_areas = dset.variables['flash_area'][:]
 
         flash_locs, flash_lats, flash_lons = latlon_bounds(flash_lats,flash_lons)
         #NOTE: You'll need to constrain all calculations to point within these bounds (using flash_locs)
@@ -244,6 +243,7 @@ def data_loader_gridsearch(file_list):
         #Grabbing the flash start time and flash end times (time=np.timedelta64('ns'))
         flash_start_times = GLM_LCFA_times(dset.time_coverage_start, dset.variables['flash_time_offset_of_first_event'][flash_locs])
         flash_ids = dset.variables['flash_id'][flash_locs]
+        flash_areas = dset.variables['flash_area'][flash_locs]
         
         file_start_time = file_list[i][-50:-34]
         fstart_time_array = np.full(len(flash_lats),file_start_time)
@@ -499,7 +499,7 @@ def ff_hunter_gridsearch(df, search_start_time, search_end_time, search_r, searc
         if search_flash_r == 0: #If there's no value for the flash radius value, then use the traditional radius values
             indicies = btree.query_radius([c_pt], r = search_r/R)
         elif search_r == 0: #If the traditional radius value is zero, then use the circular radius of the flash area plus a buffer
-            c_area = df.loc[i][['flash_areas']].values
+            c_area = df.loc[i][['flash_area']].values
             flash_r_from_area = np.sqrt((c_area/1000000)/np.pi) #Getting the radius (km) from the flash area in sq meters
             indicies = btree.query_radius([c_pt], r = (search_flash_r + flash_r_from_area)/R)
 
