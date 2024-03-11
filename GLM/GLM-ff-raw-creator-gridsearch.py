@@ -64,7 +64,7 @@ ver = 1
 # In[4]:
 
 
-def first_flash_multiprocessor(start_time, end_time, search_m, search_r, search_flash_r,i):
+def first_flash_multiprocessor(start_time, end_time):
     '''
     Breaking down the daily GLM data into chunks that can be processed by ff_hunter
     PARAMS:
@@ -82,7 +82,7 @@ def first_flash_multiprocessor(start_time, end_time, search_m, search_r, search_
     
     if __name__ == "__main__":
         with mp.Pool(12) as p:
-            p.starmap(ff_driver,zip(time_list[:-1],time_list[1:],search_m, search_r, search_flash_r,i))
+            p.starmap(ff_driver,zip(time_list[:-1],time_list[1:]))
             p.close()
             p.join()
 
@@ -132,11 +132,15 @@ def ff_raw_saver(ff_df, s_time, e_time, version, glm_sat, search_r, search_m, se
 # In[7]:
 
 
-def ff_driver(s_time, e_time, search_m, search_r, search_flash_r, i):
+def ff_driver(s_time, e_time):
     #Grabbing all the extra variables
     global ver
     global df
     global glm_sat
+    global search_m
+    global search_r
+    global search_flash_r
+    global i
 
     #Getting the first flashes for the time period of interest, output as a dataframe
     ff_df = ff.ff_hunter_gridsearch(df, s_time, e_time, search_r, search_m, search_flash_r)
