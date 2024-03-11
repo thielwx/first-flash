@@ -147,7 +147,7 @@ def ff_driver(s_time, e_time):
     
     ff_df = ff.ff_next_flashes(df, ff_df, s_time, e_time, 30, 30) #Keeping those at 30 min/30 km for consistency
     
-    ff_df.index.names['fistart_flid'] #Trying to force the index to take on the correct names before saving it
+    #ff_df.index.names['fistart_flid'] #Trying to force the index to take on the correct names before saving it
 
     ff_raw_saver(ff_df, s_time, e_time, ver, glm_sat, search_r, search_m, search_flash_r, i)
 
@@ -168,6 +168,7 @@ for i in search_combos.index:
     search_m = search_combos['minutes'][i]
     search_r = search_combos['simple_radius'][i]
     search_flash_r = search_combos['flash_area_radius'][i]
+    print ('Combination: '+str(i))
     first_flash_multiprocessor(start_time, end_time)
 
 print ('First Flashes Found')
