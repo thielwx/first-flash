@@ -500,7 +500,6 @@ def ff_hunter_gridsearch(df, search_start_time, search_end_time, search_r, searc
             indicies = btree.query_radius([c_pt], r = search_r/R)
         elif search_r == 0: #If the traditional radius value is zero, then use the circular radius of the flash area plus a buffer
             c_area = df.loc[i][['flash_area']].values[0]
-            print (c_area)
             flash_r_from_area = np.sqrt((c_area/1000000)/np.pi) #Getting the radius (km) from the flash area in sq meters
             indicies = btree.query_radius([c_pt], r = (search_flash_r + flash_r_from_area)/R)
 
