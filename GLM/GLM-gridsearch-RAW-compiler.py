@@ -131,11 +131,13 @@ for i in combos.index:
     
     #Get the list of files
     file_list = file_list_creator(glm_sat, t_list, i)
-    #Loading the csv files
-    new_df = file_loader(file_list, search_bounds, start_time_search, end_time_search, search_m, search_r, search_flash_r, i)
     
-    #Adding the data to the dataframe
-    df = pd.concat((df,new_df))
+    if len(file_list)>0:
+        #Loading the csv files
+        new_df = file_loader(file_list, search_bounds, start_time_search, end_time_search, search_m, search_r, search_flash_r, i)
+        
+        #Adding the data to the dataframe
+        df = pd.concat((df,new_df))
 
 #Saving the finished dataframe
 df.to_csv('/localdata/first-flash/data/GLM-gridsearch-1/'+case+'-flashes-combos.csv')
