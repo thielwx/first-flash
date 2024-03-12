@@ -15,7 +15,6 @@
 
 
 import sys
-import os
 import pandas as pd
 from datetime import datetime
 from glob import glob
@@ -85,7 +84,7 @@ def file_list_creator(glm_sat, t_list, combo_num):
     for t in t_list[:-1]:
         t_str = t.strftime('%Y%m%d')
         
-        collected_files = sorted(glob[file_loc+t_str+'/*.csv'])
+        collected_files = sorted(glob(file_loc+t_str+'/*.csv'))
         
         if len(collected_files)==0:
             print ('ERROR: NO FILES FOUND')
