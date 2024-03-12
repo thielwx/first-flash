@@ -121,7 +121,7 @@ def ff_raw_saver(ff_df, s_time, e_time, version, glm_sat, search_r, search_m, se
     #Creating the entire save string
     save_str = front_string+'_'+stime_str+'_'+ctime_str+'.csv'
     
-    save_loc = '/localdata/first-flash/data/GLM-gridsearch-'+str(ver)+'/GLM'+str(glm_sat)+'_ffRAW_v'+str(i).zfill(2)+'/'+output_date_str+'/'
+    save_loc = '/localdata/first-flash/data/GLM-gridsearch-'+str(version)+'/GLM'+str(glm_sat)+'_ffRAW_v'+str(i).zfill(2)+'/'+output_date_str+'/'
     
     print (save_loc+save_str)
     if not os.path.exists(save_loc):

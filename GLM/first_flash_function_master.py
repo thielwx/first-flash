@@ -242,21 +242,31 @@ def data_loader_gridsearch(file_list):
         
         #Grabbing the flash start time and flash end times (time=np.timedelta64('ns'))
         flash_start_times = GLM_LCFA_times(dset.time_coverage_start, dset.variables['flash_time_offset_of_first_event'][flash_locs])
+        flash_end_times = GLM_LCFA_times(dset.time_coverage_start, dset.variables['flash_time_offset_of_last_event'][flash_locs])
         flash_ids = dset.variables['flash_id'][flash_locs]
         flash_areas = dset.variables['flash_area'][flash_locs]
+        flash_quality_flag = dset.variables['flash_quality_flag'][flash_locs]
+        num_events, num_groups = events_per_flash(event_parent_ids=dset.variables['event_parent_group_id'][:],
+                                                  group_ids=dset.variables['group_id'][:],
+                                                  group_parent_ids=dset.variables['group_parent_flash_id'][:],
+                                                  flash_ids = flash_ids)
         
         file_start_time = file_list[i][-50:-34]
         fstart_time_array = np.full(len(flash_lats),file_start_time)
         
         #Creating a dictionary
         d = {'start_time':flash_start_times,
+             'end_time':flash_end_times,
             'lat':flash_lats,
             'lon':flash_lons,
             'lat_rad':flash_lats_rad,
             'lon_rad':flash_lons_rad,
             'flash_id':flash_ids,
             'fstart':fstart_time_array,
-            'flash_area':flash_areas
+            'flash_area':flash_areas,
+            'flash_quality_flag': flash_quality_flag,
+            'num_events': num_events,
+            'num_groups': num_groups
             }
         
         #Putting it into a dataframe
@@ -363,7 +373,7 @@ def LCFA_shape_slope(group_energy, group_parent_ids, flash_ids, group_times, fla
 
 
 #This function uses the parent child relationships b/w flashes-to-groups and groups-to-events to
-#count the number pf events per flash
+#count the number of events and groups per flash
 def events_per_flash(event_parent_ids, group_ids, group_parent_ids, flash_ids):
     '''
     Calculating the events per flash using all the ids
@@ -377,11 +387,14 @@ def events_per_flash(event_parent_ids, group_ids, group_parent_ids, flash_ids):
     '''
     
     num_events = [] #Empty array we will fill with the number of events per flash
+    num_groups = [] #Empty array we will fill with the number of groups per flash
 
     #Looping on a per flash basis
     for flash_id in flash_ids:
         flash_to_group_loc = np.where(group_parent_ids==flash_id)[0]
         group_id_parents = group_ids[flash_to_group_loc]
+
+        num_groups = np.append(num_groups, len(group_id_parents))
 
         events_in_flash = 0
         #looping on a per group basis to count the events
@@ -393,7 +406,7 @@ def events_per_flash(event_parent_ids, group_ids, group_parent_ids, flash_ids):
 
         num_events = np.append(num_events,events_in_flash)
         
-    return num_events
+    return num_events, num_groups
 
 
 # In[ ]:
