@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # coding: utf-8
 
 # In[1]:
@@ -14,11 +14,12 @@ import numpy as np
 
 
 #=========EDIT THIS SECTION==============================
-data_loc = '/localdata/first-flash/figures/cases/20220322-perils/20220322-perils-f1-v1/' #This should have '/' on both ends
+data_loc = '/localdata/first-flash/figures/cases/20220322-perils/20220322-perils-f2-v1/' #This should have '/' on both ends
 file_format = '.png'
-gif_name = '20220322-perils-every4th-v1' #DON'T ADD .gif
+gif_name = '20220322-perils-all-v1' #DON'T ADD .gif
 loop_nums = 0
-frame_duration = 5 #Milliseconds per frame
+frame_duration = 1000 #Milliseconds per frame
+skip_frames = 1 #Animate every nth frame
 #========================================================
 
 
@@ -32,13 +33,10 @@ globber = glob(data_loc+'*'+file_format)
 
 
 pics = []
-for i in (sorted(globber))[::4]:
+for i in (sorted(globber))[::skip_frames]:
     pics.append(img.imread(i))
 
 img.mimsave(data_loc+gif_name+'-'+str(frame_duration)+'.gif', pics , format='gif', loop=loop_nums, duration=frame_duration/1000)
-
-
-# In[ ]:
 
 
 

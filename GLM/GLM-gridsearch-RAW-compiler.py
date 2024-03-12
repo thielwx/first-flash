@@ -85,12 +85,14 @@ def file_list_creator(glm_sat, t_list, combo_num):
         t_str = t.strftime('%Y%m%d')
         
         collected_files = sorted(glob(file_loc+t_str+'/*.csv'))
+        print (file_loc+t_str+'/*.csv')
         
         if len(collected_files)==0:
             print ('ERROR: NO FILES FOUND')
-            print (file_loc+t_str+'/*.csv')
         
         file_list = np.append(file_list,collected_files)
+
+    return file_list
 
 
 # In[ ]:
@@ -105,7 +107,9 @@ def file_loader(file_list, search_bounds, start_time_search, end_time_search, se
         
     #Cutting down the dataframe by time bounds
     flash_time = [np.datetime64(time) for time in df['start_time']]
-    df = df.loc[(flash_time>=start_time_search)&(flash_time<=end_time_search)]
+    flash_time_locs = np.where((flash_time>=np.datetime64(start_time_search))&(flash_time<=np.datetime64(end_time_search)))[0]
+    df = df.iloc[flash_time_locs]
+    
     #Cutting down the dataframe by spatial bounds
     df = df.iloc[latlon_bounds_custom(df['lat'].values, df['lon'].values ,search_bounds)]
     
