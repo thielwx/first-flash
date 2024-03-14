@@ -416,6 +416,10 @@ print ('LMA Flashes Processed')
 
 
 #Getting the timese and bounds needed to plot
+if lma_ecut_df.shape[0]==0:
+    print ('ERROR: NO LMA DATA FOUND')
+    quit()
+
 lma_e_time = LMA_times_postprocess(lma_ecut_df['file_time'].values,lma_ecut_df['time'].values)
 lat_max = search_bounds[3]
 lat_min = search_bounds[2]
