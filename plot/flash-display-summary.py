@@ -426,6 +426,7 @@ lat_min = search_bounds[2]
 lon_max = search_bounds[1]
 lon_min = search_bounds[0]
 lma_stations = pd.read_csv(lma_station_loc)
+lma_stations = lma_stations.loc[(lma_stations['active']=='A')|(lma_stations['active']=='NAS')]
 
 #Setting the tick marks and their strings
 tick_marks = pd.date_range(start=start_time, end=end_time, freq='100ms')
