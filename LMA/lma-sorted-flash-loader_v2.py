@@ -208,11 +208,12 @@ else:
 
 # In[ ]:
 
+flash_df = pd.DataFrame() #Empty dataframe that we're filling with the flashes
+event_df = pd.DataFrame() #Empty dataframe that we're filling with the sources (events)
+
 #Outer loop so we're running the data on a daily basis
 for i in range(len(time_list)-1): #Looping through the files on a daily basis
     print (time_list[i])
-    flash_df = pd.DataFrame() #Empty dataframe that we're filling with the flashes
-    event_df = pd.DataFrame() #Empty dataframe that we're filling with the sources (events)
 
     lma_files = lma_file_finder(time_list[i], data_loc, lma_string) #Getting the list of file strings to then read them in
     
@@ -224,9 +225,9 @@ for i in range(len(time_list)-1): #Looping through the files on a daily basis
     for file_str in lma_files:
         flash_df, event_df = lma_file_reader(file_str, time_list[i], flash_df, event_df, n_source_min)
     
-    #Outputting the dataframes as csv's for the given day
-    file_output_creator(t_start_dt, n_source_min, output_data_loc, lma_string, 'flash', flash_df)    
-    file_output_creator(t_start_dt, n_source_min, output_data_loc, lma_string, 'event', event_df) 
+#Outputting the dataframes as csv's for all days
+file_output_creator(t_start_dt, n_source_min, output_data_loc, lma_string, 'flash', flash_df)    
+file_output_creator(t_start_dt, n_source_min, output_data_loc, lma_string, 'event', event_df) 
 
 print('RAW Files Loaded')
 print (datetime.now()-datetime_start)
