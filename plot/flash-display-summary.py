@@ -247,7 +247,9 @@ glm_e_flocs = time_space_cutdown(glm_e_lat, glm_e_lon, glm_e_time, np.datetime64
 glm_w_flocs = time_space_cutdown(glm_w_lat, glm_w_lon, glm_w_time, np.datetime64(start_time), np.datetime64(end_time), search_bounds)
 
 #Getting the indicies of the groups and events
+print (glm_e_flocs)
 glm_e_glocs, glm_e_elocs = get_group_event_locs(glm_eff, glm_e_flocs)
+print (glm_w_flocs)
 glm_w_glocs, glm_w_elocs = get_group_event_locs(glm_wff, glm_w_flocs)
 
 #Using all of the indicies to get the data from the selected flashes, and putting them into dataframes
