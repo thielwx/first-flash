@@ -16,9 +16,9 @@ available-cases: ['20220322-perils','20220423-oklma']
 
 20220322-perils:
     #Case specific variables
-    start_time: '202203221600'
-    end_time: '202203230800'
-    bounds: [-90.0,-86.5,31,35]
+    start_time: '202203221900'
+    end_time: '202203222200'
+    bounds: [-89.10,-87.43,32.3,34.07]
     cmip_data_switch: False
     case_name: 'PERiLS LMA'
     conus_check: False
@@ -27,13 +27,13 @@ available-cases: ['20220322-perils','20220423-oklma']
     cmip_loc: '/localdata/first-flash/data/ABI16-CMIPM13-2/'
     glm_east_all_loc: '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202203221600_s202203230800_c202402131406.csv'
     lma_station_loc: '/localdata/first-flash/data/LMA-clusters/perils-LMA-20220322-stations.csv'
-    lma_loc: '/localdata/first-flash/data/OK-LMA-RAW/20220423/OK-LMA_RAW-flash_202204230000_c202403141024_source-min-10.csv'
+    lma_loc: '/localdata/first-flash/data/perils-LMA-RAW/20220322/perils-LMA_RAW-flash_202203220000_c202401191517_source-min-10.csv'
     output_loc: '/localdata/first-flash/figures/cases/20220322-perils/manual-animation-1/'
 
 20220423-oklma:
     #Case specific variables
-    start_time: '202204232100'
-    end_time: '202204240000'
+    start_time: '202204232200'
+    end_time: '202204240100'
     bounds: [-98.62,-96.93,34.43,36.11]
     cmip_data_switch: False
     case_name: 'OK LMA'
@@ -43,5 +43,5 @@ available-cases: ['20220322-perils','20220423-oklma']
     cmip_loc: '/localdata/first-flash/data/ABI16-CMIPM13-1/'
     glm_east_all_loc: '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202204232000_s202204241000_c202402271317.csv'
     lma_station_loc: '/localdata/first-flash/data/LMA-clusters/OK-LMA-20220423-stations.csv'
-    lma_loc: '/localdata/first-flash/data/perils-LMA-RAW/20220322/perils-LMA_RAW-flash_202203220000_c202401191517_source-min-10.csv'
+    lma_loc: '/localdata/first-flash/data/OK-LMA-RAW/20220423/OK-LMA_RAW-flash_202204230000_c202403141024_source-min-10.csv'
     output_loc: '/localdata/first-flash/figures/cases/20220423-oklma/manual-animation-1/'

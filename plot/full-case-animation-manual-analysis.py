@@ -307,8 +307,9 @@ for t in time_list:
     print(t)
     
     #Getting all GLM flashes from the last 10 minutes
-    glmeast_all_lat, glmeast_all_lon = data_cutdown(e_all['lat'].values,e_all['lon'].values,e_all['start_time'], t-dt10,t, bounds_extent)
+    glmeast_all_lat, glmeast_all_lon = data_cutdown(e_all['lat'].values,e_all['lon'].values,e_all['start_time'], t-dt10, t, bounds_extent)
     lma_lat, lma_lon = data_cutdown(lma_all['ctr_lat'].values, lma_all['ctr_lon'].values, lma_all['flash_start_time'], t-dt10, t, bounds_extent)
+    
    
     if cmip_data==True:
         #Getting the ABI data
