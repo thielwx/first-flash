@@ -53,7 +53,10 @@ def LMA_times_postprocess(file_times, times):
 
 
 def time_cutdown(df, start_time, end_time):
-    df_cut = df.loc[(df['ptime']>=start_time)&(df['ptime']<=end_time)]
+    if df.shape[0]>0:
+        df_cut = df.loc[(df['ptime']>=start_time)&(df['ptime']<=end_time)]
+    else:
+        df_cut = df
     return df_cut
 
 
@@ -184,7 +187,7 @@ for i in range(len(time_list)):
         gw_gr_cut = time_cutdown(gw_gr,start_time,cur_time)
         gw_ev_cut = time_cutdown(gw_ev,start_time,cur_time)
         gw_ev_new = time_cutdown(gw_ev,cur_time-dt,cur_time)
-    eni_cut = time_cutdown(eni, start_time,cur_time)
+    eni_cut = time_cutdown(eni,start_time,cur_time)
     lma_e_cut = time_cutdown(lma_e,start_time,cur_time)
     
     #The most recent activity to also plot (GLM E/W above in conditionals)

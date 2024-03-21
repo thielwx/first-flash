@@ -126,7 +126,7 @@ out_plot_loc: '/localdata/first-flash/figures/cases/'
     f2: #Case Number
         
         #Search-specific data
-        start_time: '2022-04-23T22:29:51.3'
+        start_time: '2022-04-23T22:29:51.4'
         end_time: '2022-04-23T22:29:51.7'
         search_bounds: [-98.55,-98.35,35.1,35.3] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
         plot_bounds: [-99.0,-96.5,34,36.5] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
