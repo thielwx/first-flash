@@ -12,7 +12,7 @@
 #=====================================================
 
 
-available-cases: ['20220322-perils','20220423-oklma']
+available-cases: ['20220322-perils','20220423-oklma', '20220927-lee']
 
 #Output Data Locations
 out_data_loc: '/localdata/first-flash/data/cases/'
@@ -146,4 +146,26 @@ out_plot_loc: '/localdata/first-flash/figures/cases/'
         
         #The correct ENI data
         eni_loc: '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220424.csv'
+
+20220927-lee:
+    case_name: 'LEE'
+    #Input Data Locations
+    glm_east_ff_loc: '/localdata/first-flash/data/GLM16-ff-processed/GLM16_first-flash-data-land_v2_s202209270000_e202209290000_c202403041516.nc'
+    glm_west_ff_loc: '/localdata/first-flash/data/GLM17-ff-processed/GLM17_first-flash-data-land_v2_s202209270000_e202209290000_c202403041517.nc'
+    lma_flash_loc: '/localdata/first-flash/data/LEE-LMA-RAW/20220928/LEE-LMA_RAW-flash_202209280000_c202401191528_source-min-10.csv'
+    lma_event_loc: '/localdata/first-flash/data/LEE-LMA-RAW/20220928/LEE-LMA_RAW-event_202209280000_c202401191528_source-min-10.csv'
+    lma_station_loc: '/localdata/first-flash/data/LMA-clusters/LEE-LMA-20220927-stations'
+
+    f1: #Case Number
+        
+        #Search-specific data
+        start_time: '2022-09-28T22:00:20.00'
+        end_time: '2022-09-28T22:00:23.00'
+        search_bounds: [-77.25,-74.25,42,45] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        plot_bounds: [-77.25,-74.25,42,45] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        hist_max : 4 #Maximum for the GLM group density y-axis
+        
+        #The correct ENI data
+        eni_loc: '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220928.csv'
+
       

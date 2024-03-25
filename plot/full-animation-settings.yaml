@@ -1,47 +1,69 @@
 #=====================================================
-# File: full-animation-settings-manual-analysis.yaml
-# Version 1.0.0
+# File: full-animation-settings.yaml
+# Version 1.0.2
 # Author: Kevin Thiel
-# Creation Date: March 2024
+# Creation Date: February 2024
 # Description:
 # This settings file is meant to be adaptable for any case
-# study that needs an animation of the entire case and its
-# manual analysis. This is based on full-animation-settings.yaml
+# study that needs an animation of the entire case
 # 
 # Change log:
-#
+#  02-28-2024: Added 20220424-oklma case
+#  03-04-2024: Added 'conus_check' when meso cmi data is unavilable
 #=====================================================
 
-available-cases: ['20220322-perils','20220423-oklma']
+available-cases: ['20220322-perils','20220423-oklma','20220927-lee']
 
 20220322-perils:
     #Case specific variables
     start_time: '202203221600'
     end_time: '202203230800'
     bounds: [-90.0,-86.5,31,35]
-    cmip_data_switch: False
+    cmip_data_switch: True
     case_name: 'PERiLS LMA'
     conus_check: False
     
     #Data locations
     cmip_loc: '/localdata/first-flash/data/ABI16-CMIPM13-2/'
+    glm_east_ff_loc: '/localdata/first-flash/data/GLM16-ff-processed/GLM16_first-flash-data-land_v2_s202203220000_e202203240000_c202401191535.nc'
+    glm_west_ff_loc: '/localdata/first-flash/data/GLM17-ff-processed/GLM17_first-flash-data-land_v2_s202203220000_e202203240000_c202401191540.nc'
     glm_east_all_loc: '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202203221600_s202203230800_c202402131406.csv'
+    glm_west_all_loc: '/localdata/first-flash/data/GLM17-cases-allflash/GLM17allflashes_v1_s202203221600_s202203230800_c202402131410.csv'
     lma_station_loc: '/localdata/first-flash/data/LMA-clusters/perils-LMA-20220322-stations.csv'
-    lma_loc: '/localdata/first-flash/data/OK-LMA-RAW/20220423/OK-LMA_RAW-flash_202204230000_c202403141024_source-min-10.csv'
-    output_loc: '/localdata/first-flash/figures/cases/20220322-perils/manual-animation-1/'
+    output_loc: '/localdata/first-flash/figures/cases/20220322-perils/full-animation-1/'
 
 20220423-oklma:
     #Case specific variables
-    start_time: '202204232100'
-    end_time: '202204240000'
-    bounds: [-98.62,-96.93,34.43,36.11]
-    cmip_data_switch: False
+    start_time: '202204232000'
+    end_time: '202204241000'
+    bounds: [-100.5,-95.5,32.5,37.5]
+    cmip_data_switch: True
     case_name: 'OK LMA'
     conus_check: False
     
     #Data locations
     cmip_loc: '/localdata/first-flash/data/ABI16-CMIPM13-1/'
+    glm_east_ff_loc: '/localdata/first-flash/data/GLM16-ff-processed/GLM16_first-flash-data-land_v2_s202204230000_e202204250000_c202402281302.nc'
+    glm_west_ff_loc: '/localdata/first-flash/data/GLM17-ff-processed/GLM17_first-flash-data-land_v2_s202204230000_e202204250000_c202402281302.nc'
     glm_east_all_loc: '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202204232000_s202204241000_c202402271317.csv'
+    glm_west_all_loc: '/localdata/first-flash/data/GLM17-cases-allflash/GLM17allflashes_v1_s202204232000_s202204241000_c202402271321.csv'
     lma_station_loc: '/localdata/first-flash/data/LMA-clusters/OK-LMA-20220423-stations.csv'
-    lma_loc: '/localdata/first-flash/data/perils-LMA-RAW/20220322/perils-LMA_RAW-flash_202203220000_c202401191517_source-min-10.csv'
-    output_loc: '/localdata/first-flash/figures/cases/20220423-oklma/manual-animation-1/'
+    output_loc: '/localdata/first-flash/figures/cases/20220423-oklma/full-animation-1/'
+
+20220927-lee:
+    #Case specific variables
+    start_time: '202209272200'
+    end_time: '202209280500'
+    bounds: [-77.25,-74.25,42,45]
+    cmip_data_switch: True
+    case_name: 'LEE LMA'
+    conus_check: True
+    
+    #Data locations
+    cmip_loc: '/localdata/first-flash/data/ABI16-CMIPC13/'
+    glm_east_ff_loc: '/localdata/first-flash/data/GLM16-ff-processed/GLM16_first-flash-data-land_v2_s202209270000_e202209290000_c202403041516.nc'
+    glm_west_ff_loc: '/localdata/first-flash/data/GLM17-ff-processed/GLM17_first-flash-data-land_v2_s202209270000_e202209290000_c202403041517.nc'
+    glm_east_all_loc: '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202209272200_s202209280500_c202403041528.csv'
+    glm_west_all_loc: '/localdata/first-flash/data/GLM17-cases-allflash/GLM17allflashes_v1_s202209272200_s202209280500_c202403041528.csv'
+    lma_station_loc: '/localdata/first-flash/data/LMA-clusters/LEE-LMA-20220927-stations.csv'
+    output_loc: '/localdata/first-flash/figures/cases/20220927-lee/full-animation-1/'
