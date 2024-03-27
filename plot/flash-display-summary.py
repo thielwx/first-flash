@@ -247,9 +247,7 @@ glm_e_flocs = time_space_cutdown(glm_e_lat, glm_e_lon, glm_e_time, np.datetime64
 glm_w_flocs = time_space_cutdown(glm_w_lat, glm_w_lon, glm_w_time, np.datetime64(start_time), np.datetime64(end_time), search_bounds)
 
 #Getting the indicies of the groups and events
-print (glm_e_flocs)
 glm_e_glocs, glm_e_elocs = get_group_event_locs(glm_eff, glm_e_flocs)
-print (glm_w_flocs)
 glm_w_glocs, glm_w_elocs = get_group_event_locs(glm_wff, glm_w_flocs)
 
 #Using all of the indicies to get the data from the selected flashes, and putting them into dataframes
@@ -257,7 +255,6 @@ glm_e_flash_df, glm_e_group_df, glm_e_event_df = glm_df_creator(glm_eff, glm_e_f
 glm_w_flash_df, glm_w_group_df, glm_w_event_df = glm_df_creator(glm_wff, glm_w_flocs, glm_w_glocs, glm_w_elocs)
 
 print ('GLM First-Flashes Processed')
-
 
 # # ENI Flash Processing
 
@@ -363,6 +360,8 @@ def LMA_times_postprocess(file_times, times):
     return (flash_datetime)
 
 
+
+
 # In[14]:
 
 
@@ -408,6 +407,7 @@ lma_locs = time_space_cutdown(lma_f_lat, lma_f_lon, lma_f_time, np.datetime64(st
 
 #Cutting down the initial dataframe of flashes
 lma_fcut_df = lma_f_df.iloc[lma_locs,:]
+
 #Cutting down the event dataframe too
 lma_ecut_df = lma_event_cutter(lma_fcut_df,lma_e_df)
 
