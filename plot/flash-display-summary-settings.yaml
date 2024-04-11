@@ -93,8 +93,8 @@ out_plot_loc: '/localdata/first-flash/figures/cases/'
 20220423-oklma:
     case_name: 'OK-LMA'
     #Input Data Locations
-    glm_east_ff_loc: '/localdata/first-flash/data/GLM16-ff-processed/GLM16_first-flash-data-land_v2_s202204230000_e202204250000_c202402281302.nc'
-    glm_west_ff_loc: '/localdata/first-flash/data/GLM17-ff-processed/GLM17_first-flash-data-land_v2_s202204230000_e202204250000_c202402281302.nc'
+    glm_east_ff_loc: '/localdata/first-flash/data/GLM16-ff-processed/GLM16_first-flash-data-land_v2_s202204230000_e202204250000_c202404101751.nc'
+    glm_west_ff_loc: '/localdata/first-flash/data/GLM17-ff-processed/GLM17_first-flash-data-land_v2_s202204230000_e202204250000_c202404101742.nc'
     lma_flash_loc: '/localdata/first-flash/data/OK-LMA-RAW/20220423/OK-LMA_RAW-flash_202204230000_c202403141024_source-min-10.csv'
     lma_event_loc: '/localdata/first-flash/data/OK-LMA-RAW/20220423/OK-LMA_RAW-event_202204230000_c202403141024_source-min-10.csv'
     lma_station_loc: '/localdata/first-flash/data/LMA-clusters/OK-LMA-20220423-stations.csv'
@@ -138,9 +138,9 @@ out_plot_loc: '/localdata/first-flash/figures/cases/'
     f3: #Case Number
         
         #Search-specific data
-        start_time: '2022-04-24T07:36:00.0'
-        end_time: '2022-04-24T07:37:00.0'
-        search_bounds: [-99.0,-96.5,34,36.5] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
+        start_time: '2022-04-24T07:35:55.0'
+        end_time: '2022-04-24T07:36:05.0'
+        search_bounds: [-98.25,-97.25,35.5,36.5] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
         plot_bounds: [-99.0,-96.5,34,36.5] #LONMIN, LONMAX, LATMIN, LATMAX (MUST MAKE A SQUARE)
         hist_max : 4 #Maximum for the GLM group density y-axis
         
