@@ -4,8 +4,8 @@
 # A script that makes all the plots/animations necessary for the manual analysis processor
 # Creating a 10 minute animation with two subplots (left and right)
 # 
-# Left: GLM16 all flashes (30 minutes), eni all flashes (30 minutes), GLM16 first flash (circular flash area), and ABI16.
-# Right: LMA flashes (30 minutes), GLM16 first flash (circular flash area), and MRMS -10C dBZ
+# Left: GLM16 all flashes (10 minutes), eni all flashes (30 minutes), GLM16 first flash (circular flash area), and ABI16.
+# Right: LMA flashes (10 minutes), GLM16 first flash (circular flash area), and MRMS -10C dBZ
 
 # In[2]:
 
@@ -59,7 +59,7 @@ if case == '20220322-perils':
     #LIVE
     ff_loc = '/localdata/first-flash/data/manual-analysis/20220322-perils-flashes-manual-analysis.csv'
     g16_all_loc = '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202203221600_s202203230800_c202402131406.csv'
-    lma_loc = '/localdata/first-flash/data/perils-LMA-RAW/perils-LMA_RAW-flash_202203220000_c202401191517_source-min-10.csv'
+    lma_loc = '/localdata/first-flash/data/perils-LMA-RAW/20220322/perils-LMA_RAW-flash_202203220000_c202401191517_source-min-10.csv'
     eni_loc = '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220322.csv'
 
 
@@ -111,7 +111,7 @@ def LMA_times_postprocess(file_times, times):
 
 def abi_puller(t, abi_meso_num):
     #Getting the necessary ABI data
-    CMI = [-999]
+    CMI = [[-999]]
     x = [np.nan]
     y = [np.nan]
     extent = [np.nan]
@@ -127,7 +127,7 @@ def abi_puller(t, abi_meso_num):
     
     cur_abi = 'ABI16-CMIPM13-'+abi_meso_num
     file_loc = '/localdata/first-flash/data/'+cur_abi+'/'+cur_date+'/*s'+file_time_string+'*.nc'
-    print (file_loc)
+    #print (file_loc)
     collected_files = glob(file_loc)
     
     if len(collected_files)>0:
@@ -161,17 +161,17 @@ def mrms_puller(t,cur_lat,cur_lon):
         cur_time = str(int(cur_time)-1).zfill(2)
         
     file_loc = '/raid/swat_archive/vmrms/CONUS/'+cur_date+'/multi/Reflectivity_-10C/00.50/'+cur_date+'-'+cur_time+'*.netcdf.gz'
-    print (file_loc)
+    #print (file_loc)
     collected_files = glob(file_loc)
     
     if len(collected_files) > 0:
-        with gzip.open('../../test-data/manual-analysis-test/20220423-231038.netcdf.gz') as gz:
+        with gzip.open(collected_files[0]) as gz:
             with nc.Dataset('dummy', mode='r', memory=gz.read()) as dset:
+                #Extracting the data from the file                
                 data = dset.variables['Reflectivity_-10C'][:]
-                
+              
                 x_pix = dset.variables['pixel_x'][:] #Pixel locations (indicies) for LATITUDE
                 y_pix = dset.variables['pixel_y'][:] #Pixel locations (indicies) for LONGITUDE
-                data = dset.variables[var][:]
 
                 u_lat = dset.Latitude #Upper-most latitude
                 l_lon = dset.Longitude #Left-most longitude
@@ -209,7 +209,7 @@ def mrms_puller(t,cur_lat,cur_lon):
                 
     else:
         print ('ERROR: MRMS DATA MISSING')
-        output = [-999]
+        output = [[-999]]
         extent_mrms = [-999]
             
     return output, extent_mrms
@@ -277,7 +277,8 @@ def plotter(cur, dx, i, case):
         plt_car_crs = ccrs.PlateCarree()
         plot_extent = [cur_lon-dxc, cur_lon+dxc, cur_lat-dxc, cur_lat+dxc]
         
-        fig = plt.figure(figsize=(16,8))
+        fig = plt.figure(constrained_layout=True, figsize=(16,7))
+        fig.patch.set_facecolor('silver')
         gs = fig.add_gridspec(nrows=8, ncols=16)
         fig.suptitle(str(cur['fistart_flid']) + 
                      '\n'+str(t-cur_time)+
@@ -296,8 +297,9 @@ def plotter(cur, dx, i, case):
         ax1.legend(loc='upper right')
         ax1.set_title('GLM / ENI / CMIP13')
         
-        if CMI[0]!=-999:
-            ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.4, vmin=180, vmax=300, zorder=0)
+        if CMI[0,0]!=-999:
+            a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.4, vmin=180, vmax=300, zorder=0)
+            plt.colorbar(a)
         
         if t>=cur_time:
             ax1.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
@@ -314,13 +316,15 @@ def plotter(cur, dx, i, case):
         ax2.legend(loc='upper right')
         ax2.set_title('LMA / -10C dBZ')
         
-        if refl_10[0]!=-999:
-            ax2.imshow(X=refl_10, extent=mrms_extent, transform=plt_car_crs, cmap=plt.get_cmap('turbo', 30), vmin=10, vmax=60, zorder=0, alpha=0.4)
+        if refl_10[0,0]!=-999:
+            b = ax2.imshow(refl_10, extent=mrms_extent, transform=plt_car_crs, cmap=plt.get_cmap('turbo', 30), vmin=10, vmax=60, zorder=0, alpha=0.4)
+            plt.colorbar(b)
 
         if t>=cur_time:
             ax2.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
             
-        print (save_str)    
+        print (save_str)
+        plt.savefig(save_str)    
 
 
 # In[9]:
