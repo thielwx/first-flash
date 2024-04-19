@@ -30,7 +30,7 @@ import os
 # In[11]:
 
 
-args = sys.argv[]
+args = sys.argv
 #args = ['', '20220322-perils'] #DEVMODE
 
 case = args[1]
