@@ -328,7 +328,8 @@ def plotter(cur, dx, i, case):
             ax2.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
             
         print (save_str)
-        plt.savefig(save_str)    
+        plt.savefig(save_str) 
+        plt.close()   
 
 
 # In[9]:
