@@ -69,7 +69,11 @@ elif case == '20220423-oklma':
     abi_meso_num = '1'
     
     #DEVMODE
-    ff_loc = '20220423-oklma-flashes-manual-analysis.csv'
+    # ff_loc = '20220423-oklma-flashes-manual-analysis.csv'
+    ff_loc = '/localdata/first-flash/data/manual-analysis/20220423-oklma-flashes-manual-analysis.csv'
+    g16_all_loc = '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202204232000_s202204241000_c202402271317.csv'
+    lma_loc = '/localdata/first-flash/data/OK-LMA-RAW/20220423/OK-LMA_RAW-flash_202204230000_c202403141024_source-min-10.csv'
+    eni_loc = '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220423.csv'
 
 else:
     print('ERROR: INCORRECT DATA')
