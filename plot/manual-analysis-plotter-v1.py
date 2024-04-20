@@ -302,7 +302,7 @@ def plotter(cur, dx, i, case):
         ax1.set_title('GLM / ENI / CMIP13')
         
         if CMI[0,0]!=-999:
-            a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.4, vmin=180, vmax=300, zorder=0)
+            a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.6, vmin=180, vmax=300, zorder=0)
             plt.colorbar(a)
         
         if t>=cur_time:
@@ -321,7 +321,7 @@ def plotter(cur, dx, i, case):
         ax2.set_title('LMA / -10C dBZ')
         
         if refl_10[0,0]!=-999:
-            b = ax2.imshow(refl_10, extent=mrms_extent, transform=plt_car_crs, cmap=plt.get_cmap('turbo', 30), vmin=10, vmax=60, zorder=0, alpha=0.4)
+            b = ax2.imshow(refl_10, extent=mrms_extent, transform=plt_car_crs, cmap=plt.get_cmap('turbo', 30), vmin=10, vmax=60, zorder=0, alpha=0.6)
             plt.colorbar(b)
 
         if t>=cur_time:
