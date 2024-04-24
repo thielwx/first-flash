@@ -31,9 +31,9 @@ scenario_options = ['c','s','a','o']
 scenario_text = 'Convective core (c), stratiform (s), anvil (a), or other (o): '
 scenario_full = ['Convective Core', 'Stratiform', 'Anvil', 'Other']
 
-t_diff_text = 'Late time difference (0-600s): '
-t_diff_range = [0,600]
-
+t_diff_text_eni = 'ENI late time difference (-1-600s): '
+t_diff_text_lma = 'LMA late time difference (-1-600s): '
+t_diff_range = [-1,600]
 
 # In[12]:
 
@@ -86,22 +86,30 @@ elif case == '20220423-oklma':
 ff = pd.read_csv(ff_loc, index_col=0)
 
 
-# In[15]:
+#Deciding where to start if picking up from a previous spot
+start_text = 'Which event would you like to start with? (Index:0-'+str(ff.shape[0]-1)+') '
+start_range = [0,ff.shape[0]-1]
+
+start_index = input_checker_range(start_text, start_range)
 
 
 #Setting up the manual analysis dataframe and filling the categories with the dummy entries
 ff_ma = ff.copy()
-ff_ma['ma_category'] = ['NULL' for i in range(ff.shape[0])]
-ff_ma['ma_confidence'] = [0 for i in range(ff.shape[0])]
-ff_ma['ma_scenario'] = ['NULL' for i in range(ff.shape[0])]
-ff_ma['ma_time_diff'] = [np.nan for i in range(ff.shape[0])]
+
+#If there are any fewer columns, then we know it's a new dataset and needs the extra fields
+if ff_ma.shape[1]<26: 
+    ff_ma['ma_category'] = ['NULL' for i in range(ff.shape[0])]
+    ff_ma['ma_confidence'] = [0 for i in range(ff.shape[0])]
+    ff_ma['ma_scenario'] = ['NULL' for i in range(ff.shape[0])]
+    ff_ma['ma_time_diff_eni'] = [np.nan for i in range(ff.shape[0])]
+    ff_ma['ma_time_diff_lma'] = [np.nan for i in range(ff.shape[0])]
 
 
 # In[17]:
 
 
 #Looping through each row in the dataframe and collecting user input
-for i in range(ff.shape[0]):
+for i in range(ff.shape[0])[int(start_index):]:
     
     #Categorizing the flash as a 'Hit' or a 'Miss'
     folder_str = str(i) + '-' + ff['fistart_flid'].values[i]+': '
@@ -130,17 +138,21 @@ for i in range(ff.shape[0]):
     elif ff_scen=='o':
         ff_ma['ma_scenario'].values[i] = scenario_full[3]
         
-    #Getting how late was the flash if (it wasn't a miss)
+    #Getting how late was the flash if (it wasn't a miss) for ENI and LMA
     if ff_cat == 'h':
-        ff_ma['ma_time_diff'].values[i] = 0
+        ff_ma['ma_time_diff_eni'].values[i] = 0
+        ff_ma['ma_time_diff_lma'].values[i] = 0
     elif ff_cat == 'l':
-        ff_late = input_checker_range(t_diff_text, t_diff_range)
-        ff_ma['ma_time_diff'].values[i] = ff_late
-
+        ff_late_eni = input_checker_range(t_diff_text_eni, t_diff_range)
+        ff_ma['ma_time_diff_eni'].values[i] = ff_late_eni
+        ff_late_lma = input_checker_range(t_diff_text_lma, t_diff_range)
+        ff_ma['ma_time_diff_lma'].values[i] = ff_late_lma
+    
+    ff_ma.to_csv(ff_loc)
 
 # In[ ]:
 
 
-output_str = '/localdata/first-flash/data/manual-analysis/OUTPUT-'+case+'-manual-analysis.csv'
-ff_ma.to_csv(output_str)
+
+
 
