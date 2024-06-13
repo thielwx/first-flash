@@ -18,7 +18,7 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   case_name: '20220423 Oklahoma Supercell Case'
 
   start_time: '20220423-2100'
-  end_time: '20220424-0600'
+  end_time: '20220424-0200'
 
   ul_lat: 37.39
   ul_lon: -101.03

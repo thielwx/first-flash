@@ -36,7 +36,7 @@ from glob import glob
 
 # In[3]:
 
-
+dt_start = datetime.now()
 #Importing the appropriate yaml file
 with open('case-settings-manual-analysis.yaml', 'r') as f:
     sfile = yaml.safe_load(f)
@@ -161,7 +161,7 @@ def ff_driver(s_time, e_time):
 
 
 #Outerloop for cases
-for case in cases[:1]:
+for case in cases:
     print ('=========================')
     print ('START OF CASE: '+case)
     print ('=========================')
@@ -189,7 +189,7 @@ for case in cases[:1]:
     print (df.shape[0])
 
     #Looping through each combination of search criterion
-    for i in search_combos.index[:1]:
+    for i in search_combos.index:
         search_m = search_combos['minutes'][i]
         search_r = search_combos['simple_radius'][i]
         search_flash_r = search_combos['flash_area_radius'][i]
@@ -200,3 +200,4 @@ for case in cases[:1]:
         first_flash_multiprocessor(start_time, end_time)
 
 print ('DING! All First-Flashes Found')
+print (datetime.now()-dt_start)

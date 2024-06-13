@@ -507,7 +507,7 @@ def ff_hunter_gridsearch(df, search_start_time, search_end_time, search_r, searc
     t_delta = timedelta(minutes=search_m)
 
     ff_df = pd.DataFrame()
-    print (df['start_time'])
+    
     #Pruning our indicies to only the ones that are after the current search timeframe
     df_search = df.loc[(df['start_time'].values >= search_start_time) & (df['start_time'].values <= search_end_time)]
     #Pruning the search indicies to only those within the case bounds
