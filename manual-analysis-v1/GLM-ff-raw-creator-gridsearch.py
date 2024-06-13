@@ -179,6 +179,8 @@ for case in cases[:1]:
     lr_lon = sfile[case]['lr_lon']
     bounds = [ul_lat,ul_lon,lr_lat,lr_lon]
 
+    print (start_time-dt)
+    print (end_time+dt30)
     #Getting the list of files
     file_list = ff.data_loader_list(start_time=start_time-dt, end_time=end_time+dt30,glm_sat=glm_sat)
     print ('File List Created')
