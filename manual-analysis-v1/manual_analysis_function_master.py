@@ -63,7 +63,7 @@ def data_loader_list(start_time, end_time, glm_sat):
         chunk files: a list of file names and locations all as str
     '''
     #Making a list of times that we can pull from
-    chunk_list = pd.date_range(start=start_time, end=end_time, freq='60min')[:-1]
+    chunk_list = pd.date_range(start=start_time, end=end_time, freq='10min')[:-1]
     chunk_files = []
     
     
