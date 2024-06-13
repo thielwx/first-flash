@@ -120,8 +120,8 @@ def latlon_bounds_custom(flash_lats, flash_lons, bounds, dx):
     '''
     lat_max = bounds[0] + dx
     lat_min = bounds[2] - dx
-    lon_max = bounds[1] + dx
-    lon_min = bounds[3] - dx
+    lon_max = bounds[3] + dx
+    lon_min = bounds[1] - dx
     
     latlon_locs = np.where((flash_lats<=lat_max)&(flash_lats>=lat_min)&(flash_lons<=lon_max)&(flash_lons>=lon_min))[0]
     
@@ -260,7 +260,6 @@ def data_loader_gridsearch(file_list, bounds):
         #Cutting down the data to case-specific bounds (with padding of 0.5 degrees)
         flash_locs, flash_lats, flash_lons = latlon_bounds_custom(flash_lats, flash_lons, bounds, 0.5)
         #NOTE: You'll need to constrain all calculations to point within these bounds (using flash_locs)
-        print (len(flash_locs))
 
         flash_lats_rad = flash_lats * (np.pi/180)
         flash_lons_rad = flash_lons * (np.pi/180)
