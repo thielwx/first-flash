@@ -49,7 +49,7 @@ search_combos = pd.read_csv('ff_gridsearch_combinations.csv', index_col=0)
 
 #Constants
 dt = timedelta(minutes=50) #Set to the max possible search time period
-dt30 = timedelta(minutes=31) #Set for the end times
+dt30 = timedelta(minutes=30) #Set for the end times
 ver = 1
 glm_sat = 16
 
@@ -179,12 +179,9 @@ for case in cases[:1]:
     lr_lon = sfile[case]['lr_lon']
     bounds = [ul_lat,ul_lon,lr_lat,lr_lon]
 
-    print (start_time-dt)
-    print (end_time+dt30)
     #Getting the list of files
     file_list = ff.data_loader_list(start_time=start_time-dt, end_time=end_time+dt30,glm_sat=glm_sat)
     print ('File List Created')
-    print (file_list)
     #Getting the flashes and putting them into a dataframe for the case ()
     df = ff.data_loader_gridsearch(file_list,bounds)
     print ('DataFrame Created')

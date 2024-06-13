@@ -77,7 +77,6 @@ def data_loader_list(start_time, end_time, glm_sat):
         #file_loc = '../../test-data/GLM'+str(glm_sat)+'-LCFA/'+str(date1)+'/OR_GLM-L2-LCFA_G'+str(glm_sat)+'_s'+str(date2)+'*.nc' #Dev mode
         
         files = sorted(glob(file_loc))
-        print (files)
         chunk_files = np.append(chunk_files,files)
        
     return chunk_files
@@ -261,6 +260,7 @@ def data_loader_gridsearch(file_list, bounds):
         #Cutting down the data to case-specific bounds (with padding of 0.5 degrees)
         flash_locs, flash_lats, flash_lons = latlon_bounds_custom(flash_lats, flash_lons, bounds, 0.5)
         #NOTE: You'll need to constrain all calculations to point within these bounds (using flash_locs)
+        print (len(flash_locs))
 
         flash_lats_rad = flash_lats * (np.pi/180)
         flash_lons_rad = flash_lons * (np.pi/180)
