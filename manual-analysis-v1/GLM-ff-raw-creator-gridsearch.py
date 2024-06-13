@@ -182,9 +182,11 @@ for case in cases[:1]:
     #Getting the list of files
     file_list = ff.data_loader_list(start_time=start_time-dt, end_time=end_time+dt30,glm_sat=glm_sat)
     print ('File List Created')
+    print (file_list)
     #Getting the flashes and putting them into a dataframe for the case ()
     df = ff.data_loader_gridsearch(file_list,bounds)
     print ('DataFrame Created')
+    print (df.shape[0])
 
     #Looping through each combination of search criterion
     for i in search_combos.index[:1]:
