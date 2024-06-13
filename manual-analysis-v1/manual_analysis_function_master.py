@@ -71,7 +71,7 @@ def data_loader_list(start_time, end_time, glm_sat):
     for i in range(len(chunk_list)):
         y, m, d, doy, hr, mi = datetime_converter(chunk_list[i])
         date1 = y+m+d
-        date2 = y+doy+hr
+        date2 = y+doy+hr+mi
         
         file_loc = '/localdata/first-flash/data/GLM'+str(glm_sat)+'-LCFA/'+str(date1)+'/OR_GLM-L2-LCFA_G'+str(glm_sat)+'_s'+str(date2)+'*.nc' #Production Mode
         #file_loc = '../../test-data/GLM'+str(glm_sat)+'-LCFA/'+str(date1)+'/OR_GLM-L2-LCFA_G'+str(glm_sat)+'_s'+str(date2)+'*.nc' #Dev mode
