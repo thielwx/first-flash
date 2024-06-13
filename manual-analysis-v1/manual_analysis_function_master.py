@@ -76,7 +76,7 @@ def data_loader_list(start_time, end_time, glm_sat):
         file_loc = '/localdata/first-flash/data/GLM'+str(glm_sat)+'-LCFA/'+str(date1)+'/OR_GLM-L2-LCFA_G'+str(glm_sat)+'_s'+str(date2)+'*.nc' #Production Mode
         #file_loc = '../../test-data/GLM'+str(glm_sat)+'-LCFA/'+str(date1)+'/OR_GLM-L2-LCFA_G'+str(glm_sat)+'_s'+str(date2)+'*.nc' #Dev mode
         
-        files = glob(file_loc)
+        files = sorted(glob(file_loc))
         print (files)
         chunk_files = np.append(chunk_files,files)
        
