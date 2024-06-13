@@ -141,6 +141,7 @@ def ff_driver(s_time, e_time):
     global i
     global case
     global bounds
+    global glm_sat
 
     #Getting the first flashes for the time period of interest, output as a dataframe
     ff_df = ff.ff_hunter_gridsearch(df, s_time, e_time, search_r, search_m, search_flash_r, bounds)
@@ -149,7 +150,7 @@ def ff_driver(s_time, e_time):
     
     #ff_df.index.names['fistart_flid'] #Trying to force the index to take on the correct names before saving it
 
-    ff_raw_saver(ff_df, s_time, e_time, ver, search_r, search_m, search_flash_r, i, case)
+    ff_raw_saver(ff_df, s_time, e_time, ver, glm_sat, search_r, search_m, search_flash_r, i, case)
 
 
 # # Driver section
