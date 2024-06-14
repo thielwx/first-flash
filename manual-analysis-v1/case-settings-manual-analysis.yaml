@@ -29,7 +29,7 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   case_name: '20220504 Texas Supercell Case' 
 
   start_time: '20220504-1600'
-  end_time: '20220505-0600'
+  end_time: '20220505-0400'
 
   ul_lat: 37.00
   ul_lon: -103.00
@@ -62,7 +62,7 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   case_name: '20220921 Intermountain West Case'
 
   start_time: '20220921-1600'
-  end_time: '20220922-0600'
+  end_time: '20220922-0400'
 
   ul_lat: 44.67
   ul_lon: -116.98

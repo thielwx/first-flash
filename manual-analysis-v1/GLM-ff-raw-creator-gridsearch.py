@@ -72,16 +72,12 @@ def first_flash_multiprocessor(start_time, end_time):
         None
     '''
     #Making a list of times in two hour chunks
-    time_list = pd.date_range(start=start_time, end=end_time, freq='2H')
+    time_list = pd.date_range(start=start_time, end=end_time, freq='1H')
     pool_size = len(time_list)
     print (time_list)
-    
-    #Ensuring the pool size doesn't exceed the number of available CPUs
-    if pool_size > 12:
-        pool_size = 12
 
     if __name__ == "__main__":
-        with mp.Pool(12) as p:
+        with mp.Pool(pool_size) as p:
             p.starmap(ff_driver,zip(time_list[:-1],time_list[1:]))
             p.close()
             p.join()
