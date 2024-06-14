@@ -112,3 +112,26 @@ for case in cases[:1]:
         os.makedirs(save_loc)
     df.to_csv(save_loc+ case+'-ffRAW-ALLcombos-v1.csv')
 
+    #Saving out the 10km 10min data separately for the manual analysis plotting & evaluation
+
+    #Grabbing the current serach criterion
+    i=0
+    search_m = combos['minutes'][i]
+    search_r = combos['simple_radius'][i]
+    search_flash_r = combos['flash_area_radius'][i]
+    
+    #Get the list of files
+    file_list = file_list_creator(glm_sat, i, case)
+    
+    if len(file_list)>0:
+        #Loading the csv files
+        new_df = file_loader(file_list, search_m, search_r, search_flash_r, i)
+        
+        #Adding the data to the dataframe
+        df = pd.concat((df,new_df))
+
+    #Saving the finished 
+    save_loc = '/localdata/first-flash/data/manual-analysis-v1/'+case+'/'
+    if not os.path.exists(save_loc):
+        os.makedirs(save_loc)
+    df.to_csv(save_loc+ case+'-ffRAW-v00combos-v1.csv')
