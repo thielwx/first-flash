@@ -5,48 +5,34 @@
 
 
 #======================================
-# This script takes in all of the raw gridsearch files and combines them into one csv
+# This script takes in all of the raw gridsearch files and combines them into one csv per case 
+# (adapted from GLM-gridsearch-RAW-compiler.py in GLM/)
+#
 # Author: Kevin Thiel (kevin.thiel@ou.edu)
-# Created: March 2024
+# Created: June 2024
 #======================================
 
 
 # In[19]:
 
 
-import sys
 import pandas as pd
 from datetime import datetime
 from glob import glob
 import numpy as np
+import yaml
 
 
 # In[10]:
+#Importing the appropriate yaml file
+with open('case-settings-manual-analysis.yaml', 'r') as f:
+    sfile = yaml.safe_load(f)
 
+cases = sfile['cases']
 
 combos = pd.read_csv('ff_gridsearch_combinations.csv', index_col=0)
 
-args = sys.argv
-#args = ['BLANK', '20220322-perils', '16'] #devmode
-
-case = args[1]
-glm_sat = args[2]
-
-if case == '20220322-perils':
-    start_time = datetime(2022, 3, 22, 0, 0)
-    end_time = datetime(2022, 3, 24, 0, 0)
-    start_time_search = datetime(2022, 3, 22, 0, 0)
-    end_time_search = datetime(2022, 3, 23, 6, 0)
-    search_bounds = [37, 28, -83, -99]
-    
-elif case == '20220423-oklma':
-    start_time = datetime(2022, 4, 23, 0, 0)
-    end_time = datetime(2022, 4, 25, 0, 0)
-    start_time_search = datetime(2022, 4, 23, 21, 0)
-    end_time_search = datetime(2022, 4, 24, 12, 0)
-    search_bounds = [37, 33, -92, -100]
-    
-t_list = pd.date_range(start=start_time, end=end_time, freq='1D')
+glm_sat = 16
 
 
 # In[21]:
@@ -76,21 +62,18 @@ def latlon_bounds_custom(flash_lats, flash_lons, search_bounds):
 # In[ ]:
 
 
-def file_list_creator(glm_sat, t_list, combo_num):
-    file_loc = '/localdata/first-flash/data/GLM-gridsearch-1/GLM'+glm_sat+'_ffRAW_v'+str(combo_num).zfill(2)+'/'
+def file_list_creator(glm_sat, combo_num, case):
+    file_loc = '/localdata/first-flash/data/manual-analysis-v1/'+case+'/GLM'+str(glm_sat)+'_ffRAW_v'+str(combo_num).zfill(2)+'/'
     
     file_list = [] #Empty file list that we'll fill
+        
+    collected_files = sorted(glob(file_loc+'/*.csv'))
+    print (file_loc+'/*.csv')
     
-    for t in t_list[:-1]:
-        t_str = t.strftime('%Y%m%d')
-        
-        collected_files = sorted(glob(file_loc+t_str+'/*.csv'))
-        print (file_loc+t_str+'/*.csv')
-        
-        if len(collected_files)==0:
-            print ('ERROR: NO FILES FOUND')
-        
-        file_list = np.append(file_list,collected_files)
+    if len(collected_files)==0:
+        print ('ERROR: NO FILES FOUND')
+    
+    file_list = np.append(file_list,collected_files)
 
     return file_list
 
@@ -98,20 +81,13 @@ def file_list_creator(glm_sat, t_list, combo_num):
 # In[ ]:
 
 
-def file_loader(file_list, search_bounds, start_time_search, end_time_search, search_m, search_r, search_flash_r, ver):
+def file_loader(file_list, search_m, search_r, search_flash_r, ver):
     #Loading in all of the data
     df = pd.DataFrame()
     for f in file_list:
-        new_df = pd.read_csv(f)
+        new_df = pd.read_csv(f, index_col=0)
         df = pd.concat((df,new_df))
-        
-    #Cutting down the dataframe by time bounds
-    flash_time = [np.datetime64(time) for time in df['start_time']]
-    flash_time_locs = np.where((flash_time>=np.datetime64(start_time_search))&(flash_time<=np.datetime64(end_time_search)))[0]
-    df = df.iloc[flash_time_locs]
     
-    #Cutting down the dataframe by spatial bounds
-    df = df.iloc[latlon_bounds_custom(df['lat'].values, df['lon'].values ,search_bounds)]
     
     #Adding search information to the dataframe
     df['search_m'] = np.full(df.shape[0], search_m)
@@ -123,26 +99,38 @@ def file_loader(file_list, search_bounds, start_time_search, end_time_search, se
 
 
 # In[6]:
-
-
-df = pd.DataFrame() #Empty dataframe that will be filled with the first flash events
-#Outer loop is for the ff serach combinations
-for i in combos.index:
-    #Grabbing the current serach criterion
-    search_m = combos['minutes'][i]
-    search_r = combos['simple_radius'][i]
-    search_flash_r = combos['flash_area_radius'][i]
+#Outer loop for a case-by-case basis
+for case in cases[:1]:
     
-    #Get the list of files
-    file_list = file_list_creator(glm_sat, t_list, i)
-    
-    if len(file_list)>0:
-        #Loading the csv files
-        new_df = file_loader(file_list, search_bounds, start_time_search, end_time_search, search_m, search_r, search_flash_r, i)
+    #Getting the case times
+    start_time_str = sfile[case]['start_time']
+    end_time_str = sfile[case]['end_time']
+    #Converting the time strings to datetimes
+    start_time = datetime.strptime(start_time_str, '%Y%m%d-%H%M')
+    end_time = datetime.strptime(end_time_str, '%Y%m%d-%H%M')
+
+    df = pd.DataFrame() #Empty dataframe that will be filled with the first flash events
+
+    #Inner loop is for the ff serach combinations
+    for i in combos.index:
+        #Grabbing the current serach criterion
+        search_m = combos['minutes'][i]
+        search_r = combos['simple_radius'][i]
+        search_flash_r = combos['flash_area_radius'][i]
         
-        #Adding the data to the dataframe
-        df = pd.concat((df,new_df))
+        #Get the list of files
+        file_list = file_list_creator(glm_sat, i, case)
+        
+        if len(file_list)>0:
+            #Loading the csv files
+            new_df = file_loader(file_list, search_m, search_r, search_flash_r, i)
+            
+            #Adding the data to the dataframe
+            df = pd.concat((df,new_df))
 
-#Saving the finished dataframe
-df.to_csv('/localdata/first-flash/data/GLM-gridsearch-1/'+case+'-flashes-combos.csv')
+    #Saving the finished 
+    save_loc = '/localdata/first-flash/data/manual-analysis-v1/'+case+'/'
+    if not os.path.exists(save_loc):
+        os.makedirs(save_loc)
+    df.to_csv(save_loc+ case+'-ffRAW-ALLcombos-v1.csv')
 
