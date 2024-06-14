@@ -511,8 +511,8 @@ def ff_hunter_gridsearch(df, search_start_time, search_end_time, search_r, searc
     #Pruning our indicies to only the ones that are after the current search timeframe
     df_search = df.loc[(df['start_time'].values >= search_start_time) & (df['start_time'].values <= search_end_time)]
     #Pruning the search indicies to only those within the case bounds
-    flash_locs, flash_lats, flash_lons = latlon_bounds_custom(df['lat'].values, df['lon'].values, bounds, 0.0)
-    df_search = df.iloc[flash_locs]
+    flash_locs, flash_lats, flash_lons = latlon_bounds_custom(df_search['lat'].values, df_search['lon'].values, bounds, 0.0)
+    df_search = df_search.iloc[flash_locs]
     
     #This loop goes through based upon the index of the provided dataframe and finds the first flashes
     #The output is a dataframe of first flash events 
