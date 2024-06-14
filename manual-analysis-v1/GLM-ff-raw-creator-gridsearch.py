@@ -71,10 +71,9 @@ def first_flash_multiprocessor(start_time, end_time):
     RETURNS:
         None
     '''
-    #Making a list of times in two hour chunks
+    #Making a list of times in one hour chunks
     time_list = pd.date_range(start=start_time, end=end_time, freq='1H')
     pool_size = len(time_list)
-    print (time_list)
 
     if __name__ == "__main__":
         with mp.Pool(pool_size) as p:
@@ -142,10 +141,6 @@ def ff_driver(s_time, e_time):
 
     #Getting the first flashes for the time period of interest, output as a dataframe
     ff_df = ff.ff_hunter_gridsearch(df, s_time, e_time, search_r, search_m, search_flash_r, bounds)
-
-    print (s_time)
-    print (e_time)
-    print (ff_df)
     
     ff_df = ff.ff_next_flashes(df, ff_df, s_time, e_time, 30, 30) #Keeping those at 30 min/30 km for consistency
     
@@ -162,7 +157,7 @@ def ff_driver(s_time, e_time):
 
 
 #Outerloop for cases
-for case in cases[:1]:
+for case in cases:
     print ('=========================')
     print ('START OF CASE: '+case)
     print ('=========================')
@@ -187,10 +182,10 @@ for case in cases[:1]:
     #Getting the flashes and putting them into a dataframe for the case ()
     df = ff.data_loader_gridsearch(file_list,bounds)
     print ('DataFrame Created')
-    print (df.shape[0])
+    print ('Total Flashes: '+str(df.shape[0]))
 
     #Looping through each combination of search criterion
-    for i in search_combos.index[:1]:
+    for i in search_combos.index:
         search_m = search_combos['minutes'][i]
         search_r = search_combos['simple_radius'][i]
         search_flash_r = search_combos['flash_area_radius'][i]
