@@ -21,6 +21,7 @@ from datetime import datetime
 from glob import glob
 import numpy as np
 import yaml
+import os
 
 
 # In[10]:
@@ -34,29 +35,6 @@ combos = pd.read_csv('ff_gridsearch_combinations.csv', index_col=0)
 
 glm_sat = 16
 
-
-# In[21]:
-
-
-def latlon_bounds_custom(flash_lats, flash_lons, search_bounds):
-    '''
-    Takes in the flash latitudes and longitudes determines which ones are within the domain
-    PARAMS:
-        flash_lats: array of flash latitudes (floats)
-        flash_lons: array of flash longitudes (floats) 
-    RETURNS:
-        latlon_locs: array of indicies from which the input lat/lon values are within the domain
-        flash_lats: array of flash lats within the domain
-        flash_lons: array of flash lons within the domain
-    '''
-    lat_max = search_bounds[0]
-    lat_min = search_bounds[1]
-    lon_max = search_bounds[2]
-    lon_min = search_bounds[3]
-    
-    latlon_locs = np.where((flash_lats<=lat_max)&(flash_lats>=lat_min)&(flash_lons<=lon_max)&(flash_lons>=lon_min))[0]
-    
-    return latlon_locs
 
 
 # In[ ]:
