@@ -509,7 +509,7 @@ def ff_hunter_gridsearch(df, search_start_time, search_end_time, search_r, searc
     ff_df = pd.DataFrame()
     
     #Pruning our indicies to only the ones that are after the current search timeframe
-    df_search = df.loc[(df['start_time'].values >= search_start_time) & (df['start_time'].values <= search_end_time)]
+    df_search = df.loc[(df['start_time'] >= search_start_time) & (df['start_time'] < search_end_time)]
     #Pruning the search indicies to only those within the case bounds
     flash_locs, flash_lats, flash_lons = latlon_bounds_custom(df_search['lat'].values, df_search['lon'].values, bounds, 0.0)
     df_search = df_search.iloc[flash_locs]
