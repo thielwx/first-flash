@@ -142,6 +142,10 @@ def ff_driver(s_time, e_time):
 
     #Getting the first flashes for the time period of interest, output as a dataframe
     ff_df = ff.ff_hunter_gridsearch(df, s_time, e_time, search_r, search_m, search_flash_r, bounds)
+
+    print (s_time)
+    print (e_time)
+    print (ff_df)
     
     ff_df = ff.ff_next_flashes(df, ff_df, s_time, e_time, 30, 30) #Keeping those at 30 min/30 km for consistency
     
