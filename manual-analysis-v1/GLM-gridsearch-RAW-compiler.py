@@ -112,8 +112,9 @@ for case in cases[:1]:
         os.makedirs(save_loc)
     df.to_csv(save_loc+ case+'-ffRAW-ALLcombos-v1.csv')
 
-    #Saving out the 10km 10min data separately for the manual analysis plotting & evaluation
 
+    #Saving out the 10km 10min data separately for the manual analysis plotting & evaluation
+    df = pd.DataFrame() #Empty dataframe that will be filled with the first flash events
     #Grabbing the current serach criterion
     i=0
     search_m = combos['minutes'][i]
