@@ -5,7 +5,7 @@
 
 
 #=================================================================================================
-# This script takes in GLM L2 LCFA files (25+ hrs) and finds the first GLM flashes 
+# This script takes in GLM L2 LCFA files and finds the first GLM flashes 
 # based on distance and time (varaible). Data is output as csv files 
 # as 'raw' data to be compiled later (so we can capture all the group and event data)
 # Note: Script was adapted from GLM-ff-raw-creator-v2.py
@@ -74,6 +74,7 @@ def first_flash_multiprocessor(start_time, end_time):
     #Making a list of times in two hour chunks
     time_list = pd.date_range(start=start_time, end=end_time, freq='2H')
     pool_size = len(time_list)
+    print (time_list)
     
     #Ensuring the pool size doesn't exceed the number of available CPUs
     if pool_size > 12:
@@ -161,7 +162,7 @@ def ff_driver(s_time, e_time):
 
 
 #Outerloop for cases
-for case in cases:
+for case in cases[:1]:
     print ('=========================')
     print ('START OF CASE: '+case)
     print ('=========================')
@@ -189,7 +190,7 @@ for case in cases:
     print (df.shape[0])
 
     #Looping through each combination of search criterion
-    for i in search_combos.index:
+    for i in search_combos.index[:0]:
         search_m = search_combos['minutes'][i]
         search_r = search_combos['simple_radius'][i]
         search_flash_r = search_combos['flash_area_radius'][i]
