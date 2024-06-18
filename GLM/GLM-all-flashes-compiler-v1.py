@@ -74,7 +74,7 @@ def ff_raw_saver(df, s_time, e_time, version, glm_sat):
 
     #Creating the start time string for the current file
     y, m, d, doy, hr, mi = ff.datetime_converter(e_time)
-    etime_str = 's'+y+m+d+hr+mi
+    etime_str = 'e'+y+m+d+hr+mi
     
     #Creating the current time string for the current time
     y, m, d, doy, hr, mi = ff.datetime_converter(datetime.now())
