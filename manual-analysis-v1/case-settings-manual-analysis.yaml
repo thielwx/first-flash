@@ -25,6 +25,8 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   lr_lat: 31.97
   lr_lon: -94.11
 
+  glm16_all: 'GLM16allflashes_v1_s202204232000_s202204241000_c202402271317.csv'
+
 20220504-tx:
   case_name: '20220504 Texas Supercell Case' 
 
@@ -35,6 +37,8 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   ul_lon: -103.00
   lr_lat: 31.97
   lr_lon: -95.14
+
+  glm16_all: 'GLM16allflashes_v1_s202205041500_e202205050400_c202406181523.csv'
 
 20220612-co:
   case_name: '20220612 High Plains Case'
@@ -47,6 +51,8 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   lr_lat: 37.00
   lr_lon: -97.27
 
+  glm16_all: 'GLM16allflashes_v1_s202206121800_e202206130300_c202406181525.csv'
+
 20220614-ne:
   case_name: '20220614 Central Plains Case'
 
@@ -57,6 +63,8 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   ul_lon: -109.05
   lr_lat: 37.32
   lr_lon: -91.12
+
+  glm16_all: 'GLM16allflashes_v1_s202206142100_e202206150600_c202406181531.csv'
 
 20220921-ut:
   case_name: '20220921 Intermountain West Case'
@@ -69,6 +77,8 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   lr_lat: 39.59
   lr_lon: -109.10
 
+  glm16_all: 'GLM16allflashes_v1_s202209211500_e202209220400_c202406181533.csv'
+
 20220625-tn:
   case_name: '20220625 Tennessee Valley Case'
 
@@ -79,3 +89,5 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   ul_lon: -85.78
   lr_lat: 35.17
   lr_lon: -80.94
+
+  glm16_all: 'GLM16allflashes_v1_s202206251400_e202206260100_c202406181535.csv'
