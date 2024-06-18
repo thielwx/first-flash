@@ -72,8 +72,8 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
 20220625-tn:
   case_name: '20220625 Tennessee Valley Case'
 
-  start_time: '20220925-1500'
-  end_time: '20220926-0100'
+  start_time: '20220625-1500'
+  end_time: '20220626-0100'
 
   ul_lat: 38.29
   ul_lon: -85.78
