@@ -90,8 +90,8 @@ def eni_puller(start_time_str, end_time_str):
 
     #Loading in the data to a single dataframe
     if start_time_str[:8] != end_time_str[:8]:
-        eni1 = pd.read_csv(data_loc+start_time_str+'.csv', index_col=0)
-        eni2 = pd.read_csv(data_loc+end_time_str+'.csv', index_col=0)
+        eni1 = pd.read_csv(data_loc+start_time_str[:8]+'.csv', index_col=0)
+        eni2 = pd.read_csv(data_loc+end_time_str[:8]+'.csv', index_col=0)
         eni = pd.concat((eni1,eni2), axis=0)
     else:
         eni = pd.read_csv(data_loc+start_time_str[:8]+'.csv', index_col=0)
