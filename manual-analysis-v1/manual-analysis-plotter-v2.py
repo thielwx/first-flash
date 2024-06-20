@@ -19,6 +19,7 @@ import gzip
 import netCDF4 as nc
 import yaml
 from datetime import datetime
+from datetime import timedelta
 from glob import glob
 from pyresample import SwathDefinition, kd_tree
 import matplotlib.gridspec as gridspec
@@ -117,8 +118,17 @@ def abi_puller(t):
     
     
     #Getting the time strings needed to find the file
-    cur_date = t.strftime('%Y%m%d')
-    file_time_string = t.strftime('%Y%j%H%M')
+    cur_minute = int(t.srftime('%M'))
+    if cur_minute == 0:
+        dt_int = 5
+    elif cur_minute == 5:
+        dt_int = 5
+    elif (cur_minute != 5) or (cur_minute != 0):
+        dt_int = int(t.strftime('%M'))%5 #Using the mod operator to tell us how much to adjust the time
+    
+    adjusted_time = t - timedelta(minutes=dt_int-1)
+    cur_date = adjusted_time.strftime('%Y%m%d')
+    file_time_string = adjusted_time.strftime('%Y%j%H%M')
     
     cur_abi = 'ABI16-CMIPC13'
     file_loc = '/localdata/first-flash/data/'+cur_abi+'/'+cur_date+'/*s'+file_time_string+'*.nc'
@@ -332,6 +342,7 @@ for case in cases[:1]:
 
     #Reading in the datasets and getting the time data necessary
     ff = pd.read_csv(ff_loc+case+'-ffRAW-v00combos-v1.csv', index_col=0)
+    ff.index.name = 'fistart_flid'
     ff['time64'] = [np.datetime64(i) for i in ff['start_time'].values]
 
     g16 = pd.read_csv('/localdata/first-flash/data/GLM16-cases-allflash/'+glm16_all_file, index_col=0)
