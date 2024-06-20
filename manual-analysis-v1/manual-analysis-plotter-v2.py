@@ -46,41 +46,6 @@ dt10 = np.timedelta64(10,'m')
 dt30 = np.timedelta64(30,'m')
 dt50s = np.timedelta64(50, 's')
 
-#Grabbing the case-specific data
-if case == '20220322-perils':
-    start_time = np.datetime64('2022-03-22 19:00')
-    end_time = np.datetime64('2022-03-22 22:00')
-    abi_meso_num = '2'
-    
-    #DEVMODE
-    # ff_loc = '20220322-perils-flashes-manual-analysis.csv'
-    # g16_all_loc = '../../test-data/manual-analysis-test/GLM16allflashes_v1_s202203221600_s202203230800_c202402131406.csv'
-    # lma_loc = '../../test-data/manual-analysis-test/perils-LMA_RAW-flash_202203220000_c202401191517_source-min-10.csv'
-    # eni_loc = '../../test-data/manual-analysis-test/eni_flash_flash20220322.csv'
-    
-    #LIVE
-    ff_loc = '/localdata/first-flash/data/manual-analysis/20220322-perils-flashes-manual-analysis.csv'
-    g16_all_loc = '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202203221600_s202203230800_c202402131406.csv'
-    lma_loc = '/localdata/first-flash/data/perils-LMA-RAW/20220322/perils-LMA_RAW-flash_202203220000_c202401191517_source-min-10.csv'
-    eni_loc = '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220322.csv'
-
-
-elif case == '20220423-oklma':
-    start_time = np.datetime64('2022-04-23 22:00')
-    end_time = np.datetime64('2022-04-24 01:00')
-    abi_meso_num = '1'
-    
-    #DEVMODE
-    # ff_loc = '20220423-oklma-flashes-manual-analysis.csv'
-    ff_loc = '/localdata/first-flash/data/manual-analysis/20220423-oklma-flashes-manual-analysis.csv'
-    g16_all_loc = '/localdata/first-flash/data/GLM16-cases-allflash/GLM16allflashes_v1_s202204232000_s202204241000_c202402271317.csv'
-    lma_loc = '/localdata/first-flash/data/OK-LMA-RAW/20220423/OK-LMA_RAW-flash_202204230000_c202403141024_source-min-10.csv'
-    eni_loc = '/localdata/first-flash/data/ENI-base-stock/eni_flash_flash20220423.csv'
-
-else:
-    print('ERROR: INCORRECT DATA')
-    exit()
-
 
 # In[4]:
 
