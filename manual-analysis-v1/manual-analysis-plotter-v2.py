@@ -118,7 +118,7 @@ def abi_puller(t):
     
     
     #Getting the time strings needed to find the file
-    cur_minute = int(t.srftime('%M'))
+    cur_minute = int(t.strftime('%M'))
     if cur_minute == 0:
         dt_int = 5
     elif cur_minute == 5:
