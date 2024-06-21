@@ -98,14 +98,13 @@ def abi_puller(t):
     if dt_int == 0:
         dt_int = 5
         
-    print (t)
     adjusted_time = t - timedelta(minutes=dt_int-1)
     cur_date = adjusted_time.strftime('%Y%m%d')
     file_time_string = adjusted_time.strftime('%Y%j%H%M')
     
     cur_abi = 'ABI16-CMIPC13'
     file_loc = '/localdata/first-flash/data/'+cur_abi+'/'+cur_date+'/*s'+file_time_string+'*.nc'
-    print (file_loc)
+    #print (file_loc)
     collected_files = glob(file_loc)
     
     if len(collected_files)>0:
@@ -180,7 +179,7 @@ def mrms_puller(t,cur_lat,cur_lon):
                 output = kd_tree.resample_nearest(source_geo_def=MRMS_point_swath,
                                         data=data,
                                         target_geo_def=MRMS_grid_swath,
-                                        radius_of_influence=5e3)
+                                        radius_of_influence=1e3)
                 
                 extent_mrms = [np.min(lon), np.max(lon), np.min(lat), np.max(lat)] 
                 
@@ -214,7 +213,7 @@ def save_string(cur, i, t, case):
 
 def plotter(cur, dx, i, case, g16, eni):
     cur_time = cur['time64']
-    print (cur_time)
+    #print (cur_time)
     cur_lat = cur['lat']
     cur_lon = cur['lon']
     cur_area = cur['flash_area'] / 1e6 #Putting into km sq
@@ -235,7 +234,7 @@ def plotter(cur, dx, i, case, g16, eni):
     tf_size = 5
     
     #Looping through the individual times
-    for t in time_list:
+    for t in time_list[:]:
         #Step 1: Get the data from the dataframes
         g16_cut = g16.loc[(g16['lat']>=cur_lat-dx)&(g16['lat']<=cur_lat+dx)&
                          (g16['lon']>=cur_lon-dx)&(g16['lon']<=cur_lon+dx)&
@@ -267,7 +266,7 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.coastlines()
         ax1.add_feature(cfeature.STATES, edgecolor ='r',linewidth=1.5, zorder=0)
         ax1.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
-        
+        ax1.set_extent(plot_extent, crs=plt_car_crs)
         
         ax1.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GLM16 Flashes (10 min.)', marker='.', s=tf_size, c='r')
         ax1.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='ENI Flashes (10 min.)', marker='o', s=tf_size, c='k')
@@ -275,16 +274,15 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.legend(loc='upper right')
         ax1.set_title('GLM / ENI / CMIP13')
         
-        
 
-        if CMI[0,0]!=-999:
-            a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.6, vmin=180, vmax=300, zorder=0)
+        if np.nanmax(CMI)>0:
+            a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 60), alpha=0.6, vmin=180, vmax=300, zorder=0, transform=geo_crs)
             plt.colorbar(a)
         
         if t>=cur_time:
-            ax1.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
+            ax1.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=plt_car_crs, zorder=1, fill=True))
         
-        ax1.set_extent(plot_extent, crs=plt_car_crs)
+        
 
         #Subplot 2
         ax2 = fig.add_subplot(gs[:,8:], projection=plt_car_crs)
@@ -306,16 +304,16 @@ def plotter(cur, dx, i, case, g16, eni):
         if t>=cur_time:
             ax2.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
             
-        print (save_str)
+        #print (save_str)
         plt.savefig(save_str) 
         plt.close()   
 
 
 # In[9]:
-
+dt_start = datetime.now()
 #Outerloop on a per-case basis
-for case in cases[:1]:
-
+for case in cases[:]:
+    print ('====='+case+'=====')
     ff_loc = '/localdata/first-flash/data/manual-analysis-v1/'+case+'/'
     glm16_all_file = sfile[case]['glm16_all']
 
@@ -331,7 +329,10 @@ for case in cases[:1]:
     eni['time64'] = [np.datetime64(i) for i in eni['timestamp'].values]
 
     #Looping through each first flash event
-    for i in range(ff.shape[0])[:1]:
+    for i in range(ff.shape[0])[:]:
         print (str(i+1)+'/'+str(ff.shape[0]))
         cur = ff.iloc[i]
         plotter(cur, dx, i, case, g16, eni)
+
+print ('Figures made')
+print (datetime.now()-dt_start)
