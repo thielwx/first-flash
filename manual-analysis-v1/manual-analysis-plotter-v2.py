@@ -247,7 +247,6 @@ def plotter(cur, dx, i, case, g16, eni):
         #=====================================================
         #Step 2: Getting the data from the MRMS and ABI
         CMI, x, y, abi_extent, geo_crs = abi_puller(t)
-        print (CMI[0,0])
         refl_10, mrms_extent = mrms_puller(t, cur_lat, cur_lon)
         save_str = save_string(cur, i, t, case)
         
@@ -268,7 +267,7 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.coastlines()
         ax1.add_feature(cfeature.STATES, edgecolor ='r',linewidth=1.5, zorder=0)
         ax1.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
-        ax1.set_extent(plot_extent, crs=plt_car_crs)
+        
         
         ax1.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GLM16 Flashes (10 min.)', marker='.', s=tf_size, c='r')
         ax1.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='ENI Flashes (10 min.)', marker='o', s=tf_size, c='k')
@@ -276,6 +275,8 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.legend(loc='upper right')
         ax1.set_title('GLM / ENI / CMIP13')
         
+        
+
         if CMI[0,0]!=-999:
             a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.6, vmin=180, vmax=300, zorder=0)
             plt.colorbar(a)
@@ -283,6 +284,8 @@ def plotter(cur, dx, i, case, g16, eni):
         if t>=cur_time:
             ax1.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
         
+        ax1.set_extent(plot_extent, crs=plt_car_crs)
+
         #Subplot 2
         ax2 = fig.add_subplot(gs[:,8:], projection=plt_car_crs)
         ax2.coastlines()
