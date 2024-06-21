@@ -239,8 +239,8 @@ def save_string(cur, i, t, case):
 
 
 def plotter(cur, dx, i, case, g16, eni):
-    print (cur_time)
     cur_time = cur['time64']
+    print (cur_time)
     cur_lat = cur['lat']
     cur_lon = cur['lon']
     cur_area = cur['flash_area'] / 1e6 #Putting into km sq
