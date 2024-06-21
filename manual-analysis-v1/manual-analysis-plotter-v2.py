@@ -99,6 +99,7 @@ def eni_puller(start_time_str, end_time_str):
 
     return eni
 
+
     
 
 
@@ -223,7 +224,7 @@ def mrms_puller(t,cur_lat,cur_lon):
 
 def save_string(cur, i, t, case):
     #fistart_flid = cur['fistart_flid']
-    fistart_flid = cur.index
+    fistart_flid = cur.name
     time_str = t.strftime('%Y%m%d-%H%M%S')
     start_str = '/localdata/first-flash/figures/manual-analysis-v1/'+case+'/'+str(i)+'-'+fistart_flid +'/'
     save_str = start_str + time_str + '.png'
@@ -284,7 +285,7 @@ def plotter(cur, dx, i, case, g16, eni):
         fig = plt.figure(constrained_layout=True, figsize=(16,7))
         fig.patch.set_facecolor('silver')
         gs = fig.add_gridspec(nrows=8, ncols=16)
-        fig.suptitle(str(cur.index) + 
+        fig.suptitle(str(cur.name) + 
                      '\n'+str(t-cur_time)+
                      '\n'+str(t.strftime('%H:%M:%S')))
         
@@ -356,5 +357,5 @@ for case in cases[:1]:
     for i in range(ff.shape[0])[:1]:
         print (str(i+1)+'/'+str(ff.shape[0]))
         cur = ff.iloc[i]
-        
+        print (cur.name)
         plotter(cur, dx, i, case, g16, eni)
