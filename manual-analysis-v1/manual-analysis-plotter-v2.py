@@ -268,7 +268,7 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.coastlines()
         ax1.add_feature(cfeature.STATES, edgecolor ='r',linewidth=1.5, zorder=0)
         ax1.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
-        ax1.set_extent(plot_extent, crs=plt_car_crs)
+        #ax1.set_extent(plot_extent, crs=plt_car_crs)
         
         ax1.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GLM16 Flashes (10 min.)', marker='.', s=tf_size, c='r')
         ax1.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='ENI Flashes (10 min.)', marker='o', s=tf_size, c='k')
