@@ -239,6 +239,7 @@ def save_string(cur, i, t, case):
 
 
 def plotter(cur, dx, i, case, g16, eni):
+    print (cur_time)
     cur_time = cur['time64']
     cur_lat = cur['lat']
     cur_lon = cur['lon']
