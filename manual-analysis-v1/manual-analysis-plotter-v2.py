@@ -276,9 +276,8 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.legend(loc='upper right')
         ax1.set_title('GLM / ENI / CMIP13')
         
-        if CMI[0,0]!=-999:
-            a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.6, vmin=180, vmax=300, zorder=0)
-            plt.colorbar(a)
+        a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.6, vmin=180, vmax=300, zorder=0)
+        plt.colorbar(a)
         
         if t>=cur_time:
             ax1.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
