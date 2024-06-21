@@ -284,7 +284,7 @@ def plotter(cur, dx, i, case, g16, eni):
         fig = plt.figure(constrained_layout=True, figsize=(16,7))
         fig.patch.set_facecolor('silver')
         gs = fig.add_gridspec(nrows=8, ncols=16)
-        fig.suptitle(str(cur['fistart_flid']) + 
+        fig.suptitle(str(cur[0]) + 
                      '\n'+str(t-cur_time)+
                      '\n'+str(t.strftime('%H:%M:%S')))
         
