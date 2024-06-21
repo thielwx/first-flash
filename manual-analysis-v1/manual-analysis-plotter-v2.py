@@ -51,33 +51,6 @@ dt50s = np.timedelta64(50, 's')
 # In[4]:
 
 
-#This function takes in a file start time and the first/last event times to create a list of datetime objects
-def LMA_times_postprocess(file_times, times):
-    '''
-    Creates a list of datetime objects from the LCFA L2 file times, and the start time of the file
-    PARAMS:
-        file_times: listed times on the lma file (str)
-        times: times (seconds since the day begins) from the lma file (float)
-    RETURNS
-        flash_datetime: a list of datetimes based on the flash/group/event times in the LCFA L2 file down to ns (datetime)
-    '''
-    
-    #Converting to nanoseconds to use for timedelta
-    nanosecond_times = times*(10**9)
-    
-    #Creating datetime object for the file time
-    flash_file_datetime = [np.datetime64(datetime.strptime(file_times[i][:8], '%Y%m%d')) for i in range(len(file_times))]
-    
-    #Creating timedetla objects from our array
-    flash_timedelta = [np.timedelta64(int(val), 'ns') for val in nanosecond_times]
-    
-    #Creating an array of datetime objects with the (more) exact times down to the microsecond
-    #flash_datetime = [flash_file_datetime+dt for dt in flash_timedelta]
-    flash_datetime = [flash_file_datetime[i] + flash_timedelta[i] for i in range(len(flash_timedelta))]
-
-    return (flash_datetime)
-
-
 def eni_puller(start_time_str, end_time_str):
     '''
     Pulls data from the current and next day since you have to load in multipe files (days) for a case
@@ -138,7 +111,7 @@ def abi_puller(t):
     if len(collected_files)>0:
         dset = nc.Dataset(collected_files[0],'r')
         CMI = dset.variables['CMI'][:]
-        CMI[CMI>280] = np.nan
+        #CMI[CMI>280] = np.nan
         sat_lon = dset.variables['goes_imager_projection'].longitude_of_projection_origin
         sat_h = dset.variables['goes_imager_projection'].perspective_point_height
         geo_crs = ccrs.Geostationary(central_longitude=sat_lon,satellite_height=sat_h)
@@ -357,5 +330,4 @@ for case in cases[:1]:
     for i in range(ff.shape[0])[:1]:
         print (str(i+1)+'/'+str(ff.shape[0]))
         cur = ff.iloc[i]
-        print (cur.name)
         plotter(cur, dx, i, case, g16, eni)
