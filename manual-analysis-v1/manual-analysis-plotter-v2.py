@@ -111,7 +111,7 @@ def abi_puller(t):
     if len(collected_files)>0:
         dset = nc.Dataset(collected_files[0],'r')
         CMI = dset.variables['CMI'][:]
-        #CMI[CMI>280] = np.nan
+        CMI[CMI>280] = np.nan
         sat_lon = dset.variables['goes_imager_projection'].longitude_of_projection_origin
         sat_h = dset.variables['goes_imager_projection'].perspective_point_height
         geo_crs = ccrs.Geostationary(central_longitude=sat_lon,satellite_height=sat_h)
@@ -268,7 +268,7 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.coastlines()
         ax1.add_feature(cfeature.STATES, edgecolor ='r',linewidth=1.5, zorder=0)
         ax1.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
-        #ax1.set_extent(plot_extent, crs=plt_car_crs)
+        ax1.set_extent(plot_extent, crs=plt_car_crs)
         
         ax1.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GLM16 Flashes (10 min.)', marker='.', s=tf_size, c='r')
         ax1.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='ENI Flashes (10 min.)', marker='o', s=tf_size, c='k')
@@ -276,8 +276,9 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.legend(loc='upper right')
         ax1.set_title('GLM / ENI / CMIP13')
         
-        a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.6, vmin=180, vmax=300, zorder=0)
-        plt.colorbar(a)
+        if CMI[0,0]!=-999:
+            a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 24), alpha=0.6, vmin=180, vmax=300, zorder=0)
+            plt.colorbar(a)
         
         if t>=cur_time:
             ax1.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
