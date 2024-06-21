@@ -118,21 +118,20 @@ def abi_puller(t):
     
     
     #Getting the time strings needed to find the file
-    cur_minute = int(t.strftime('%M'))
-    if cur_minute == 0:
-        dt_int = 5
-    elif cur_minute == 5:
-        dt_int = 5
-    elif (cur_minute != 5) or (cur_minute != 0):
-        dt_int = int(t.strftime('%M'))%5 #Using the mod operator to tell us how much to adjust the time
     
+
+    dt_int = int(t.strftime('%M'))%5 #Using the mod operator to tell us how much to adjust the time
+    if dt_int == 0:
+        dt_int = 5
+        
+    print (t)
     adjusted_time = t - timedelta(minutes=dt_int-1)
     cur_date = adjusted_time.strftime('%Y%m%d')
     file_time_string = adjusted_time.strftime('%Y%j%H%M')
     
     cur_abi = 'ABI16-CMIPC13'
     file_loc = '/localdata/first-flash/data/'+cur_abi+'/'+cur_date+'/*s'+file_time_string+'*.nc'
-    #print (file_loc)
+    print (file_loc)
     collected_files = glob(file_loc)
     
     if len(collected_files)>0:
@@ -223,7 +222,8 @@ def mrms_puller(t,cur_lat,cur_lon):
 
 
 def save_string(cur, i, t, case):
-    fistart_flid = cur['fistart_flid']
+    #fistart_flid = cur['fistart_flid']
+    fistart_flid = cur[0]
     time_str = t.strftime('%Y%m%d-%H%M%S')
     start_str = '/localdata/first-flash/figures/manual-analysis-v1/'+case+'/'+str(i)+'-'+fistart_flid +'/'
     save_str = start_str + time_str + '.png'
