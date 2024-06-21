@@ -247,6 +247,7 @@ def plotter(cur, dx, i, case, g16, eni):
         #=====================================================
         #Step 2: Getting the data from the MRMS and ABI
         CMI, x, y, abi_extent, geo_crs = abi_puller(t)
+        print (CMI[0,0])
         refl_10, mrms_extent = mrms_puller(t, cur_lat, cur_lon)
         save_str = save_string(cur, i, t, case)
         
