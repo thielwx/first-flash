@@ -223,7 +223,7 @@ def mrms_puller(t,cur_lat,cur_lon):
 
 def save_string(cur, i, t, case):
     #fistart_flid = cur['fistart_flid']
-    fistart_flid = cur[0]
+    fistart_flid = cur.index
     time_str = t.strftime('%Y%m%d-%H%M%S')
     start_str = '/localdata/first-flash/figures/manual-analysis-v1/'+case+'/'+str(i)+'-'+fistart_flid +'/'
     save_str = start_str + time_str + '.png'
@@ -284,7 +284,7 @@ def plotter(cur, dx, i, case, g16, eni):
         fig = plt.figure(constrained_layout=True, figsize=(16,7))
         fig.patch.set_facecolor('silver')
         gs = fig.add_gridspec(nrows=8, ncols=16)
-        fig.suptitle(str(cur[0]) + 
+        fig.suptitle(str(cur.index) + 
                      '\n'+str(t-cur_time)+
                      '\n'+str(t.strftime('%H:%M:%S')))
         
