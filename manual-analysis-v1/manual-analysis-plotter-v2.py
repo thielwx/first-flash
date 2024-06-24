@@ -141,7 +141,7 @@ def mrms_puller(t,cur_lat,cur_lon):
         cur_date = t.strftime('%Y%m%d')
         
     file_loc = '/raid/swat_archive/vmrms/CONUS/'+cur_date+'/multi/Reflectivity_-10C/00.50/'+cur_date+'-'+cur_time+'*.netcdf.gz'
-    print (file_loc)
+    #print (file_loc)
     collected_files = glob(file_loc)
     
     if len(collected_files) > 0:
@@ -336,7 +336,7 @@ for case in cases[:]:
 
     #Looping through each first flash event
     for i in range(ff.shape[0])[:]:
-        print (str(i+1)+'/'+str(ff.shape[0]))
+        print (str(i)+'/'+str(ff.shape[0])-1)
         cur = ff.iloc[i]
         plotter(cur, dx, i, case, g16, eni)
 
