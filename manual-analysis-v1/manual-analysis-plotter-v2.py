@@ -129,15 +129,19 @@ def abi_puller(t):
 
 
 def mrms_puller(t,cur_lat,cur_lon):
-    cur_date = t.strftime('%Y%m%d')
-    cur_time = t.strftime('%H%M')
+    cur_minute = t.strftime('%M')
     
     #Making sure we are only looking for even data files
-    if int(cur_time)%2 == 1:
-        cur_time = str(int(cur_time)-1).zfill(2)
+    if int(cur_minute)%2 == 1:
+        t_adj = t - timedelta(minutes=1)
+        cur_time = t_adj.strftime('%H%M')
+        cur_date = t_adj.strftime('%Y%m%d')
+    else:
+        cur_time = t.strftime('%H%M')
+        cur_date = t.strftime('%Y%m%d')
         
     file_loc = '/raid/swat_archive/vmrms/CONUS/'+cur_date+'/multi/Reflectivity_-10C/00.50/'+cur_date+'-'+cur_time+'*.netcdf.gz'
-    #print (file_loc)
+    print (file_loc)
     collected_files = glob(file_loc)
     
     if len(collected_files) > 0:
@@ -198,7 +202,7 @@ def save_string(cur, i, t, case):
     #fistart_flid = cur['fistart_flid']
     fistart_flid = cur.name
     time_str = t.strftime('%Y%m%d-%H%M%S')
-    start_str = '/localdata/first-flash/figures/manual-analysis-v1/'+case+'/'+str(i)+'-'+fistart_flid +'/'
+    start_str = '/localdata/first-flash/figures/manual-analysis-v1/'+case+'/'+str(i).zfill(2)+'-'+fistart_flid +'/'
     save_str = start_str + time_str + '.png'
 
     # Uncomment when running on devlab4
@@ -295,7 +299,9 @@ def plotter(cur, dx, i, case, g16, eni):
         ax2.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='ENI Flashes (10 min.)', marker='o', s=tf_size, c='k')
         ax2.scatter(x=cur_lon, y=cur_lat, transform=plt_car_crs, c='k', s=150, marker='x', zorder=2, alpha=0.25)
         ax2.legend(loc='upper right')
-        ax2.set_title('GLM/ ENI / -10C dBZ')
+        ax2.set_title('GLM / ENI / -10C dBZ')
+        ax2.gridlines(crs=plt_car_crs, draw_labels=True, linewidth=1, color='white', alpha=0.25, linestyle='--')
+
         
         if refl_10[0,0]!=-999:
             b = ax2.imshow(refl_10, extent=mrms_extent, transform=plt_car_crs, cmap=plt.get_cmap('turbo', 30), vmin=10, vmax=60, zorder=0, alpha=0.6)
