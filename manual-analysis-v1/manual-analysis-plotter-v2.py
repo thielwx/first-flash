@@ -336,7 +336,7 @@ for case in cases[:]:
 
     #Looping through each first flash event
     for i in range(ff.shape[0])[:]:
-        print (str(i)+'/'+str(ff.shape[0])-1)
+        print (str(i)+'/'+str(ff.shape[0]-1))
         cur = ff.iloc[i]
         plotter(cur, dx, i, case, g16, eni)
 
