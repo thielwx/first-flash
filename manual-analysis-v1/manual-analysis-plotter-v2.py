@@ -282,7 +282,10 @@ def plotter(cur, dx, i, case, g16, eni):
         if np.nanmax(CMI)>0:
             a = ax1.imshow(CMI,extent=abi_extent,cmap=plt.get_cmap('nipy_spectral_r', 60), alpha=0.6, vmin=180, vmax=300, zorder=0, transform=geo_crs)
             plt.colorbar(a)
-        
+        else:
+            a = ax1.imshow([[0]],extent=[-0.1,0.1,-0.1,0.1],cmap=plt.get_cmap('nipy_spectral_r', 60), alpha=0.6, vmin=180, vmax=300, zorder=0, transform=geo_crs)
+            a.set_visible(False)
+            plt.colorbar(a)
         if t>=cur_time:
             ax1.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=plt_car_crs, zorder=1, fill=True))
         
@@ -298,14 +301,19 @@ def plotter(cur, dx, i, case, g16, eni):
         ax2.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GLM16 Flashes (10 min.)', marker='.', s=tf_size, c='r')
         ax2.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='ENI Flashes (10 min.)', marker='o', s=tf_size, c='k')
         ax2.scatter(x=cur_lon, y=cur_lat, transform=plt_car_crs, c='k', s=150, marker='x', zorder=2, alpha=0.25)
+        
         ax2.legend(loc='upper right')
         ax2.set_title('GLM / ENI / -10C dBZ')
         ax2.gridlines(crs=plt_car_crs, draw_labels=True, linewidth=1, color='white', alpha=0.25, linestyle='--')
-
         
-        if refl_10[0,0]!=-999:
+        if refl_10[0][0]!=-999:
+            refl_10[refl_10<10] = np.nan
             b = ax2.imshow(refl_10, extent=mrms_extent, transform=plt_car_crs, cmap=plt.get_cmap('turbo', 30), vmin=10, vmax=60, zorder=0, alpha=0.6)
-            plt.colorbar(b)
+            
+        else:
+            b = ax2.imshow([[0]], extent=[-1,1,-1,1], transform=plt_car_crs,cmap=plt.get_cmap('turbo', 30), vmin=10, vmax=60, zorder=0, alpha=0.6)
+            b.set_visible(False)
+        plt.colorbar(b)
 
         if t>=cur_time:
             ax2.add_patch(mpatches.Circle(xy=[cur_lon, cur_lat], radius=r, color='r', alpha=0.25, transform=ccrs.PlateCarree(), zorder=1, fill=True))
