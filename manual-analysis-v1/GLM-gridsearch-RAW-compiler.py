@@ -78,7 +78,7 @@ def file_loader(file_list, search_m, search_r, search_flash_r, ver):
 
 # In[6]:
 #Outer loop for a case-by-case basis
-for case in cases[-2:-1]:
+for case in cases:
     
     #Getting the case times
     start_time_str = sfile[case]['start_time']
