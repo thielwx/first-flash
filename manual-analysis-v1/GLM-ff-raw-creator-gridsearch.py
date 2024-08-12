@@ -157,7 +157,7 @@ def ff_driver(s_time, e_time):
 
 
 #Outerloop for cases
-for case in cases:
+for case in cases[-2:-1]:
     print ('=========================')
     print ('START OF CASE: '+case)
     print ('=========================')
