@@ -269,6 +269,7 @@ def data_loader_gridsearch(file_list, bounds):
         flash_end_times = GLM_LCFA_times(dset.time_coverage_start, dset.variables['flash_time_offset_of_last_event'][flash_locs])
         flash_ids = dset.variables['flash_id'][flash_locs]
         flash_areas = dset.variables['flash_area'][flash_locs]
+        flash_energy = dset.variables['flash_energy'][flash_locs]
         flash_quality_flag = dset.variables['flash_quality_flag'][flash_locs]
         num_events, num_groups = events_per_flash(event_parent_ids=dset.variables['event_parent_group_id'][:],
                                                   group_ids=dset.variables['group_id'][:],
@@ -277,6 +278,11 @@ def data_loader_gridsearch(file_list, bounds):
         
         file_start_time = file_list[i][-50:-34]
         fstart_time_array = np.full(len(flash_lats),file_start_time)
+
+        group_energy = dset.variables['group_energy'][:] * 1e15
+        group_parent_ids = dset.variables['group_parent_flash_id'][:]
+        group_times = GLM_LCFA_times(dset.timecoverage_start, dset.variables['group_time_offset'][:])
+        flash_slopes, flash_shapes = LCFA_shape_slope(group_energy, group_parent_ids, flash_ids, group_times, flash_start_times, flash_end_times)
         
         #Creating a dictionary
         d = {'start_time':flash_start_times,
@@ -288,6 +294,9 @@ def data_loader_gridsearch(file_list, bounds):
             'flash_id':flash_ids,
             'fstart':fstart_time_array,
             'flash_area':flash_areas,
+            'flash_energy':flash_energy,
+            'flash_slope':flash_slopes,
+            'flash_shape':flash_shapes,
             'flash_quality_flag': flash_quality_flag,
             'num_events': num_events,
             'num_groups': num_groups
@@ -538,6 +547,18 @@ def ff_hunter_gridsearch(df, search_start_time, search_end_time, search_r, searc
         
         if search_flash_r == 0: #If there's no value for the flash radius value, then use the traditional radius values
             indicies = btree.query_radius([c_pt], r = search_r/R)
+        
+        elif (search_r==0)and(search_flash_r==999): #The special case where we vary the radius based on the flash area radius
+            c_area = df.loc[i][['flash_area']].values[0]
+            flash_r_from_area = np.sqrt((c_area/1000000)/np.pi) #Getting the radius (km) from the flash area in sq meters
+            #If the radius is below 10km, make it 10 km
+            if flash_r_from_area < 10:
+                flex_radius = 10
+            #Otherwise..use the flash radius
+            else:
+                flex_radius = flash_r_from_area
+            indicies = btree.query_radius([c_pt], r = (flex_radius)/R)
+        
         elif search_r == 0: #If the traditional radius value is zero, then use the circular radius of the flash area plus a buffer
             c_area = df.loc[i][['flash_area']].values[0]
             flash_r_from_area = np.sqrt((c_area/1000000)/np.pi) #Getting the radius (km) from the flash area in sq meters
