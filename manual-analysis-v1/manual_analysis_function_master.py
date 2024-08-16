@@ -281,7 +281,8 @@ def data_loader_gridsearch(file_list, bounds):
 
         group_energy = dset.variables['group_energy'][:] * 1e15
         group_parent_ids = dset.variables['group_parent_flash_id'][:]
-        group_times = GLM_LCFA_times(dset.time_coverage_start, dset.variables['group_time_offset'][:])
+        group_times = np.array(GLM_LCFA_times(dset.time_coverage_start, dset.variables['group_time_offset'][:]))
+
         flash_slopes, flash_shapes = LCFA_shape_slope(group_energy, group_parent_ids, flash_ids, group_times, flash_start_times, flash_end_times)
         
         #Creating a dictionary
@@ -513,7 +514,7 @@ def ff_hunter_gridsearch(df, search_start_time, search_end_time, search_r, searc
     R = 6371.0087714 #Earths radius in km
     
     #Need to institute this below
-    t_delta = timedelta(minutes=search_m)
+    t_delta = timedelta(minutes=float(search_m))
 
     ff_df = pd.DataFrame()
     
