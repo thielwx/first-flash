@@ -281,7 +281,7 @@ def data_loader_gridsearch(file_list, bounds):
 
         group_energy = dset.variables['group_energy'][:] * 1e15
         group_parent_ids = dset.variables['group_parent_flash_id'][:]
-        group_times = GLM_LCFA_times(dset.timecoverage_start, dset.variables['group_time_offset'][:])
+        group_times = GLM_LCFA_times(dset.time_coverage_start, dset.variables['group_time_offset'][:])
         flash_slopes, flash_shapes = LCFA_shape_slope(group_energy, group_parent_ids, flash_ids, group_times, flash_start_times, flash_end_times)
         
         #Creating a dictionary
