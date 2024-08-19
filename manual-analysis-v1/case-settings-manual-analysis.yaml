@@ -91,3 +91,16 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   lr_lon: -80.94
 
   glm16_all: 'GLM16allflashes_v1_s202206251400_e202206260100_c202406181535.csv'
+
+20220322-al:
+  case_name: '20220322 Alabama PERiLS Case'
+
+  start_time: '202203222-1900'
+  end_time: '20220322-2200'
+
+  ul_lat: 34.07
+  ul_lon: -89.10
+  lr_lat: 32.30
+  lr_lon: -87.43
+
+  glm16_all: 'GLM16allflashes_v1_s202203221600_s202203230800_c202402131406.csv'
