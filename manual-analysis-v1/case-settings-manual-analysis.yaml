@@ -95,7 +95,7 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
 20220322-al:
   case_name: '20220322 Alabama PERiLS Case'
 
-  start_time: '202203222-1900'
+  start_time: '20220322-1900'
   end_time: '20220322-2200'
 
   ul_lat: 34.07
