@@ -113,7 +113,7 @@ def ff_raw_saver(ff_df, s_time, e_time, version, glm_sat, search_r, search_m, se
     ctime_str = 'c'+y+m+d+hr+mi
     
     #The beginning string for the file name
-    front_string = 'GLM'+str(glm_sat)+'_ffRAW_r'+str(search_r).zfill(2)+'_t'+str(search_m).zfill(2)+'fr'+str(search_fr).zfill(2)+'_v'+str(version).zfill(2)
+    front_string = 'GLM'+str(glm_sat)+'_ffRAW_r'+str(search_r).zfill(2)+'_t'+str(search_m).zfill(2)+'_fr'+str(search_fr).zfill(2)+'_v'+str(version).zfill(2)
     
     #Creating the entire save string
     save_str = front_string+'_'+stime_str+'_'+ctime_str+'.csv'
