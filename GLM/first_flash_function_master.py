@@ -188,6 +188,8 @@ def data_loader(file_list):
         #Grabbing the flash start time and flash end times (time=np.timedelta64('ns'))
         flash_start_times = GLM_LCFA_times(dset.time_coverage_start, dset.variables['flash_time_offset_of_first_event'][flash_locs])
         flash_ids = dset.variables['flash_id'][flash_locs]
+
+        flash_areas = dset.variables['flash_area'][flash_locs]
         
         file_start_time = file_list[i][-50:-34]
         fstart_time_array = np.full(len(flash_lats),file_start_time)
@@ -199,6 +201,7 @@ def data_loader(file_list):
             'lat_rad':flash_lats_rad,
             'lon_rad':flash_lons_rad,
             'flash_id':flash_ids,
+            'flash_area':flash_areas,
             'fstart':fstart_time_array
             }
         
