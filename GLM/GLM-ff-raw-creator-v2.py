@@ -53,10 +53,12 @@ end_time = datetime.strptime(end_time_str, '%Y%m%d%H%M')
 
 
 #Constants
-search_r = 30
-search_m = 30
+search_r = 0
+search_m = 20
+search_fr = 20
+
 dt = timedelta(minutes=search_m)
-ver = 2
+ver = '32'
 
 
 # # Function Land
@@ -86,7 +88,7 @@ def first_flash_multiprocessor(start_time, end_time):
 # In[5]:
 
 
-def ff_raw_saver(ff_df, s_time, e_time, version, glm_sat, search_r, search_m):
+def ff_raw_saver(ff_df, s_time, e_time, version, glm_sat, search_r, search_m, search_fr):
     '''
     A function for saving out the raw files
     PARAMS:
@@ -97,6 +99,7 @@ def ff_raw_saver(ff_df, s_time, e_time, version, glm_sat, search_r, search_m):
         glm_sat: GOES GLM number (16, 17, 18, 19)
         search_r: Search radius in km (int)
         search_m: Search time period in minutes (int)
+        search_fr: Search flash radius buffer in km (int)
     RETURNS:
         None
     '''
@@ -110,12 +113,12 @@ def ff_raw_saver(ff_df, s_time, e_time, version, glm_sat, search_r, search_m):
     ctime_str = 'c'+y+m+d+hr+mi
     
     #The beginning string for the file name
-    front_string = 'GLM'+str(glm_sat)+'_ffRAW_r'+str(search_r)+'_t'+str(search_m)+'_v'+str(version)
+    front_string = 'GLM'+str(glm_sat)+'_ffRAW_r'+str(search_r).zfill(2)+'_t'+str(search_m).zfill(2)+'fr'+str(search_fr).zfill(2)+'_v'+str(version).zfill(2)
     
     #Creating the entire save string
     save_str = front_string+'_'+stime_str+'_'+ctime_str+'.csv'
     
-    save_loc = '/localdata/first-flash/data/GLM'+str(glm_sat)+'_ffRAW_v'+str(version)+'/'+output_date_str+'/'
+    save_loc = '/localdata/first-flash/data/GLM'+str(glm_sat)+'_ffRAW_v'+str(version).zfill(2)+'/'+output_date_str+'/'
     #save_loc = './' #devmode
     
     print (save_loc+save_str)
@@ -131,6 +134,7 @@ def ff_driver(s_time, e_time):
     #Grabbing all the extra variables
     global search_r
     global search_m
+    global search_fr
     global ver
     dt = timedelta(minutes=search_m)
     global df
@@ -139,13 +143,14 @@ def ff_driver(s_time, e_time):
     #Cutting down the initial dataframe to something smaller 
     #df_cutdown = df.loc[(df['start_time']>=s_time-dt)&(df['start_time']<=e_time+dt)] I don't think we need this?
     #Getting the first flashes for the time period of interest, output as a dataframe
-    ff_df = ff.ff_hunter(df, s_time, e_time, search_r, search_m)
-    
-    ff_df = ff.ff_next_flashes(df, ff_df, s_time, e_time, search_r, search_m)
+    ff_df = ff.ff_hunter(df, s_time, e_time, search_r, search_m, search_fr)
+    search_r_next = 30
+    search_m_next = 30
+    ff_df = ff.ff_next_flashes(df, ff_df, s_time, e_time, search_r_next, search_m_next)
     
     ff_df.index.names['fistart_flid'] #Trying to force the index to take on the correct names before saving it
 
-    ff_raw_saver(ff_df, s_time, e_time, ver, glm_sat, search_r, search_m)
+    ff_raw_saver(ff_df, s_time, e_time, ver, glm_sat, search_r, search_m, search_fr)
 
 
 # # Driver section

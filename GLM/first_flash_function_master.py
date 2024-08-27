@@ -412,7 +412,7 @@ def events_per_flash(event_parent_ids, group_ids, group_parent_ids, flash_ids):
 # In[ ]:
 
 
-def ff_hunter(df, search_start_time, search_end_time, search_r, search_m):
+def ff_hunter(df, search_start_time, search_end_time, search_r, search_m, search_fr):
     '''
     Funciton used to identify first flash events. Using the Ball Tree from scikitlearn
     https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
@@ -456,11 +456,18 @@ def ff_hunter(df, search_start_time, search_end_time, search_r, search_m):
 
         #Setting up and running a ball tree
         btree = BallTree(df_cut[['lat_rad','lon_rad']].values, leaf_size=2, metric='haversine')
-        indicies = btree.query_radius([c_pt], r = search_r/R)
 
-        #If only the point itself is returned within the search distance, then
+        if search_r == 0: #If the traditional radius value is zero, then use the circular radius of the flash area plus a buffer
+            c_area = df.loc[i][['flash_area']].values[0]
+            flash_r_from_area = np.sqrt((c_area/1000000)/np.pi) #Getting the radius (km) from the flash area in sq meters
+            indicies = btree.query_radius([c_pt], r = (search_fr + flash_r_from_area)/R)
+        else: #Default to the simple flash one
+            indicies = btree.query_radius([c_pt], r = search_r/R)
+        
+        #If only the point itself is returned within the search distance, then it's a first flash event!
         if len(indicies[0])==1:
             ff_df = pd.concat((ff_df,df.loc[df.index==i]),axis=0)
+            
             
     return ff_df
 
