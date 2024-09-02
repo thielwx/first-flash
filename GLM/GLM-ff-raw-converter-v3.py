@@ -196,9 +196,9 @@ def meta_create_v2():
         'flashes_after_20_minutes':['1','number of flashes within 30 km and 20 minutes after the first flash event',('number_of_flashes',),'int',False],
         'flashes_after_25_minutes':['1','number of flashes within 30 km and 25 minutes after the first flash event',('number_of_flashes',),'int',False],
         'flashes_after_30_minutes':['1','number of flashes within 30 km and 30 minutes after the first flash event',('number_of_flashes',),'int',False],
-        'flash_fistart_flid':['str', 'string of the original file start time (fistart) and flash id (flid) to easily connect to the groups/events',('number of flashes',),'str',False],
-        'group_fistart_flid':['str', 'string of the original file start time (fistart) and parent flash id (flid) to easily connect to the groups/events',('number of groups',),'str',False],
-        'event_fistart_flid':['str', 'string of the original file start time (fistart) and parent flash id (flid) to easily connect to the groups/events',('number of events',),'str',False]
+        'flash_fistart_flid':['1', 'string of the original file start time (fistart) and flash id (flid) to easily connect to the groups/events',('number_of_flashes',),'str',False],
+        'group_fistart_flid':['1', 'string of the original file start time (fistart) and parent flash id (flid) to easily connect to the groups/events',('number_of_groups',),'str',False],
+        'event_fistart_flid':['1', 'string of the original file start time (fistart) and parent flash id (flid) to easily connect to the groups/events',('number_of_events',),'str',False]
         }
     
     # Creating the data for compressing the values back into the form needed in the netCDF4 file (USING GOES-R standard values)
@@ -396,7 +396,7 @@ def netcdf_filler(out, f_keys, g_keys, e_keys, aux_keys1, aux_keys2, meta_dict, 
 datetime_start = datetime.now()
 
 #==========================
-# Run like this python GLM-ff-raw-converter-v2.py 20220501 20220502 16 land
+# Run like this python GLM-ff-raw-converter-v3.py 20220501 20220502 16 land
 #==========================
 
 args = sys.argv
