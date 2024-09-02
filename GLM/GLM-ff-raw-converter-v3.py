@@ -326,9 +326,9 @@ def netcdf_filler(out, f_keys, g_keys, e_keys, aux_keys1, aux_keys2, meta_dict, 
         event_locs = np.append(event_locs,cur_event_loc)
     
     #aux data2 (file names for the flashes, groups, and events so they are all traceable)
-    new_f_files = [file+flash_id for i in range(len(flash_locs))] #Creating an array of file start and flash id names based on the number of flashes (1)
-    new_g_files = [file+flash_id for i in range(len(group_locs))] #Creating an array of file start and flash id names based on the number of groups
-    new_e_files = [file+flash_id for i in range(len(event_locs))] #Creating an array of file start and flash id names based on the number of events
+    new_f_files = [file+str(flash_id) for i in range(len(flash_locs))] #Creating an array of file start and flash id names based on the number of flashes (1)
+    new_g_files = [file+str(flash_id) for i in range(len(group_locs))] #Creating an array of file start and flash id names based on the number of groups
+    new_e_files = [file+str(flash_id) for i in range(len(event_locs))] #Creating an array of file start and flash id names based on the number of events
 
     
     #Flash: Placing the variables for each flash together        
