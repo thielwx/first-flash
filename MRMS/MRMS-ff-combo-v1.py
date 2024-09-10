@@ -216,7 +216,7 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
     mrms_data_search = mrms_data[mrms_locs]
 
     mrms_latlons = np.vstack((mrms_lats_rad, mrms_lons_rad)).T
-    if len(mrms_latlons.shape())==1:
+    if len(mrms_latlons.shape)==1:
         mrms_latlons = mrms_latlons.reshape(1, -1)
     
     #Converting first flash lat/lon to radians
@@ -292,8 +292,7 @@ for i in range(len(time_list_days)-1):
     
     #Breaking the day into 12, 2-hour chunks
     tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='2H')
-    print ('Times')
-    print (tlist_starmap)
+
     #Getting the time for the MRMS file string
     y, m, d, doy, hr, mi = datetime_converter(t_range_start)
     print ('---'+y+m+d+'---')
