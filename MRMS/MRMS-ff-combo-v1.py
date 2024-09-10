@@ -217,7 +217,7 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
 
     mrms_latlons = np.vstack((mrms_lats_rad, mrms_lons_rad)).T
     if len(mrms_latlons.shape)==1:
-        mrms_latlons = mrms_latlons.reshape(1, -1)
+        mrms_latlons = mrms_latlons.reshape(-1, 1)
     
     #Converting first flash lat/lon to radians
     fl_lat_rad = cur_fl_lat * (np.pi/180)
