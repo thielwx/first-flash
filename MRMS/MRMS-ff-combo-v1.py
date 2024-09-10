@@ -109,7 +109,6 @@ def mrms_driver(t_start, t_end):
     global fistart_flid
     global f_lat
     global f_lon
-    import netCDF4 as nc
     
     #A 2-minute time list to go through each  mrms file
     tlist_2min = pd.date_range(start=t_start, end=t_end, freq='120s')
@@ -289,7 +288,7 @@ for i in range(len(time_list_days)-1):
     t_range_end = time_list_days[i+1]
     
     #Breaking the day into 12, 2-hour chunks
-    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='2H')
+    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='24H')
     
     #Getting the time for the MRMS file string
     y, m, d, doy, hr, mi = datetime_converter(t_range_start)
@@ -300,7 +299,7 @@ for i in range(len(time_list_days)-1):
     
     #Sending the file string to the mrms_driver function that takes over from here...
     if __name__ == "__main__":
-        with mp.Pool(12) as p:
+        with mp.Pool(1) as p:
             p.starmap(mrms_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
             p.close()
             p.join()
