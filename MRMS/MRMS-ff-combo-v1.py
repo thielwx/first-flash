@@ -211,24 +211,34 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
     
     #Cutting down the mrms searchable data and converting lat/lon to radians
     mrms_locs = np.where((mrms_lons>=cur_fl_lon-dx) & (mrms_lons<=cur_fl_lon+dx) & (mrms_lats<=cur_fl_lat+dx) & (mrms_lats>=cur_fl_lat-dx))[0]
-    mrms_lats_rad = mrms_lats[mrms_locs] * (np.pi/180)
-    mrms_lons_rad = mrms_lons[mrms_locs] * (np.pi/180)
-    mrms_data_search = mrms_data[mrms_locs]
+    if len(mrms_locs)==0:
+        mrms_data_max = np.nan
+        mrms_data_95 = np.nan
+    
+    else:
+        mrms_lats_rad = mrms_lats[mrms_locs] * (np.pi/180)
+        mrms_lons_rad = mrms_lons[mrms_locs] * (np.pi/180)
+        mrms_data_search = mrms_data[mrms_locs]
 
-    mrms_latlons = np.vstack((mrms_lats_rad, mrms_lons_rad)).T
-    if len(mrms_latlons.shape)==1:
-        mrms_latlons = mrms_latlons.reshape(-1, 1)
-    
-    #Converting first flash lat/lon to radians
-    fl_lat_rad = cur_fl_lat * (np.pi/180)
-    fl_lon_rad = cur_fl_lon * (np.pi/180)
-    
-    #Implement a Ball Tree to capture the maximum and 95th percentiles within the range of 20km
-    btree = BallTree([fl_lat_rad,fl_lon_rad], leaf_size=2, metric='haversize')
-    indicies = btree.query_radius(mrms_latlons, r = max_range/R)
-    
-    mrms_data_max = np.nanmax(mrms_data_search[indicies])
-    mrms_data_95 = np.nanpercentile(a=mrms_data, q=95)
+        mrms_latlons = np.vstack((mrms_lats_rad, mrms_lons_rad)).T
+        if len(mrms_lats_rad)==1:
+            print ('Ding!')
+            mrms_latlons = np.reshape(mrms_latlons, (-1, 2))
+        
+        #Converting first flash lat/lon to radians
+        fl_lat_rad = cur_fl_lat * (np.pi/180)
+        fl_lon_rad = cur_fl_lon * (np.pi/180)
+        
+        #Implement a Ball Tree to capture the maximum and 95th percentiles within the range of 20km
+        btree = BallTree([fl_lat_rad,fl_lon_rad], leaf_size=2, metric='haversize')
+        indicies = btree.query_radius(mrms_latlons, r = max_range/R)
+        
+        if len(indicies)==0:
+            mrms_data_max = np.nan
+            mrms_data_95 = np.nan
+        else:
+            mrms_data_max = np.nanmax(mrms_data_search[indicies])
+            mrms_data_95 = np.nanpercentile(a=mrms_data_search[indicies], q=95)
     
     return mrms_data_max, mrms_data_95
 
