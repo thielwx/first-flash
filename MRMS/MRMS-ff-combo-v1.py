@@ -109,6 +109,7 @@ def mrms_driver(t_start, t_end):
     global fistart_flid
     global f_lat
     global f_lon
+    import netCDF4 as nc
     
     #A 2-minute time list to go through each  mrms file
     tlist_2min = pd.date_range(start=t_start, end=t_end, freq='120s')
