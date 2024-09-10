@@ -169,7 +169,6 @@ def MRMS_data_loader(time, fstring_start ,var):
         lon_data = [-999]
         data = [-999]
     else:
-        print (file_locs)
         #This is what I call a pro-'gramer' move...loading the netcdfs while zipped on another machine
         with gzip.open(file_locs[0]) as gz:
             with nc.Dataset('dummy', mode='r', memory=gz.read()) as dset:
@@ -196,8 +195,6 @@ def MRMS_data_loader(time, fstring_start ,var):
                 lon_data = lon_data[locs]
                 lat_data = lat_data[locs]
                 data = data[locs]
-                
-                print('Ding!')
 
     return lat_data, lon_data, data
 
@@ -217,6 +214,10 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
     mrms_lats_rad = mrms_lats[mrms_locs] * (np.pi/180)
     mrms_lons_rad = mrms_lons[mrms_locs] * (np.pi/180)
     mrms_data_search = mrms_data[mrms_locs]
+
+    mrms_latlons = np.vstack((mrms_lats_rad, mrms_lons_rad)).T
+    if len(mrms_latlons.shape())==1:
+        mrms_latlons = mrms_latlons.reshape(1, -1)
     
     #Converting first flash lat/lon to radians
     fl_lat_rad = cur_fl_lat * (np.pi/180)
@@ -224,7 +225,7 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
     
     #Implement a Ball Tree to capture the maximum and 95th percentiles within the range of 20km
     btree = BallTree([fl_lat_rad,fl_lon_rad], leaf_size=2, metric='haversize')
-    indicies = btree.query_radius(np.vstack((mrms_lats_rad, mrms_lons_rad)).T, r = max_range/R)
+    indicies = btree.query_radius(mrms_latlons, r = max_range/R)
     
     mrms_data_max = np.nanmax(mrms_data_search[indicies])
     mrms_data_95 = np.nanpercentile(a=mrms_data, q=95)
