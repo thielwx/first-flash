@@ -114,8 +114,10 @@ def mrms_driver(t_start, t_end):
     #A 2-minute time list to go through each  mrms file
     tlist_2min = pd.date_range(start=t_start, end=t_end, freq='120s')
     
+    df_locs = np.where((f_time>=t_start) & (f_time<t_end))[0]
+
     #Creating an empty dataframe to fill
-    df = pd.DataFrame(index=fistart_flid, columns=mrms_variables_output)
+    df = pd.DataFrame(index=fistart_flid[df_locs], columns=mrms_variables_output)
     
     #Looping through each 2 minute span in the mrms data
     for i in range(len(tlist_2min)-1):
