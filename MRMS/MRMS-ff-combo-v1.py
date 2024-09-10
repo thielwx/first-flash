@@ -221,6 +221,7 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
         mrms_data_search = mrms_data[mrms_locs]
 
         mrms_latlons = np.vstack((mrms_lats_rad, mrms_lons_rad)).T
+        print (mrms_latlons.shape)
         if len(mrms_lats_rad)==1:
             print ('Ding!')
             mrms_latlons = np.reshape(mrms_latlons, (-1, 2))
