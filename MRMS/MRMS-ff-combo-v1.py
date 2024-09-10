@@ -27,7 +27,8 @@ from glob import glob
 import gzip
 from sklearn.neighbors import BallTree
 import os
-
+import warnings
+warnings.filterwarnings('ignore') 
 
 # In[3]:
 
