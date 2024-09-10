@@ -197,10 +197,10 @@ def MRMS_data_loader(time, fstring_start ,var):
                 lat_data = lat_data[locs]
                 data = data[locs]
                 
-                #CLosing the file
-                dset.close()
+                print('Ding!')
 
     return lat_data, lon_data, data
+
 
 
 # In[ ]:
