@@ -295,7 +295,7 @@ for i in range(len(time_list_days)-1):
     print ('---'+y+m+d+'---')
     
     #Getting the location of the MRMS data (in its daily folder)
-    fstring_start = '/raid/swat_archive/vmrms/CONUS/'y+m+d+'/multi/'
+    fstring_start = '/raid/swat_archive/vmrms/CONUS/'+y+m+d+'/multi/'
     
     #Sending the file string to the mrms_driver function that takes over from here...
     if __name__ == "__main__":
