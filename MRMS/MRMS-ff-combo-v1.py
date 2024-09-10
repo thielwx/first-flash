@@ -221,9 +221,7 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
         mrms_data_search = mrms_data[mrms_locs]
 
         mrms_latlons = np.vstack((mrms_lats_rad, mrms_lons_rad)).T
-        print (mrms_latlons.shape)
         if len(mrms_lats_rad)==1:
-            print ('Ding!')
             mrms_latlons = np.reshape(mrms_latlons, (-1, 2))
         
         #Converting first flash lat/lon to radians
@@ -231,7 +229,7 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
         fl_lon_rad = cur_fl_lon * (np.pi/180)
         
         #Implement a Ball Tree to capture the maximum and 95th percentiles within the range of 20km
-        btree = BallTree(mrms_latlons, leaf_size=2, metric='haversize')
+        btree = BallTree(mrms_latlons, leaf_size=2, metric='haversine')
         indicies = btree.query_radius([fl_lat_rad,fl_lon_rad], r = max_range/R)
         
         if len(indicies)==0:
@@ -263,6 +261,7 @@ def mrms_data_saver(df, t_start, t_end, version):
     if not os.path.exists(output_loc):
         os.makedirs(output_loc)
     df.to_csv(output_loc+output_file)
+    print (output_loc+output_file)
 
 
 # # Work Zone
