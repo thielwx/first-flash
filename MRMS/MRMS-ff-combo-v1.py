@@ -125,7 +125,7 @@ def mrms_driver(t_start, t_end):
             
             #Adding each mrms variable individually
             for var in mrms_variables:
-                mrms_lats, mrms_lons, mrms_data = mrms_data_loader(tlist_2min[i], fstring_start, var)
+                mrms_lats, mrms_lons, mrms_data = MRMS_data_loader(tlist_2min[i], fstring_start, var)
                 #A check that we actually have mrms data, or else skip this variable
                 if mrms_lats[0]==-999:
                     continue
@@ -137,7 +137,7 @@ def mrms_driver(t_start, t_end):
                     cur_fl_lon = f_lon[ff]
                     
                     #Getting the maximum and 95th percentile values and putting them into the dataframe
-                    var_max, var_95 = mrmrs_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data)
+                    var_max, var_95 = mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data)
                     df.loc[cur_fi_fl,var+'_max'] = var_max
                     df.loc[cur_fi_fl,var+'_95'] = var_95
     
@@ -169,7 +169,7 @@ def MRMS_data_loader(time, fstring_start ,var):
         data = [-999]
     else:
         #This is what I call a pro-'gramer' move...loading the netcdfs while zipped on another machine
-        with gzip.open(fiel_locs[0]) as gz:
+        with gzip.open(file_locs[0]) as gz:
             with nc.Dataset('dummy', mode='r', memory=gz.read()) as dset:
                 #loading in the data from the MRMS netcdf file
                 x_pix = dset.variables['pixel_x'][:] #Pixel locations (indicies) for LATITUDE
@@ -183,7 +183,7 @@ def MRMS_data_loader(time, fstring_start ,var):
                 y = dset.dimensions['Lat'].size #3500
                 x = dset.dimensions['Lon'].size #7000
                 lat = np.arange(u_lat, u_lat-(y*0.01),-0.01) #Going from upper to lower
-                lon = np.arange(l_lon, l_lon+(x*0.01),0.-01) #Going from left to right
+                lon = np.arange(l_lon, l_lon+(x*0.01),0.01) #Going from left to right
 
                 #Using the pixel indicides to get the pixel latitudes and longitudes
                 lat_data = lat[x_pix] #Remember x_pixel represents LATITUDE
