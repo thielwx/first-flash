@@ -231,8 +231,8 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
         fl_lon_rad = cur_fl_lon * (np.pi/180)
         
         #Implement a Ball Tree to capture the maximum and 95th percentiles within the range of 20km
-        btree = BallTree([fl_lat_rad,fl_lon_rad], leaf_size=2, metric='haversize')
-        indicies = btree.query_radius(mrms_latlons, r = max_range/R)
+        btree = BallTree(mrms_latlons, leaf_size=2, metric='haversize')
+        indicies = btree.query_radius([fl_lat_rad,fl_lon_rad], r = max_range/R)
         
         if len(indicies)==0:
             mrms_data_max = np.nan
