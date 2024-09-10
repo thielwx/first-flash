@@ -26,6 +26,7 @@ import multiprocessing as mp
 from glob import glob
 import gzip
 from sklearn.neighbors import BallTree
+import os
 
 
 # In[3]:
@@ -168,6 +169,7 @@ def MRMS_data_loader(time, fstring_start ,var):
         lon_data = [-999]
         data = [-999]
     else:
+        print (file_locs)
         #This is what I call a pro-'gramer' move...loading the netcdfs while zipped on another machine
         with gzip.open(file_locs[0]) as gz:
             with nc.Dataset('dummy', mode='r', memory=gz.read()) as dset:
@@ -288,8 +290,9 @@ for i in range(len(time_list_days)-1):
     t_range_end = time_list_days[i+1]
     
     #Breaking the day into 12, 2-hour chunks
-    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='24H')
-    
+    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='2H')
+    print ('Times')
+    print (tlist_starmap)
     #Getting the time for the MRMS file string
     y, m, d, doy, hr, mi = datetime_converter(t_range_start)
     print ('---'+y+m+d+'---')
@@ -299,7 +302,7 @@ for i in range(len(time_list_days)-1):
     
     #Sending the file string to the mrms_driver function that takes over from here...
     if __name__ == "__main__":
-        with mp.Pool(1) as p:
+        with mp.Pool(12) as p:
             p.starmap(mrms_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
             p.close()
             p.join()
