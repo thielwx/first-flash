@@ -286,7 +286,7 @@ nc_dset = nc.Dataset(nc_file_loc,'r')
 
 #Setting up the time range
 start_time = datetime.strptime(nc_dset.time_coverage_start, '%Y-%m-%d %H:%M:%S')
-start_time = datetime.strptime('2022-01-19 00:00:00', '%Y-%m-%d %H:%M:%S') #DEVMODE
+#start_time = datetime.strptime('2022-01-19 00:00:00', '%Y-%m-%d %H:%M:%S') #DEVMODE
 end_time = datetime.strptime(nc_dset.time_coverage_end, '%Y-%m-%d %H:%M:%S')
 time_list_days = pd.date_range(start=start_time, end=end_time, freq='1D') #Daily list to loop through
 
