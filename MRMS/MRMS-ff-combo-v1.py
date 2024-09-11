@@ -252,7 +252,9 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
 
 # Saving the DataFrame out as a CSV
 def mrms_data_saver(df, t_start, t_end, version):
-    
+    global glm_number
+
+
     y, m, d, doy, hr, mi = datetime_converter(t_start)
     output_folder = y+m+d
     start_time_str = 's'+y+m+d+hr+mi
@@ -261,10 +263,10 @@ def mrms_data_saver(df, t_start, t_end, version):
     y, m, d, doy, hr, mi = datetime_converter(datetime.now())
     cur_time_str = 'c'+y+m+d+hr+mi
     
-    output_loc = '/localdata/first-flash/data/MRMS-processed-v'+str(version)+'/'+output_folder +'/'
+    output_loc = '/localdata/first-flash/data/MRMS-processed-GLM'+glm_number+'-v'+str(version)+'/'+output_folder +'/'
     output_file = 'MRMS-ff-v'+str(version)+'-'+start_time_str+'-'+end_time_str+'-'+cur_time_str+'.csv'
     if not os.path.exists(output_loc):
-        os.makedirs(output_loc)
+        os.makedirs(output_loc, exist_ok=True)
     df.to_csv(output_loc+output_file)
     print (output_loc+output_file)
 
@@ -284,8 +286,12 @@ nc_dset = nc.Dataset(nc_file_loc,'r')
 
 #Setting up the time range
 start_time = datetime.strptime(nc_dset.time_coverage_start, '%Y-%m-%d %H:%M:%S')
+start_time = datetime.strptime('2022-01-19 00:00:00', '%Y-%m-%d %H:%M:%S') #DEVMODE
 end_time = datetime.strptime(nc_dset.time_coverage_end, '%Y-%m-%d %H:%M:%S')
 time_list_days = pd.date_range(start=start_time, end=end_time, freq='1D') #Daily list to loop through
+
+#GLM Number for later
+glm_number = nc_dset.glm_number
 
 #Getting the flash ids, lats, and lons for searching later...
 fistart_flid = nc_dset.variables['flash_fistart_flid'][:]
