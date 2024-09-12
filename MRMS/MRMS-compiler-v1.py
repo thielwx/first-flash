@@ -54,7 +54,7 @@ df = pd.DataFrame(columns=mrms_variables_output)
 for file in file_list:
     print (file)
     #Getting the CSV names to imoport from the daily file
-    csv_names = sorted(glob(file+'*.csv'))
+    csv_names = sorted(glob(file+'/*.csv'))
     
     #To avoid double counting files (multiple iterations in one daily file)
     if len(csv_names)>12:
