@@ -52,19 +52,19 @@ df = pd.DataFrame(columns=mrms_variables_output)
 
 #Looping through the daily files
 for file in file_list:
+    print (file)
     #Getting the CSV names to imoport from the daily file
     csv_names = sorted(glob(file+'*.csv'))
     
     #To avoid double counting files (multiple iterations in one daily file)
     if len(csv_names)>12:
         print('ERROR: TOO MANY CSV FILES IN A FOLDER')
-        print(file)
         exit()
     
     #Looping through the individual csv files to load them in
     for csv_file in csv_names:
         #Reading in the CSV file
-        new_df = pd.read_csv(file, index_col=0)
+        new_df = pd.read_csv(csv_file, index_col=0)
         #Concatenating the new dataFrame and the compiled dataFrame
         df = pd.concat((df,new_df),axis=0)
 
