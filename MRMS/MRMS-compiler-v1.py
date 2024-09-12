@@ -34,7 +34,7 @@ version = args[2]
 
 #Constants
 mrms_variables_output = ['MergedReflectivityQCComposite_max','MergedReflectivityQCComposite_95','Reflectivity_-10C_max','Reflectivity_-10C_95','ReflectivityAtLowestAltitude_max','ReflectivityAtLowestAltitude_95']
-loc = '/localdata/first-flash/data/MRMS-processsed-GLM'+str(GLM_number)+'-v'+str(version)+'/'
+loc = '/localdata/first-flash/data/MRMS-processed-GLM'+str(GLM_number)+'-v'+str(version)+'/'
 
 
 # In[5]:
