@@ -243,7 +243,7 @@ def plotter(cur, dx, i, case, g16, eni):
     title_size = 16
     
     #Looping through the individual times
-    for t in time_list[:1]:
+    for t in time_list[:]:
         #Step 1: Get the data from the dataframes
         g16_cut = g16.loc[(g16['lat']>=cur_lat-dx)&(g16['lat']<=cur_lat+dx)&
                          (g16['lon']>=cur_lon-dx)&(g16['lon']<=cur_lon+dx)&
