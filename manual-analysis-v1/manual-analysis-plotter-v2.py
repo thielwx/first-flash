@@ -111,7 +111,10 @@ def abi_puller(t):
         dset = nc.Dataset(collected_files[0],'r')
         CMI = dset.variables['CMI'][:]
         CMI[CMI>280] = np.nan
-        sat_lon = dset.variables['goes_imager_projection'].longitude_of_projection_origin
+        #sat_lon = dset.variables['goes_imager_projection'].longitude_of_projection_origin
+        #print ('Satellite Longitude from File:')        
+        #print (sat_lon)
+        sat_lon = -75.2
         sat_h = dset.variables['goes_imager_projection'].perspective_point_height
         geo_crs = ccrs.Geostationary(central_longitude=sat_lon,satellite_height=sat_h)
         
@@ -236,9 +239,11 @@ def plotter(cur, dx, i, case, g16, eni):
     r = (d/R)*(180/np.pi)
     
     tf_size = 5
+
+    title_size = 16
     
     #Looping through the individual times
-    for t in time_list[:]:
+    for t in time_list[:1]:
         #Step 1: Get the data from the dataframes
         g16_cut = g16.loc[(g16['lat']>=cur_lat-dx)&(g16['lat']<=cur_lat+dx)&
                          (g16['lon']>=cur_lon-dx)&(g16['lon']<=cur_lon+dx)&
@@ -247,6 +252,18 @@ def plotter(cur, dx, i, case, g16, eni):
                          (eni['longitude']>=cur_lon-dx)&(eni['longitude']<=cur_lon+dx)&
                          (eni['time64']>=t-dt10)&(eni['time64']<=t)]
         
+        #Formatting the countdown time so it's more readable
+        dt_seconds = (t-cur_time).seconds
+        if t < cur_time:
+            dt_seconds_countdown = 86400 - dt_seconds
+            minutes, seconds = divmod(dt_seconds_countdown, 60)
+            countdown_str='-{:02}:{:02}'.format(int(minutes), int(seconds))
+        elif t==cur_time:
+            countdown_str='+00:00'
+        else:
+            minutes, seconds = divmod(dt_seconds, 60)
+            countdown_str='+{:02}:{:02}'.format(int(minutes), int(seconds))
+            
         #=====================================================
         #Step 2: Getting the data from the MRMS and ABI
         CMI, x, y, abi_extent, geo_crs = abi_puller(t)
@@ -261,9 +278,9 @@ def plotter(cur, dx, i, case, g16, eni):
         fig = plt.figure(constrained_layout=True, figsize=(16,7))
         fig.patch.set_facecolor('silver')
         gs = fig.add_gridspec(nrows=8, ncols=16)
-        fig.suptitle(str(cur.name) + 
-                     '\n'+str(t-cur_time)+
-                     '\n'+str(t.strftime('%H:%M:%S')))
+        fig.suptitle('Case ID: '+str(cur.name) + 
+                     '      Countdown to First-Flash: '+countdown_str+
+                     '      Current Time: '+str(t.strftime('%H:%M:%S')) + ' UTC', fontsize=title_size)
         
         #Subplot 1
         ax1 = fig.add_subplot(gs[:,:8], projection=geo_crs)
@@ -272,11 +289,11 @@ def plotter(cur, dx, i, case, g16, eni):
         ax1.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
         ax1.set_extent(plot_extent, crs=plt_car_crs)
         
-        ax1.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GLM16 Flashes (10 min.)', marker='.', s=tf_size, c='r')
-        ax1.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='ENI Flashes (10 min.)', marker='o', s=tf_size, c='k')
+        ax1.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GOES-16 GLM Flashes (10 min.)', marker='.', s=tf_size, c='r')
+        ax1.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='Earth Networks Flashes (10 min.)', marker='o', s=tf_size, c='k')
         ax1.scatter(x=cur_lon, y=cur_lat, transform=plt_car_crs, c='k', s=150, marker='x', alpha=0.25)
         ax1.legend(loc='upper right')
-        ax1.set_title('GLM / ENI / CMIP13')
+        ax1.set_title('GOES-16 GLM / Earth Networks / ABI Clean-IR T$_{B}$', fontsize=title_size)
         
 
         if np.nanmax(CMI)>0:
@@ -298,12 +315,12 @@ def plotter(cur, dx, i, case, g16, eni):
         ax2.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
         ax2.add_feature(cfeature.STATES, edgecolor ='r',linewidth=1.5, zorder=0)
         
-        ax2.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GLM16 Flashes (10 min.)', marker='.', s=tf_size, c='r')
-        ax2.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='ENI Flashes (10 min.)', marker='o', s=tf_size, c='k')
+        ax2.scatter(x=g16_cut['lon'], y=g16_cut['lat'], transform=plt_car_crs, alpha=1, label='GOES-16 GLM Flashes (10 min.)', marker='.', s=tf_size, c='r')
+        ax2.scatter(x=eni_cut['longitude'], y=eni_cut['latitude'], transform=plt_car_crs, alpha=1, label='Earth Networks Flashes (10 min.)', marker='o', s=tf_size, c='k')
         ax2.scatter(x=cur_lon, y=cur_lat, transform=plt_car_crs, c='k', s=150, marker='x', zorder=2, alpha=0.25)
         
         ax2.legend(loc='upper right')
-        ax2.set_title('GLM / ENI / -10C dBZ')
+        ax2.set_title('GOES-16 GLM / Earth Networks / MRMS -10$^{o}$C Reflectivity', fontsize=title_size)
         ax2.gridlines(crs=plt_car_crs, draw_labels=True, linewidth=1, color='white', alpha=0.25, linestyle='--')
         
         if refl_10[0][0]!=-999:
