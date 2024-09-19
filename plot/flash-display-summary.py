@@ -449,14 +449,21 @@ if not os.path.exists(plot_save_str):
 
 # In[17]:
 
+tick_fontsize = 14
+axlabel_fontsize = 18
+title_font = 24
+dot_size = 5
+glm_tri = 40
+glm_sq = 100
+s_time = pd.to_datetime(str(start_time))
+e_time = pd.to_datetime(str(end_time)) 
 
 fig = plt.figure(constrained_layout=True, figsize=(15,20))
 fig.patch.set_facecolor('silver')
 gs = fig.add_gridspec(nrows=16,ncols=13)
-fig.suptitle(case_name + ' Case ' + fl_num + ', ' + str(start_time)+' - '+str(end_time), fontsize=16)
-dot_size = 5
-glm_tri = 40
-glm_sq = 100
+fig.suptitle(case_name + ' Case, Flash ID: ' + fl_num + '\n' + s_time.strftime('%Y-%m-%d %H:%M:%S.%f')[:-5]+' UTC - '+e_time.strftime('%Y-%m-%d %H:%M:%S.%f')[:-5], fontsize=title_font)
+
+
 
 #Plot 1, The time-altitude LMA sources in the top panel of the figure
 ax1 = fig.add_subplot(gs[0:2,0:13])
@@ -470,9 +477,10 @@ ax1.scatter(x=eni_cut.loc[eni_cut['type']=='-IC','timestamp'].values, y=np.ones(
 #ax1.legend(loc='lower left')
 ax1.set_xlim(start_time, end_time)
 ax1.set_ylim(0,20)
-ax1.set_ylabel('Altitude (km)')
+ax1.set_ylabel('Altitude (km)', fontsize=axlabel_fontsize)
+ax1.tick_params(axis='both', labelsize=tick_fontsize)
 ax1.grid(visible=True, axis='y',color='gray',linewidth=1,alpha=0.5)
-ax1.set_xticks(ticks=tick_marks, labels=tick_mark_str, fontsize=8)
+ax1.set_xticks(ticks=tick_marks, labels=tick_mark_str)
 
 
 
@@ -483,16 +491,18 @@ ax2.set_facecolor('black')
 ax2.scatter(x=lma_e_time, y=lma_ecut_df['power'], c=lma_e_time, cmap=plt.cm.rainbow, s=dot_size, label='LMA Sources')
 ax2.set_xlim(start_time, end_time)
 ax2.set_ylim(-20,50)
-ax2.set_ylabel('Source Energy (dBW)')
+ax2.set_ylabel('Source Energy (dBW)', fontsize=axlabel_fontsize)
 ax2.grid(visible=True, axis='y',color='gray',linewidth=1,alpha=0.5)
-ax2.set_xticks(ticks=tick_marks, labels=tick_mark_str, fontsize=8)
+ax2.set_xticks(ticks=tick_marks, labels=tick_mark_str)
+ax2.tick_params(axis='both', labelsize=tick_fontsize)
 
 ax2_tw = ax2.twinx()
-ax2_tw.scatter(x=glm_e_group_df['group_time'], y=glm_e_group_df['group_energy']*1e15, color='r', s=glm_tri, marker='^', label='GOES-East GLM Groups')
-ax2_tw.scatter(x=glm_w_group_df['group_time'], y=glm_w_group_df['group_energy']*1e15, color='b', s=glm_tri, marker='^', label='GOES-West GLM Groups')
+ax2_tw.scatter(x=glm_e_group_df['group_time'], y=glm_e_group_df['group_energy']*1e15, color='r', s=glm_tri, marker='^', label='GLM16 Groups')
+ax2_tw.scatter(x=glm_w_group_df['group_time'], y=glm_w_group_df['group_energy']*1e15, color='cyan', s=glm_tri, marker='^', label='GLM17 Groups')
 ax2_tw.set_ylim(1,10000)
 ax2_tw.set_yscale('log')
-ax2_tw.set_ylabel('Group Energy (fJ)')
+ax2_tw.set_ylabel('Group Energy (fJ)', fontsize=axlabel_fontsize)
+ax2_tw.tick_params(axis='both', labelsize=tick_fontsize)
 
 #ax2.legend(loc='upper left')
 ax2_tw.legend(loc='upper right')
@@ -504,33 +514,35 @@ ax3.scatter(x=lma_ecut_df['lon'], y=lma_ecut_df['alt']/1000, c=lma_e_time, cmap=
 
 ax3.set_xlim(lon_min, lon_max)
 ax3.set_ylim(0,20)
-ax3.set_ylabel('Altitude (km)')
+ax3.set_ylabel('Altitude (km)', fontsize=axlabel_fontsize)
 ax3.grid(visible=True, axis='y',color='gray',linewidth=1, alpha=0.5)
 ax3.grid(visible=True, axis='x',color='gray',linestyle='--',linewidth=2, alpha=0.5)
+ax3.tick_params(axis='both', labelsize=tick_fontsize)
 
 ax3_tw = ax3.twinx()
 ax3_tw.hist(x=glm_e_group_df['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='r')
 ax3_tw.hist(x=glm_w_group_df['group_lon'], bins=np.arange(lon_min,lon_max+0.05,0.05), zorder=1, alpha=0.3, color='b')
-ax3_tw.set_ylabel('GLM Group Density')
+ax3_tw.set_ylabel('GLM Group Density', fontsize=axlabel_fontsize)
+ax3_tw.tick_params(axis='both', labelsize=tick_fontsize)
 
 #Plot 4, Overview Map of Plot Area
 ax4 = fig.add_subplot(gs[4:6,10:13], projection=ccrs.PlateCarree())
 ax4.set_facecolor('black')
 ax4.scatter(x=lma_stations['lon'], y=lma_stations['lat'], color='white', label='LMA Stations', marker='^', s=dot_size)
 ax4.scatter(x=glm_e_flash_df['flash_lon'], y=glm_e_flash_df['flash_lat'], color='r', s=dot_size)
-ax4.scatter(x=glm_w_flash_df['flash_lon'], y=glm_w_flash_df['flash_lat'], color='b', s=dot_size)
+ax4.scatter(x=glm_w_flash_df['flash_lon'], y=glm_w_flash_df['flash_lat'], color='deepskyblue', s=dot_size)
 ax4.set_xlim(plot_bounds[0], plot_bounds[1])
 ax4.set_ylim(plot_bounds[2], plot_bounds[3])
 ax4.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
-ax4.add_feature(cfeature.STATES, edgecolor ='r',linewidth=1.5, zorder=0)
+ax4.add_feature(cfeature.STATES, edgecolor ='r', linewidth=1.5, zorder=0)
 #ax4.legend(loc='lower left', fontsize=8)
 
 #Plot 5, Lat Lon of LMA, GLM, and ENI data
 ax5 = fig.add_subplot(gs[6:16,0:10], projection=ccrs.PlateCarree())
 ax5.set_facecolor('black')
 
-ax5.scatter(x=glm_e_event_df['event_lon'], y=glm_e_event_df['event_lat'], color='r', s=glm_sq, marker='s', label='GOES-East GLM Events')
-ax5.scatter(x=glm_w_event_df['event_lon'], y=glm_w_event_df['event_lat'], color='b', s=glm_sq, marker='s', label='GOES-West GLM Events')
+ax5.scatter(x=glm_e_event_df['event_lon'], y=glm_e_event_df['event_lat'], color='r', s=glm_sq, marker='s', label='GLM16 Events')
+ax5.scatter(x=glm_w_event_df['event_lon'], y=glm_w_event_df['event_lat'], color='deepskyblue', s=glm_sq, marker='s', label='GLM17 Events')
 ax5.scatter(x=lma_ecut_df['lon'], y=lma_ecut_df['lat'], c=lma_e_time, cmap=plt.cm.rainbow, s=dot_size, zorder=10, label='LMA Sources')
 ax5.scatter(x=lma_stations['lon'], y=lma_stations['lat'], color='white', label='LMA Stations', marker='^', s=glm_tri, zorder=0)
 ax5.scatter(x=eni_cut.loc[eni_cut['type']=='+CG','longitude'].values, y=eni_cut.loc[eni_cut['type']=='+CG','latitude'].values, color='green', s=glm_sq, marker='^', label='ENI +CG', zorder=10, edgecolors='white')
@@ -541,10 +553,10 @@ ax5.scatter(x=eni_cut.loc[eni_cut['type']=='-IC','longitude'].values, y=eni_cut.
 
 ax5.set_xlim(lon_min, lon_max)
 ax5.set_ylim(lat_min, lat_max)
-ax5.legend(loc='upper right')
+ax5.legend(loc='upper right', fontsize=axlabel_fontsize)
 ax5.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
 ax5.add_feature(cfeature.STATES, edgecolor ='r',linewidth=1.5, zorder=0)
-gl5 = ax5.gridlines(crs=ccrs.PlateCarree(), draw_labels=False, linewidth=2, color='gray', alpha=0.5, linestyle='--')
+gl5 = ax5.gridlines(crs=ccrs.PlateCarree(), draw_labels=False, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=0)
 gl5.top_labels=False
 gl5.right_labels=False
 
@@ -554,16 +566,19 @@ ax6.set_facecolor('black')
 ax6.scatter(y=lma_ecut_df['lat'], x=lma_ecut_df['alt']/1000, c=lma_e_time, cmap=plt.cm.rainbow, s=dot_size)
 ax6.set_ylim(lat_min, lat_max)
 ax6.set_xlim(0,20)
-ax6.set_xlabel('Altitude (km)')
+ax6.set_xlabel('Altitude (km)', fontsize=axlabel_fontsize)
+ax6.tick_params(axis='both', labelsize=tick_fontsize)
 
 ax6_tw = ax6.twiny()
 ax6_tw.hist(x=glm_e_group_df['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='r', orientation='horizontal')
 ax6_tw.hist(x=glm_w_group_df['group_lat'], bins=np.arange(lat_min,lat_max+0.05,0.05), zorder=1, alpha=0.3, color='b', orientation='horizontal')
-ax6_tw.set_xlabel('GLM Group Density')
+ax6_tw.set_xlabel('GLM Group Density', fontsize=axlabel_fontsize)
+ax6_tw.tick_params(axis='both', labelsize=tick_fontsize)
 
 ax6.grid(visible=True, axis='y',color='gray',linestyle='--',linewidth=2, alpha=0.5)
 ax6.grid(visible=True, axis='x',color='gray',linewidth=1, alpha=0.5)
 ax6.tick_params(left = False, right = True , labelleft = False, labelright=True) 
+
 
 #plt.savefig('ithinkthiswilldo.png') #DEVMODE
 plt.savefig(plot_save_str+case+'-'+fl_num+'summary.png')
