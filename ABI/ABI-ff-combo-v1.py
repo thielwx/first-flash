@@ -24,8 +24,10 @@ from glob import glob
 import os
 from datetime import datetime, timedelta
 import numpy as np
+import multiprocessing as mp
 from pyproj import Proj
 from pyresample import SwathDefinition, kd_tree
+from sklearn.neighbors import BallTree
 import satpy.modifiers.parallax as plax
 
 
@@ -113,9 +115,11 @@ def abi_driver(t_start, t_end):
     global f_lat
     global f_lon
     
+    f_time = np.array(f_time)
+
     #Getting the 2-hour segment 
     df_locs = np.where((f_time>=np.datetime64(t_start)) & (f_time<np.datetime64(t_end)))[0]
-    
+
     #Creating an empty dataframe to fill
     df = pd.DataFrame(index=fistart_flid[df_locs], columns=abi_variables_output)
     
@@ -151,6 +155,7 @@ def abi_driver(t_start, t_end):
                     cur_fi_fl = fistart_flid[loc]
                     cur_fl_lat = f_lat[loc]
                     cur_fl_lon = f_lon[loc]
+                    
                     #Sampling the data using a 20 km BallTree to get what we want out of the file
                     cmip_min, cmip_05, acha_max, acha_95 = abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_fl_lon)
                     #Placing the sampled values in the dataframe
@@ -174,7 +179,7 @@ def abi_driver(t_start, t_end):
                     df.loc[cur_fi_fl,'ACHA_max_pre10'] = acha_max
                     df.loc[cur_fi_fl,'ACHA_95_pre10'] = acha_95
                     
-    abi_data_saver(df, t_start, t_end, verison)
+    abi_data_saver(df, t_start, t_end, version)
             
             
 
@@ -236,7 +241,7 @@ def abi_file_hunter(abi_time_str):
 
     #Tagging the times where data is missing for later
     if len(acha_file)<1:
-        print ('CMIP DATA MISSING')
+        print ('ACHA DATA MISSING')
         print (acha_loc)
         acha_file = ['MISSING']
     if len(cmip_file)<1:
@@ -257,20 +262,20 @@ def abi_file_loader(acha_file,cmip_file):
     if cmip_file != 'MISSING':
         cmip_x, cmip_y, cmip_var, cmip_lons, cmip_lats = abi_importer(cmip_file, 'CMI', np.nan)
     else:
-        cmip_x = [-999]
-        cmip_y = [-999]
-        cmip_var = [-999]
+        cmip_lats = np.array([-999])
+        cmip_lons = np.array([-999])
+        cmip_var = np.array([-999])
     
     #loading the acha data
     if acha_file != 'MISSING':
         acha_x, acha_y, acha_var, acha_lons, acha_lats = abi_importer(acha_file, 'HT', np.nan)
     else:
-        acha_x = [-999]
-        acha_y = [-999]
-        acha_var = [-999]
+        acha_lats = np.array([-999])
+        acha_lons = np.array([-999])
+        acha_var = np.array([-999])
     
     #If no acha data are available, we'll put in the artificial bounds of 280 based on Thiel et al 2020    
-    if  (acha_file == 'MISSING') and (cmip_file == 'MISSING'):
+    if  (acha_file == 'MISSING') and (cmip_file != 'MISSING'):
         cmip_var[cmip_var<280] = np.nan
     
     #If the CMIP and ACHA data are there, resampling the ACHA data to the CMIP 2km grid and use as a clear sky mask
@@ -281,9 +286,9 @@ def abi_file_loader(acha_file,cmip_file):
         cmip_var[np.isnan(acha_var)] = np.nan
         #Flattening the arrays for the output
         cmip_var = cmip_var[acha_var>0]
-        acha_var = acha_var[acha_var>0]
         cmip_lats = cmip_lats[acha_var>0]
         cmip_lons = cmip_lons[acha_var>0]
+        acha_var = acha_var[acha_var>0]
         
     # If we dont have cmip data but do have acha data, just flatten the data and swap them with the cmip_x/y
     elif (cmip_file == 'MISSING') and (acha_file != 'MISSING'):
@@ -404,20 +409,20 @@ def abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_f
             acha_max = np.nan
             acha_95 = np.nan
             
-        if (cmip_vals[0] != -999) and (len(idx)==0):
+        if (cmip_vals[0] != -999) and (len(idx)!=0):
             cmip_min = np.nanmin(cmip_vals[idx])
             cmip_05 = np.nanpercentile(a=cmip_vals[idx], q=5)
         else:
             cmip_min = np.nan
             cmip_05 = np.nan
         
-        return cmip_min, cmip_05, acha_max, acha_95
+    return cmip_min, cmip_05, acha_max, acha_95
 
 
 # In[ ]:
 
 
-def mrms_data_saver(df, t_start, t_end, version):
+def abi_data_saver(df, t_start, t_end, version):
     global glm_number
 
     y, m, d, doy, hr, mi = datetime_converter(t_start)
@@ -468,7 +473,6 @@ glm_number = nc_dset.glm_number
 #Getting the flash times for seraching later...
 fistart_str = [i[0:15] for i in nc_dset.variables['flash_fistart_flid'][:]]
 f_time = GLM_LCFA_times_postprocess(fistart_str, nc_dset.variables['flash_time_offset_of_first_event'][:])
-
 
 # In[10]:
 
