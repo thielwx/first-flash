@@ -11,7 +11,7 @@ import yaml
 
 #Constants
 loop_nums = 0
-frame_duration = 500 #Milliseconds per frame
+frame_duration = 250 #Milliseconds per frame
 
 
 #Loading in the settings file
@@ -19,6 +19,7 @@ with open('case-settings-manual-analysis.yaml', 'r') as f:
     sfile = yaml.safe_load(f)
 
 cases = sfile['cases']
+cases = ['20220504-tx']
 
 
 fig_loc = '/localdata/first-flash/figures/manual-analysis-v1/'

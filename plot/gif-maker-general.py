@@ -14,14 +14,14 @@ import numpy as np
 
 
 #=========EDIT THIS SECTION==============================
-case = '20220322-perils'
+case = '20220423-oklma'
 flash_id = 'f2'
 data_loc = '/localdata/first-flash/figures/cases/'+case+'/'+case+'-'+flash_id+'-v1/' #This should have '/' on both ends
 file_format = '.png'
 skip_frames = 5 #Animate every nth frame
 gif_name = case+'-'+flash_id+'-every'+str(skip_frames)+'-v2' #DON'T ADD .gif
 loop_nums = 0
-frame_duration = 500 #Milliseconds per frame
+frame_duration = 100 #Milliseconds per frame
 #========================================================
 
 
