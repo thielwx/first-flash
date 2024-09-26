@@ -32,7 +32,7 @@ import satpy.modifiers.parallax as plax
 
 
 # In[3]:
-
+dt_start_job = datetime.now()
 
 # Constants
 version = 1
@@ -121,7 +121,8 @@ def abi_driver(t_start, t_end):
     df_locs = np.where((f_time>=np.datetime64(t_start)) & (f_time<np.datetime64(t_end)))[0]
 
     #Creating an empty dataframe to fill
-    df = pd.DataFrame(index=fistart_flid[df_locs], columns=abi_variables_output)
+    fistart_flid_cutdown = fistart_flid[df_locs]
+    df = pd.DataFrame(index=fistart_flid_cutdown, columns=abi_variables_output)
     
     #Getting the list of ABI file times that are required from the GLM first flashes
     abi_file_time_pre0, abi_file_time_pre10 = abi_file_times_ff(f_time[df_locs])
@@ -133,12 +134,15 @@ def abi_driver(t_start, t_end):
     #Getting the list of ABI file times for the time period
     abi_times = abi_file_times(pd.date_range(start=t_start-timedelta(minutes=15), end=t_end, freq='5min'))
     
+    #Getting an updated list of first flash lat-lon points that correspond with the dataframe
+    f_lat_cut = f_lat[df_locs]
+    f_lon_cut = f_lon[df_locs]
+
     #Looping through all of the abi files so I only have to open/process them once (I am speed)
     for abi_time_str in abi_times:
-        
         #Finding the files that we'll need to load from
         pre0_locs = np.where(np.array(abi_file_time_pre0)==abi_time_str)[0]
-        pre10_locs = np.where(np.array(abi_file_time_pre0)==abi_time_str)[0]
+        pre10_locs = np.where(np.array(abi_file_time_pre10)==abi_time_str)[0]
         
         #Getting the files that we'll load in
         acha_file, cmip_file = abi_file_hunter(abi_time_str)
@@ -150,11 +154,12 @@ def abi_driver(t_start, t_end):
             
             #If there's first flashes at the ff time, get the max/min values of CMIP13/ACHA within 20 km
             if len(pre0_locs)>0:
+                #print (pre0_locs)
                 #Looping through each flash.
                 for loc in pre0_locs:
-                    cur_fi_fl = fistart_flid[loc]
-                    cur_fl_lat = f_lat[loc]
-                    cur_fl_lon = f_lon[loc]
+                    cur_fi_fl = fistart_flid_cutdown[loc]
+                    cur_fl_lat = f_lat_cut[loc]
+                    cur_fl_lon = f_lon_cut[loc]
                     
                     #Sampling the data using a 20 km BallTree to get what we want out of the file
                     cmip_min, cmip_05, acha_max, acha_95 = abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_fl_lon)
@@ -168,9 +173,10 @@ def abi_driver(t_start, t_end):
             if len(pre10_locs)>0:
                 #Looping through each flash.
                 for loc in pre10_locs:
-                    cur_fi_fl = fistart_flid[loc]
-                    cur_fl_lat = f_lat[loc]
-                    cur_fl_lon = f_lon[loc]
+                    cur_fi_fl = fistart_flid_cutdown[loc]
+                    cur_fl_lat = f_lat_cut[loc]
+                    cur_fl_lon = f_lon_cut[loc]
+
                     #Sampling the data using a 20 km BallTree to get what we want out of the file
                     cmip_min, cmip_05, acha_max, acha_95 = abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_fl_lon)
                     #Placing the sampled values in the dataframe
@@ -311,7 +317,6 @@ def abi_importer(file, var, fill_val):
     lons, lats = latlon(dset)
     return x, y, var, lons, lats
 
-
 # In[12]:
 
 
@@ -379,6 +384,7 @@ def abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_f
         cmip_05 = np.nan
         acha_max = np.nan
         acha_95 = np.nan
+
     else:
         #Running the parallax correction
         lon_search, lat_search = plax.get_parallax_corrected_lonlats(sat_lon=-75.0, sat_lat=0.0, sat_alt=35786023.0,
@@ -399,22 +405,24 @@ def abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_f
         btree = BallTree(abi_latlons, leaf_size=2, metric='haversine')
         indicies = btree.query_radius(ff_latlons, r = max_range/R)
         idx = indicies[0]
-        
+            
         #If no data in ball tree range OR the file is empty then set all to nans, if there's data, sample it!
         
         if (acha_vals[0] != -999) and (len(idx)!=0):
             acha_max = np.nanmax(acha_vals[idx])
             acha_95 = np.nanpercentile(a=acha_vals[idx], q=95)
         else: 
-            acha_max = np.nan
-            acha_95 = np.nan
+            acha_max = -999
+            acha_95 = -999
+            #print ('ACHA NANs')
             
         if (cmip_vals[0] != -999) and (len(idx)!=0):
             cmip_min = np.nanmin(cmip_vals[idx])
             cmip_05 = np.nanpercentile(a=cmip_vals[idx], q=5)
         else:
-            cmip_min = np.nan
-            cmip_05 = np.nan
+            cmip_min = -999
+            cmip_05 = -999
+            #print ('CMIP NANs')
         
     return cmip_min, cmip_05, acha_max, acha_95
 
@@ -434,7 +442,7 @@ def abi_data_saver(df, t_start, t_end, version):
     cur_time_str = 'c'+y+m+d+hr+mi
     
     output_loc = '/localdata/first-flash/data/ABI-processed-GLM'+glm_number+'-v'+str(version)+'/'+output_folder +'/'
-    output_file = 'ABI-ff-v'+str(version)+'-'+start_time_str+'-'+end_time_str+'-'+cur_time_str+'.csv'
+    output_file = 'ABI-GLM'+glm_number+'-ff-v'+str(version)+'-'+start_time_str+'-'+end_time_str+'-'+cur_time_str+'.csv'
     if not os.path.exists(output_loc):
         os.makedirs(output_loc, exist_ok=True)
     df.to_csv(output_loc+output_file)
@@ -493,5 +501,9 @@ for i in range(len(time_list_days)-1):
     if __name__ == "__main__":
         with mp.Pool(12) as p:
             p.starmap(abi_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
+            #p.starmap(abi_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2])) #DEVMODE
             p.close()
             p.join()
+
+print ('Total Run Time:')
+print (datetime.now()-dt_start_job)
