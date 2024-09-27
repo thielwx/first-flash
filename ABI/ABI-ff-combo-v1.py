@@ -120,75 +120,77 @@ def abi_driver(t_start, t_end):
     #Getting the 2-hour segment 
     df_locs = np.where((f_time>=np.datetime64(t_start)) & (f_time<np.datetime64(t_end)))[0]
 
-    #Creating an empty dataframe to fill
-    fistart_flid_cutdown = fistart_flid[df_locs]
-    df = pd.DataFrame(index=fistart_flid_cutdown, columns=abi_variables_output)
-    
-    #Getting the list of ABI file times that are required from the GLM first flashes
-    abi_file_time_pre0, abi_file_time_pre10 = abi_file_times_ff(f_time[df_locs])
-    
-    #Placing the file strings in the dataframe in case we need them later (ya never know...)
-    df['abi_file_stime_pre0'] = abi_file_time_pre0
-    df['abi_file_stime_pre10'] = abi_file_time_pre10
-    
-    #Getting the list of ABI file times for the time period
-    abi_times = abi_file_times(pd.date_range(start=t_start-timedelta(minutes=15), end=t_end, freq='5min'))
-    
-    #Getting an updated list of first flash lat-lon points that correspond with the dataframe
-    f_lat_cut = f_lat[df_locs]
-    f_lon_cut = f_lon[df_locs]
+    #If there's first flash data lets run stuff. If not then don't!
+    if len(df_locs)>0:
 
-    #Looping through all of the abi files so I only have to open/process them once (I am speed)
-    for abi_time_str in abi_times:
-        #Finding the files that we'll need to load from
-        pre0_locs = np.where(np.array(abi_file_time_pre0)==abi_time_str)[0]
-        pre10_locs = np.where(np.array(abi_file_time_pre10)==abi_time_str)[0]
+        #Creating an empty dataframe to fill
+        fistart_flid_cutdown = fistart_flid[df_locs]
+        df = pd.DataFrame(index=fistart_flid_cutdown, columns=abi_variables_output)
         
-        #Getting the files that we'll load in
-        acha_file, cmip_file = abi_file_hunter(abi_time_str)
+        #Getting the list of ABI file times that are required from the GLM first flashes
+        abi_file_time_pre0, abi_file_time_pre10 = abi_file_times_ff(f_time[df_locs])
         
-        #If there's first flashes that correspond with the current abi time, then we'll load the data
-        if (len(pre0_locs)>0 or len(pre10_locs)>0):
-            #Loading the acha and cmip file
-            abi_lats, abi_lons, acha_vals, cmip_vals = abi_file_loader(acha_file,cmip_file)
-            
-            #If there's first flashes at the ff time, get the max/min values of CMIP13/ACHA within 20 km
-            if len(pre0_locs)>0:
-                #print (pre0_locs)
-                #Looping through each flash.
-                for loc in pre0_locs:
-                    cur_fi_fl = fistart_flid_cutdown[loc]
-                    cur_fl_lat = f_lat_cut[loc]
-                    cur_fl_lon = f_lon_cut[loc]
-                    
-                    #Sampling the data using a 20 km BallTree to get what we want out of the file
-                    cmip_min, cmip_05, acha_max, acha_95 = abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_fl_lon)
-                    #Placing the sampled values in the dataframe
-                    df.loc[cur_fi_fl,'CMIP_min'] = cmip_min
-                    df.loc[cur_fi_fl,'CMIP_05'] = cmip_05
-                    df.loc[cur_fi_fl,'ACHA_max'] = acha_max
-                    df.loc[cur_fi_fl,'ACHA_95'] = acha_95
+        #Placing the file strings in the dataframe in case we need them later (ya never know...)
+        df['abi_file_stime_pre0'] = abi_file_time_pre0
+        df['abi_file_stime_pre10'] = abi_file_time_pre10
         
-            #If there's first flashes 20 min before the ff time, get the max/min values of CMIP13/ACHA within 20 km
-            if len(pre10_locs)>0:
-                #Looping through each flash.
-                for loc in pre10_locs:
-                    cur_fi_fl = fistart_flid_cutdown[loc]
-                    cur_fl_lat = f_lat_cut[loc]
-                    cur_fl_lon = f_lon_cut[loc]
+        #Getting the list of ABI file times for the time period
+        abi_times = abi_file_times(pd.date_range(start=t_start-timedelta(minutes=15), end=t_end, freq='5min'))
+        
+        #Getting an updated list of first flash lat-lon points that correspond with the dataframe
+        f_lat_cut = f_lat[df_locs]
+        f_lon_cut = f_lon[df_locs]
 
-                    #Sampling the data using a 20 km BallTree to get what we want out of the file
-                    cmip_min, cmip_05, acha_max, acha_95 = abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_fl_lon)
-                    #Placing the sampled values in the dataframe
-                    df.loc[cur_fi_fl,'CMIP_min_pre10'] = cmip_min
-                    df.loc[cur_fi_fl,'CMIP_05_pre10'] = cmip_05
-                    df.loc[cur_fi_fl,'ACHA_max_pre10'] = acha_max
-                    df.loc[cur_fi_fl,'ACHA_95_pre10'] = acha_95
-                    
-    abi_data_saver(df, t_start, t_end, version)
+        #Looping through all of the abi files so I only have to open/process them once (I am speed)
+        for abi_time_str in abi_times:
+            #Finding the files that we'll need to load from
+            pre0_locs = np.where(np.array(abi_file_time_pre0)==abi_time_str)[0]
+            pre10_locs = np.where(np.array(abi_file_time_pre10)==abi_time_str)[0]
             
+            #Getting the files that we'll load in
+            acha_file, cmip_file = abi_file_hunter(abi_time_str)
             
+            #If there's first flashes that correspond with the current abi time, then we'll load the data
+            if (len(pre0_locs)>0 or len(pre10_locs)>0):
+                #Loading the acha and cmip file
+                abi_lats, abi_lons, acha_vals, cmip_vals = abi_file_loader(acha_file,cmip_file)
+                
+                #If there's first flashes at the ff time, get the max/min values of CMIP13/ACHA within 20 km
+                if len(pre0_locs)>0:
+                    #print (pre0_locs)
+                    #Looping through each flash.
+                    for loc in pre0_locs:
+                        cur_fi_fl = fistart_flid_cutdown[loc]
+                        cur_fl_lat = f_lat_cut[loc]
+                        cur_fl_lon = f_lon_cut[loc]
+                        
+                        #Sampling the data using a 20 km BallTree to get what we want out of the file
+                        cmip_min, cmip_05, acha_max, acha_95 = abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_fl_lon)
+                        #Placing the sampled values in the dataframe
+                        df.loc[cur_fi_fl,'CMIP_min'] = cmip_min
+                        df.loc[cur_fi_fl,'CMIP_05'] = cmip_05
+                        df.loc[cur_fi_fl,'ACHA_max'] = acha_max
+                        df.loc[cur_fi_fl,'ACHA_95'] = acha_95
+            
+                #If there's first flashes 20 min before the ff time, get the max/min values of CMIP13/ACHA within 20 km
+                if len(pre10_locs)>0:
+                    #Looping through each flash.
+                    for loc in pre10_locs:
+                        cur_fi_fl = fistart_flid_cutdown[loc]
+                        cur_fl_lat = f_lat_cut[loc]
+                        cur_fl_lon = f_lon_cut[loc]
 
+                        #Sampling the data using a 20 km BallTree to get what we want out of the file
+                        cmip_min, cmip_05, acha_max, acha_95 = abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_fl_lon)
+                        #Placing the sampled values in the dataframe
+                        df.loc[cur_fi_fl,'CMIP_min_pre10'] = cmip_min
+                        df.loc[cur_fi_fl,'CMIP_05_pre10'] = cmip_05
+                        df.loc[cur_fi_fl,'ACHA_max_pre10'] = acha_max
+                        df.loc[cur_fi_fl,'ACHA_95_pre10'] = acha_95
+                        
+        abi_data_saver(df, t_start, t_end, version)
+            
+        
 
 # In[7]:
 
@@ -282,7 +284,13 @@ def abi_file_loader(acha_file,cmip_file):
     
     #If no acha data are available, we'll put in the artificial bounds of 280 based on Thiel et al 2020    
     if  (acha_file == 'MISSING') and (cmip_file != 'MISSING'):
-        cmip_var[cmip_var<280] = np.nan
+        cmip_var = cmip_var.flatten(order='C')
+        cmip_lats = cmip_lats.flatten(order='C')
+        cmip_lons = cmip_lons.flatten(order='C')
+        cmip_lats = cmip_lats[cmip_var>280]
+        cmip_lons = cmip_lons[cmip_var>280]
+        cmip_var = cmip_var[cmip_var>280]
+        
     
     #If the CMIP and ACHA data are there, resampling the ACHA data to the CMIP 2km grid and use as a clear sky mask
     if (cmip_file != 'MISSING') and (acha_file != 'MISSING'):
@@ -386,9 +394,19 @@ def abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_f
         acha_95 = np.nan
 
     else:
-        #Running the parallax correction
-        lon_search, lat_search = plax.get_parallax_corrected_lonlats(sat_lon=-75.0, sat_lat=0.0, sat_alt=35786023.0,
-                                            lon=abi_lons[abi_locs], lat=abi_lats[abi_locs], height=acha_vals[abi_locs])
+        #If there's no ABI but there is CMIP data, set the ACHA to 9000 m for the parallax correction
+        if acha_vals[0]==-999:
+            lon_search, lat_search = plax.get_parallax_corrected_lonlats(sat_lon=-75.0, sat_lat=0.0, sat_alt=35786023.0,
+                                    lon=abi_lons[abi_locs], lat=abi_lats[abi_locs], height=9000)
+            print ('Ding!')
+            print (lon_search)
+            print (lat_search)
+        
+        #If we have data for both CMIP and ACHA, then use ACAH heights for the parallax correction
+        else:
+            #Running the parallax correction
+            lon_search, lat_search = plax.get_parallax_corrected_lonlats(sat_lon=-75.0, sat_lat=0.0, sat_alt=35786023.0,
+                                                lon=abi_lons[abi_locs], lat=abi_lats[abi_locs], height=acha_vals[abi_locs])
         
         #Converting the abi lat/lon to radians
         abi_lats_rad = lat_search * (np.pi/180)
