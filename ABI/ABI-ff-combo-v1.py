@@ -306,9 +306,9 @@ def abi_file_loader(acha_file,cmip_file):
         
     # If we dont have cmip data but do have acha data, just flatten the data and swap them with the cmip_x/y
     elif (cmip_file == 'MISSING') and (acha_file != 'MISSING'):
-        acha_var = acha_var[acha_var>0]
         cmip_lons = acha_lons[acha_var>0]
         cmip_lats = acha_lats[acha_var>0]
+        acha_var = acha_var[acha_var>0]
         
     return cmip_lats, cmip_lons, acha_var, cmip_var
 
