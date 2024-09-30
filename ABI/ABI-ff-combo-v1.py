@@ -398,9 +398,9 @@ def abi_data_sampler(abi_lats, abi_lons, acha_vals, cmip_vals, cur_fl_lat, cur_f
         if acha_vals[0]==-999:
             lon_search, lat_search = plax.get_parallax_corrected_lonlats(sat_lon=-75.0, sat_lat=0.0, sat_alt=35786023.0,
                                     lon=abi_lons[abi_locs], lat=abi_lats[abi_locs], height=9000)
-            print ('Ding!')
-            print (lon_search)
-            print (lat_search)
+            # print ('Ding!')
+            # print (lon_search)
+            # print (lat_search)
         
         #If we have data for both CMIP and ACHA, then use ACAH heights for the parallax correction
         else:
