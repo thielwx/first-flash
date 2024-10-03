@@ -103,7 +103,7 @@ def eni_loader(start_time, end_time, eni_vars):
     #Looping through the data to load the full dataset
     for file_str in [file_str1, file_str2, file_str3]:
         eni_file = glob(file_loc+file_str)
-        if len(eni_file>0):
+        if len(eni_file)>0:
             df_new = pd.read_csv(eni_file[0])
             df = pd.concat((df,df_new),axis=0)
         else:
@@ -113,7 +113,7 @@ def eni_loader(start_time, end_time, eni_vars):
     #If we have data, get the times and pair it down
     if df.shape[0]>0:
         #Pairing down by the spatial bounds
-        latlon_locs = lat_lon_bounds(df['latitude'].values, df['longitude'].values)
+        latlon_locs = latlon_bounds(df['latitude'].values, df['longitude'].values)
         df = df.iloc[latlon_locs,:]
         
         #Getting the times for the data in the dataframe and pairing down by time
@@ -188,16 +188,21 @@ def eni_driver(t_start, t_end):
         #Looping through the individual first flashes
         for i in range(len(f_lat_cut)):
             #Getting the current flash data that we'll be finding in the eni data
-            cur_fi_fl = fi_start_flid_cutdown[i]
+            cur_fi_fl = fistart_flid_cutdown[i]
+            #print (cur_fi_fl)
             cur_f_lat = f_lat_cut[i]
             cur_f_lon = f_lon_cut[i]
             cur_tstart = f_tstart_cut[i]
             cur_tend = f_tend_cut[i]
             
-            eni_data_package = eni_flash_grabber(eni_df, eni_stime, eni_etime, eni_vars, cur_f_lat, cur_f_lon, cur_tstart, cur_tend)
+            eni_df_output = eni_flash_grabber(eni_df, eni_stime, eni_etime, eni_vars, cur_f_lat, cur_f_lon, cur_tstart, cur_tend, cur_fi_fl)
             
-            for i in range(len(eni_vars)):
-                df[cur_fi_fl,eni_vars[i]] = eni_data_package[i]
+            #Transfering the data to the full array
+            for var in eni_vars:
+                df.loc[cur_fi_fl,var] = eni_df_output.loc[cur_fi_fl,var]
+
+            # for i in range(len(eni_vars)):
+            #     df[cur_fi_fl,eni_vars[i]] = eni_data_package[i]
          
         eni_data_saver(df,t_start,t_end,version)
     
@@ -207,19 +212,23 @@ def eni_driver(t_start, t_end):
 
 
 #A function that finds the appropriate eni flash for the current GLM first flash under investigation
-def eni_flash_grabber(eni_df, eni_stime, eni_etime, eni_vars, f_lat, f_lon, f_start, f_end):
+def eni_flash_grabber(eni_df, eni_stime, eni_etime, eni_vars, f_lat, f_lon, f_start, f_end, cur_fi_fl):
     global search_ms_dt #Search time bounds defined previously
     global search_km #Search radius defined previously
     R = 6371.0087714 #Earths radius in km
     dx = 1.0 #Search range in degrees (to cut down the amount of ABI data we're searching)
-    eni_data_package = np.empty(len(eni_vars)) #Empty 'package for our eni data
+    #eni_data_package = np.empty(len(eni_vars)) #Empty 'package for our eni data
     
     eni_lons = eni_df['longitude'].values
     eni_lats = eni_df['latitude'].values
     
+    #Empty dataframe that we'll fill
+    eni_df_output = pd.DataFrame(index=[cur_fi_fl],columns=eni_vars)
+
     #Cutting down the ABI searchable data by space and time
     eni_locs = np.where((eni_lons>=f_lon-dx) & (eni_lons<=f_lon+dx) & (eni_lats<=f_lat+dx) & (eni_lats>=f_lat-dx) &
-                       ((eni_etime>=f_start-search_ms_dt) | (eni_stime<=f_end+search_ms_dt)))[0]
+                       (((eni_etime>=f_start-search_ms_dt) & (eni_stime<=f_end+search_ms_dt)) 
+                        | ((eni_stime<=f_end+search_ms_dt) & (eni_etime>=f_start-search_ms_dt))))[0]
     eni_df_cut = eni_df.iloc[eni_locs,:]
     
     #If there's eni data, go through the trouble of running the ball tree
@@ -237,27 +246,35 @@ def eni_flash_grabber(eni_df, eni_stime, eni_etime, eni_vars, f_lat, f_lon, f_st
         btree = BallTree(eni_latlons, leaf_size=2, metric='haversine')
         indicies = btree.query_radius(ff_latlons, r = search_km/R)
         idx = indicies[0]
-
+        #print(idx)
 
         
         #If there's only one data point in range, we're done and grab the data!
         if len(idx)==1:
             #Looping through the package to fill it with the corresponding data from each variable in the dataframe
             for i in range(len(eni_vars)):
-                eni_data_package[i] = eni_df_cut.iloc[idx[0],i]
+                #eni_data_package[i] = eni_df_cut.iloc[idx[0],i]
+                eni_df_output.loc[cur_fi_fl,eni_vars[i]] = eni_df_cut.iloc[idx[0],i]
+
         #If there's more than one eni flash, then we'll grab the one closest temporally
         elif len(idx)>1:
             #Getting the mean times of the first flashes and eni flashes
-            eni_mean_times = [np.average(np.array(eni_stime[idx[i]], eni_etime[idx[i]])) for i in range(len(idx))]
-            ff_mean_time = np.average(np.array(f_start, f_end))
+            #eni_mean_times = [np.average(np.array(eni_stime[i], eni_etime[i])) for i in idx]
+            eni_mean_times = [eni_stime[i] + (eni_etime[i]-eni_stime[i])/2 for i in idx]
+            #ff_mean_time = np.average(np.array(f_start, f_end))
+            ff_mean_time = f_start + (f_end-f_start)/2
             time_difference = np.abs(eni_mean_times - ff_mean_time) #Absolute time difference of the two
             t_idx = np.where(time_difference==np.nanmin(time_difference))[0] #Getting where the time difference in the smallest
+            #print (t_idx)
 
             for i in range(len(eni_vars)):
-                eni_data_package[i] = eni_df_cut.iloc[t_idx,i]
+                #eni_data_package[i] = eni_df_cut.iloc[t_idx,i]
+                eni_df_output.loc[cur_fi_fl,eni_vars[i]] = eni_df_cut.iloc[t_idx[0],i]
+        
+    #print (eni_df_output)
 
 
-    return eni_data_package
+    return eni_df_output
 
 
 # In[ ]:
@@ -288,7 +305,7 @@ def eni_data_saver(df, t_start, t_end, version):
 
 
 version = 1
-search_km = 32 #Search radius in km based on Rudlosky and Virts 2021
+search_km = 50 #Search radius in km based on Rudlosky and Virts 2021
 search_ms = 200 #Search time in ms based on Rudlosky and Virts 2021
 search_ms_dt = np.timedelta64(search_ms, 'ms')
 eni_vars = ['type','timestamp','latitude','longitude','peakcurrent','icheight','numbersensors','icmultiplicity','cgmultiplicity','starttime','endtime','duration','ullatitude','ullongitude','lrlatitude','lrlongitude']
@@ -351,8 +368,8 @@ for i in range(len(time_list_days)-1):
     #Sending the file string to the mrms_driver function that takes over from here...
     if __name__ == "__main__":
         with mp.Pool(12) as p:
-            #p.starmap(eni_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
-            p.starmap(eni_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2])) #DEVMODE
+            p.starmap(eni_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
+            #p.starmap(eni_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2])) #DEVMODE
             p.close()
             p.join()
 
