@@ -18,7 +18,6 @@ import sys
 from datetime import datetime, timedelta
 import multiprocessing as mp
 from glob import glob
-import gzip
 from sklearn.neighbors import BallTree
 import os
 
@@ -167,7 +166,7 @@ def eni_driver(t_start, t_end):
     global f_lon
     
     #Getting the 2-hour segment 
-    df_locs = np.where((ff_time_start>=np.datetime64(t_start)) & (ff_time_end<np.datetime64(t_end)))[0]
+    df_locs = np.where((ff_time_start>=np.datetime64(t_start)) & (ff_time_start<np.datetime64(t_end)))[0]
 
     #If there's first flash data lets run stuff. If not then don't!
     if len(df_locs)>0:
@@ -369,7 +368,7 @@ for i in range(len(time_list_days)-1):
     if __name__ == "__main__":
         with mp.Pool(12) as p:
             p.starmap(eni_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
-            #p.starmap(eni_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2])) #DEVMODE
+            #p.starmap(eni_driver, zip(tlist_starmap[-2:-1], tlist_starmap[-1:])) #DEVMODE
             p.close()
             p.join()
 
