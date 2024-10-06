@@ -278,16 +278,18 @@ def mrms_data_saver(df, t_start, t_end, version):
 
 #Importing the data from the files
 args = sys.argv
-nc_file_loc = args[1]
+s_time_str = args[1]
+e_time_str = args[2]
+nc_file_loc = args[3]
 # nc_file_loc = '../../local-data/2022/GLM16_first-flash-data-all_v32_s202201010000_e202212310000_c202409021440.nc' #DEVMODE
 
 #Getting the necessary information from the netCDF file
 nc_dset = nc.Dataset(nc_file_loc,'r')
 
 #Setting up the time range
-start_time = datetime.strptime(nc_dset.time_coverage_start, '%Y-%m-%d %H:%M:%S')
+start_time = datetime.strptime(s_time_str, '%Y%m%d')
 #start_time = datetime.strptime('2022-01-19 00:00:00', '%Y-%m-%d %H:%M:%S') #DEVMODE
-end_time = datetime.strptime(nc_dset.time_coverage_end, '%Y-%m-%d %H:%M:%S')
+end_time = datetime.strptime(e_time_str, '%Y%m%d')
 time_list_days = pd.date_range(start=start_time, end=end_time, freq='1D') #Daily list to loop through
 
 #GLM Number for later
