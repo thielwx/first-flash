@@ -40,7 +40,7 @@ def conus_mask(df):
     gdata.set_crs(epsg=4326, inplace=True)
 
     #Loading in the shapefile, setting the matching coordinate reference system, and creating a CONUS mask
-    conus = gpd.read_file('tl_2024_us_state/')
+    conus = gpd.read_file('../tl_2024_us_state/')
     conus = conus.to_crs('EPSG:4326')
     notCONUS = ['Alaska', 'Hawaii', 'Puerto Rico', 'Commonwealth of the Northern Mariana Islands', 'Guam', 'United States Virgin Islands', 'American Samoa']
     mask = conus['NAME'].isin(notCONUS)
@@ -139,7 +139,7 @@ def get_meta_data():
 # In[6]:
 
 
-def df_creator(g16_dset,g17_dset,keys, fistart_flid_list):
+def df_creator(g16_dset, g17_dset,keys, fistart_flid_list):
     #Creating an empty dictionary to fill
     dict = {}
 
@@ -147,7 +147,7 @@ def df_creator(g16_dset,g17_dset,keys, fistart_flid_list):
     for key in keys[:-1]:
         var1 = g16_dset.variables[key][:]
         var2 = g17_dset.variables[key][:]
-        var = np.concat((var1,var2))
+        var = np.concatenate((var1,var2))
         dict[key] = var
 
     #Extra step to add the _16 or _17 to fistart_flid in the dictionary
@@ -156,13 +156,14 @@ def df_creator(g16_dset,g17_dset,keys, fistart_flid_list):
     fi_fl17 = g17_dset.variables[keys[-1]][:]
     fi_fl17 = [id_str+'_17' for id_str in fi_fl17]
 
-    fi_fl_combo = np.concat((fi_fl16,fi_fl17))
+    fi_fl_combo = np.concatenate((fi_fl16,fi_fl17))
     dict[keys[-1]] = fi_fl_combo
 
     #Creating the DataFrame
     df = pd.DataFrame(data=dict)
     #Setting the index to the flash/group/event_fistart_flid
     df.set_index(keys[-1],inplace=True)
+    df[keys[-1]] = fi_fl_combo
     #Slicing the DataFrame by the list of fistart_flids that you need from the filter
     df = df.loc[fistart_flid_list,:]
 
@@ -209,70 +210,6 @@ def output_netcdf_setup(out, g16_dset, cur_time, num_flash, num_group, num_event
 
 # In[7]:
 
-
-#Funciton that creates each variable in the meta_dictionary, extracts the data from each file, and fills it with the concatenated arrays
-def file_filler(out, g16_dset, g17_dset, meta_dict, g16_floc, g16_gloc, g16_eloc, g17_floc, g17_gloc, g17_eloc):
-    
-    #Going through all by the fistart_flids
-    for key in list(meta_dict.keys())[:-3]:
-        #Ensuring we set up each variable correctly
-        if meta_dict[key][3] == 'int':
-            var =  out.createVariable(key, np.int16, meta_dict[key][2])
-        elif meta_dict[key][3] == 'int32':
-            var =  out.createVariable(key, np.int32, meta_dict[key][2])
-        elif meta_dict[key][3] == 'float':
-            var =  out.createVariable(key, np.float32, meta_dict[key][2])
-        elif meta_dict[key][3] == 'float64':
-            var =  out.createVariable(key, np.float64, meta_dict[key][2])
-        else:
-            var =  out.createVariable(key, np.str_, meta_dict[key][2])
-        var.units = meta_dict[key][0]
-        var.long_name = meta_dict[key][1]
-        
-        #Parsing the data based on its indicies 
-        if key[0] == 'f':
-            g16_var = g16_dset.variables[key][g16_floc]
-            g17_var = g17_dset.variables[key][g17_floc]
-        elif key[0] == 'g':
-            g16_var = g16_dset.variables[key][g16_gloc]
-            g17_var = g17_dset.variables[key][g17_gloc]
-        elif key[0] == 'e':
-            g16_var = g16_dset.variables[key][g16_eloc]
-            g17_var = g17_dset.variables[key][g17_eloc]
-            
-        #Combining the arrays and putting them into the variable
-        var[:] = np.concatenate((g16_var,g17_var))
-            
-    #Going through the fistart_flid because I need them to 
-    for key in list(meta_dict.keys())[-3:]:
-        var =  out.createVariable(key, np.str_, meta_dict[key][2])
-        var.units = meta_dict[key][0]
-        var.long_name = meta_dict[key][1]
-        
-        #Loading the data
-        g16_var = g16_dset.variables[key][:]
-        g17_var = g17_dset.variables[key][:]
-        if key[0] == 'f':
-            #parsing by indicies
-            g16_var = g16_var[g16_floc]
-            #Adding original glm location to fistart_flid
-            g16_var = np.array([val+'_16' for val in g16_var])
-            g17_var = g17_var[g17_floc]
-            g17_var = np.array([val+'_17' for val in g17_var])
-        elif key[0] == 'g':
-            g16_var = g16_var[g16_gloc]
-            g16_var = np.array([val+'_16' for val in g16_var])
-            g17_var = g17_var[g17_gloc]
-            g17_var = np.array([val+'_17' for val in g17_var])
-        elif key[0] == 'e':
-            g16_var = g16_var[g16_eloc]
-            g16_var = np.array([val+'_16' for val in g16_var])
-            g17_var = g17_var[g17_eloc]
-            g17_var = np.array([val+'_17' for val in g17_var])
-        
-        #Combining the arrays and putting them into the variable    
-        var[:] = np.concatenate((g16_var,g17_var))
-    return out
 
 
 #Funciton that creates each variable in the meta_dictionary, extracts the data from each file, and fills it with the concatenated arrays
@@ -352,8 +289,8 @@ file_str = 'GLM-East-West_first-flash-data_v'+glm16_file_str[-47:-45]+'_'+s_time
 #Getting the list of necessary files to match with
 fistart_flid_list = combined_idx_finder(g16_dset,g17_dset)
 print ('---------------')
-print ('Flashes filtered and IDs found, length='+str(fistart_flid_list))
-print (datetime.now()-cur_time())
+print ('Flashes filtered and IDs found, length='+str(len(fistart_flid_list)))
+print (datetime.now()-cur_time)
 print ('---------------')
 
 #Getting the dictionary of meta-data to loop through
@@ -363,9 +300,8 @@ meta_dict, f_keys, g_keys, e_keys = get_meta_data()
 f_df = df_creator(g16_dset,g17_dset,f_keys, fistart_flid_list)
 g_df = df_creator(g16_dset,g17_dset,g_keys, fistart_flid_list)
 e_df = df_creator(g16_dset,g17_dset,e_keys, fistart_flid_list)
-print ('---------------')
 print ('Flash, group, event DataFrames created')
-print (datetime.now()-cur_time())
+print (datetime.now()-cur_time)
 print ('---------------')
 
 #Creating and setting up the netCDF file in write mode
@@ -376,19 +312,18 @@ out = output_netcdf_setup(out, g16_dset, cur_time, f_df.shape[0], g_df.shape[0],
 
 #Filling the netCDF file with the appropriate datasets
 out = file_filler_v2(out, g16_dset, g17_dset, meta_dict, f_df, f_keys)
-print ('---------------')
 print ('Flashes written into netCDF file')
-print (datetime.now()-cur_time())
+print (datetime.now()-cur_time)
 print ('---------------')
+
 out = file_filler_v2(out, g16_dset, g17_dset, meta_dict, g_df, g_keys)
-print ('---------------')
 print ('Groups written into netCDF file')
-print (datetime.now()-cur_time())
+print (datetime.now()-cur_time)
 print ('---------------')
+
 out = file_filler_v2(out, g16_dset, g17_dset, meta_dict, e_df, e_keys)
-print ('---------------')
 print ('Events written into netCDF file')
-print (datetime.now()-cur_time())
+print (datetime.now()-cur_time)
 print ('---------------')
 
 #Closing the file
