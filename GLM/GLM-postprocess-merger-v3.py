@@ -159,15 +159,15 @@ def get_combo_meta_data():
     }
 
     eni_meta_dict = {
-        'eni_type': ['1','eni matched flash type 0=CG, 1=IC', ('number_of_flashes',),'int',False],
+        'eni_type': ['1','eni matched flash type 0=CG, 1=IC', ('number_of_flashes',),'float',False],
         'eni_timestamp': ['1','eni matched timestamp', ('number_of_flashes',),'str',False],
         'eni_latitude': ['1','eni matched flash latitude', ('number_of_flashes',),'float',False],
         'eni_longitude': ['1','eni matched flash longitude', ('number_of_flashes',),'float',False],
         'eni_peakcurrent': ['1','eni matched peak current', ('number_of_flashes',),'float',False],
         'eni_icheight': ['1','eni matched ic height', ('number_of_flashes',),'float',False],
-        'eni_numbersensors': ['1','eni matched number of sensors', ('number_of_flashes',),'int32',False],
-        'eni_icmultiplicity': ['1','eni matched ic multiplicity', ('number_of_flashes',),'int32',False],
-        'eni_cgmultiplicity': ['1','eni matched cg multiplicity', ('number_of_flashes',),'int32',False],
+        'eni_numbersensors': ['1','eni matched number of sensors', ('number_of_flashes',),'float',False],
+        'eni_icmultiplicity': ['1','eni matched ic multiplicity', ('number_of_flashes',),'float',False],
+        'eni_cgmultiplicity': ['1','eni matched cg multiplicity', ('number_of_flashes',),'float',False],
         'eni_starttime': ['1','eni matched flash start time', ('number_of_flashes',),'str',False],
         'eni_endtime': ['1','eni matched flash end time', ('number_of_flashes',),'str',False],
         'eni_duration': ['1','eni matched flash duration', ('number_of_flashes',),'float',False],
@@ -355,9 +355,13 @@ print ('---------------')
 abi_df = combo_data_loader(fistart_flid_list, abi16_loc, abi17_loc)
 mrms_df = combo_data_loader(fistart_flid_list, mrms16_loc, mrms17_loc)
 eni_df = combo_data_loader(fistart_flid_list, eni16_loc, eni17_loc)
+eni_df['timestamp'] = eni_df['timestamp'].astype('str')
+eni_df['starttime'] = eni_df['starttime'].astype('str')
+eni_df['endtime'] = eni_df['endtime'].astype('str')
 
 for key in list(eni_df.keys()):
-    eni_df.rename({'eni_'+key: key}, axis='columns', inplace=True)
+    eni_df = eni_df.rename(columns={key: 'eni_'+key})
+
 print ('ABI, MRMS, ENI DataFrames created')
 print (datetime.now()-cur_time)
 print ('---------------')
