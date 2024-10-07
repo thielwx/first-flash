@@ -357,7 +357,7 @@ mrms_df = combo_data_loader(fistart_flid_list, mrms16_loc, mrms17_loc)
 eni_df = combo_data_loader(fistart_flid_list, eni16_loc, eni17_loc)
 
 for key in list(eni_df.keys()):
-    eni_df.rename('eni_'+key: key, inplace=True)
+    eni_df.rename({'eni_'+key: key}, axis='columns', inplace=True)
 print ('ABI, MRMS, ENI DataFrames created')
 print (datetime.now()-cur_time)
 print ('---------------')
