@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 import sys
 from datetime import datetime
-import regionmask
+#import regionmask
 
 
 # In[3]:
@@ -53,7 +53,7 @@ def us_land_bounds(dset):
     f_lon = dset.variables['flash_lon'][:]
     f_lat = dset.variables['flash_lat'][:]
     
-    mask_output = regionmask.defined_regions.natural_earth_v5_0_0.us_states_50.mask(lons,lats).values[0]
+    mask_output = regionmask.defined_regions.natural_earth_v5_0_0.us_states_50.mask(f_lon,f_lat).values[0]
     locs = np.where(mask_output>0)[0]
     
     return locs
@@ -69,13 +69,13 @@ def idx_finder(dset):
     ew_locs = east_west_line(dset)
     
     #Placeholder until I get regionmask figured out...
-    #tot_locs = np.arange(0,dset.dimensions['number_of_flashes'].size,1)
+    tot_locs = np.arange(0,dset.dimensions['number_of_flashes'].size,1)
     
     #My attempt at regionmask
-    us_land_locs = us_land_bounds(dset)
+    #us_land_locs = us_land_bounds(dset)
     
     #Finding the intersetction of all occurances
-    flash_locs = list(set.intersection(set(ew_locs),set(us_land_locs)))
+    flash_locs = list(set.intersection(set(ew_locs),set(tot_locs)))
     
     flash_fistart_flid = dset.variables['flash_fistart_flid'][flash_locs]
     event_fi_fl = dset.variables['event_fistart_flid'][:]

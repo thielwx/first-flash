@@ -64,14 +64,14 @@ def combined_idx_finder(g16_dset,g17_dset):
     
     #Putting the data into the dataframes
     d16 = {
-        'lats':g16_dset.variables['flash_lats'][:],
-        'lons':g16_dset.variables['flash_lons'][:],
+        'lats':g16_dset.variables['flash_lat'][:],
+        'lons':g16_dset.variables['flash_lon'][:],
         'idx':fi_fl16
     }
 
     d17 = {
-        'lats':g17_dset.variables['flash_lats'][:],
-        'lons':g17_dset.variables['flash_lons'][:],
+        'lats':g17_dset.variables['flash_lat'][:],
+        'lons':g17_dset.variables['flash_lon'][:],
         'idx':fi_fl17
     }
 
