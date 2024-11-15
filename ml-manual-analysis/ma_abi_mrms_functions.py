@@ -16,7 +16,8 @@ import satpy.modifiers.parallax as plax
 from pyproj import Proj
 from pyresample import SwathDefinition, kd_tree
 import geopandas as gpd
-
+import warnings
+warnings.filterwarnings('ignore') 
 
 #========================================================================
 # Takes in the glm ff times and gets the corresponding ABI file start times (pre0 and pre10)
@@ -113,6 +114,27 @@ def abi_file_loader(acha_file,cmip_file):
         cmip_lons = acha_lons[acha_var>0]
         cmip_lats = acha_lats[acha_var>0]
         acha_var = acha_var[acha_var>0]
+        
+    return cmip_lats, cmip_lons, acha_var, cmip_var
+
+def abi_file_loader_v2(acha_file,cmip_file):
+
+    #loading the cmip13 data
+    cmip_x, cmip_y, cmip_var, cmip_lons, cmip_lats = abi_importer(cmip_file, 'CMI', np.nan)
+    
+    #loading the acha data
+    acha_x, acha_y, acha_var, acha_lons, acha_lats = abi_importer(acha_file, 'HT', np.nan)        
+    
+    #If the CMIP and ACHA data are there, resampling the ACHA data to the CMIP 2km grid and use as a clear sky mask
+    #Resampling the ACHA the CMIP grid
+    acha_var = resample(acha_var, acha_lats, acha_lons, cmip_lats, cmip_lons)
+    #Appling a mask to the cmip data based on the acha data
+    cmip_var[np.isnan(acha_var)] = np.nan
+    #Flattening the arrays for the output
+    cmip_var = cmip_var[acha_var>0]
+    cmip_lats = cmip_lats[acha_var>0]
+    cmip_lons = cmip_lons[acha_var>0]
+    acha_var = acha_var[acha_var>0]
         
     return cmip_lats, cmip_lons, acha_var, cmip_var
 
@@ -262,7 +284,6 @@ def glm_ff_pts(hit, f_time, cur_lat, cur_lon):
 def abi_subset(abi_lats, abi_lons, acha_vals, cmip_vals, ff_lats, ff_lons, cur_lat, cur_lon):    
     #Parsing the points by space
     R = 6371.0087714 #Earths radius in km
-    print (abi_lats)
     if abi_lats[0]!=-999:
     
         #Setting up a dataframe to run the conus mask on the data
@@ -291,11 +312,12 @@ def abi_subset(abi_lats, abi_lons, acha_vals, cmip_vals, ff_lats, ff_lons, cur_l
             max_range = 20 #Range in km to search
 
             #Running the second ball tree to find points are <20 km a first flash point to exclude for later
-            idx = ball_tree_runner(ff_lats[i], ff_lons[i], abi_lats, abi_lons, 20)
+            idx = ball_tree_runner(ff_lats[i], ff_lons[i], abi_lats, abi_lons, max_range)
             idx_accumulator = np.append(idx_accumulator, idx, axis=0)
 
         if len(idx_accumulator)>0:
             #Removing the values within 20 km of the first flashes
+            idx_accumulator = idx_accumulator.astype('int')
             idx_removed = np.unique(idx_accumulator)
             abi_lats = np.delete(abi_lats, idx_removed)
             abi_lons = np.delete(abi_lons, idx_removed)
@@ -318,7 +340,7 @@ def abi_subset(abi_lats, abi_lons, acha_vals, cmip_vals, ff_lats, ff_lons, cur_l
         for i in range(len(r_lats)):
             #Ball tree to get the samples within 20 km of randomly sampled points
             idx = ball_tree_runner(r_lats[i], r_lons[i], abi_lats, abi_lons, 20)
-
+        
             #If no data in ball tree range OR the file is empty then set all to nans, if there's data, sample it!
             if (acha_vals[0] != -999) and (len(idx)!=0):
                 acha_max = np.nanmax(acha_vals[idx])
@@ -341,14 +363,13 @@ def abi_subset(abi_lats, abi_lons, acha_vals, cmip_vals, ff_lats, ff_lons, cur_l
 
         #Making a dictionary to pass everything cleanly later
         d = {
-            'CMIP_min': cmip_min,
-            'CMIP_05': cmip_05,
-            'ACHA_max': acha_max,
-            'ACHA_95': acha_95,
+            'CMIP_min': cmip_min_samples,
+            'CMIP_05': cmip_05_samples,
+            'ACHA_max': acha_max_samples,
+            'ACHA_95': acha_95_samples,
             'random_lat': r_lats,
             'random_lon': r_lons
         }
-
         df = pd.DataFrame(data=d)
     
     else:
@@ -387,8 +408,8 @@ def conus_mask(df):
     gdata.set_crs(epsg=4326, inplace=True)
 
     #Loading in the shapefile, setting the matching coordinate reference system, and creating a CONUS mask
-    #conus = gpd.read_file('../tl_2024_us_state/')
-    conus = gpd.read_file('../../../../git-thielwx/first-flash/tl_2024_us_state/') #DEVMODE
+    conus = gpd.read_file('../tl_2024_us_state/')
+    #conus = gpd.read_file('../../../../git-thielwx/first-flash/tl_2024_us_state/') #DEVMODE
     conus = conus.to_crs('EPSG:4326')
     notCONUS = ['Alaska', 'Hawaii', 'Puerto Rico', 'Commonwealth of the Northern Mariana Islands', 'Guam', 'United States Virgin Islands', 'American Samoa']
     mask = conus['NAME'].isin(notCONUS)
@@ -457,7 +478,7 @@ def MRMS_data_loader(time, fstring_start ,var):
         lon_data = [-999]
         data = [-999]
     else:
-        #This is what I call a pro-'gramer' move...loading the netcdfs while zipped on another machine
+        #This is what I call a 'pro-gamer' move...loading the netcdfs while zipped on another machine
         with gzip.open(file_locs[0]) as gz:
             with nc.Dataset('dummy', mode='r', memory=gz.read()) as dset:
                 #loading in the data from the MRMS netcdf file
@@ -490,6 +511,7 @@ def MRMS_data_loader(time, fstring_start ,var):
 #A function to find the maximum/95th percentile values within a specified range:
 def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
     dx = 0.5 #Search range in degrees (to cut down the amount of MRMS data we're searching)
+    max_range  = 20
     
     #Cutting down the mrms searchable data and converting lat/lon to radians
     mrms_locs = np.where((mrms_lons>=cur_fl_lon-dx) & (mrms_lons<=cur_fl_lon+dx) & (mrms_lats<=cur_fl_lat+dx) & (mrms_lats>=cur_fl_lat-dx))[0]
@@ -503,7 +525,7 @@ def mrms_max_finder(cur_fl_lat, cur_fl_lon, mrms_lats, mrms_lons, mrms_data):
         mrms_data_search = mrms_data[mrms_locs]
         
         #Run a ball tree to find the mrms points within 20 km of the current point
-        idx = ball_tree_runner(row['lat'], row['lon'], mrms_lats_cur, mrms_lons_cur, max_range)
+        idx = ball_tree_runner(cur_fl_lat, cur_fl_lon, mrms_lats_cur, mrms_lons_cur, max_range)
 
         if len(idx)==0:
             mrms_data_max = np.nan
@@ -537,7 +559,7 @@ def mrms_data_subset(mrms_lats, mrms_lons, mrms_data, random_df, var):
                 val_95[i] = np.nanpercentile(a=mrms_data[idx], q=95)
     
     #Placing the values in the dataframe
-    random_df[val+'_max'] = val_max
-    random_df[val+'_95'] = val_95
+    random_df[var+'_max'] = val_max
+    random_df[var+'_95'] = val_95
     
     return random_df
