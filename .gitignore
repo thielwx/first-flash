@@ -13,3 +13,5 @@ manual-analysis-v1/__pycache__/
 manual-analysis-v1/nohup.out
 ABI/__pycache__/
 ABI/nohup.out
+ml-manual-analysis/__pycache__/
+ml-manual-analysis/nohup.out
