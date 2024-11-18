@@ -104,9 +104,11 @@ def time_list_creator(f_datetime):
 
     #==== MRMS ====
     #Getting the time difference from the 10s place
-    dt_int = [int(t.strftime('%M'))%10 for t in f_datetime]
+    dt_int = np.array([int(t.strftime('%M'))%10 for t in f_datetime])
     #Changing those minutes greater than 5 so they default to 6 rather than 0
-    dt_int[dt_int>=6] = dt_int[dt_int>=6] % 6
+    idx = np.where(dt_int>=6)[0]
+    dt_int_new = dt_int[idx] % 6
+    dt_int[dt_int>=6] = dt_int_new
     #Getting the target file times from the most recent MRMS file
     file_times_mrms = [(f_datetime[i] - timedelta(minutes=int(dt_int[i]))).strftime('s%Y%j%H%M') for i in range(len(f_datetime))]
 
@@ -152,7 +154,7 @@ def df_saver(df, output_loc, case, fsave_str):
     '''
     Function saves the dataframe as a csv
     '''
-    save_loc = output_loc + '/' + case
+    save_loc = output_loc + '/' + case +'/'
     if not os.path.exists(save_loc):
         os.makedirs(save_loc)
     df.to_csv(save_loc+fsave_str)
@@ -178,17 +180,18 @@ def ff_driver(grid_df, case_df, file_timestamp):
 
     #Looping through the first flashes in the case and placing them into the dataframe
     for index, row in case_df.iterrows():
+        print (index)
         cur_tstamp = file_timestamp[index]
         cur_lat = row['lat']
         cur_lon = row['lon']
         cur_fistart_flid = row['fistart_flid']
 
         #Finding which index has a matching timestamp and is closest to the current point. 
-        idx = np.where(grid_df['timestamp']==cur_tstamp,
-                 grid_df['lat']>=cur_lat-dx,
-                 grid_df['lat']<cur_lat+dx,
-                 grid_df['lon']>=cur_lon-dx,
-                 grid_df['lon']<cur_lon+dx)[0]
+        idx = np.where((grid_df['timestamp']==cur_tstamp) &
+                 (grid_df['lat']>=cur_lat-dx) &
+                 (grid_df['lat']<cur_lat+dx) &
+                 (grid_df['lon']>=cur_lon-dx) &
+                 (grid_df['lon']<cur_lon+dx))[0]
         
         if len(idx) == 0:
             print ('ERROR: FIRST FLASH NOT PLACED ON GRID')

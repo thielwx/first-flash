@@ -50,7 +50,7 @@ with open(yaml_file, 'r') as f:
 cases = sfile['cases']
 
 #Reading in the manually analyzed first flash dataset 
-df = pd.read_csv(source_file, index_col=0)
+df = pd.read_csv(source_file)
 df = df.loc[df['ma_category']!='Miss'] #Subsetting for ONLY the hits/lates (ID'd as first flashes)
 df['file_datetime'] = [datetime.strptime(row['fstart'][0:15],'s%Y%j%H%M%S0') for index, row in df.iterrows()]
 
@@ -70,6 +70,7 @@ def driver_function(case):
 
     #Creating the gridded output dataframe that we'll fill with the ABI and MRMS data
     grid_df = mgr.df_creator(grid_lats, grid_lons, file_timestamp, case_df)
+    mgr.df_saver(grid_df, output_loc, case, fsave_str)
 
     #Placing the first flashes on the grid
     grid_df = mgr.ff_driver(grid_df, case_df, file_timestamp) 
