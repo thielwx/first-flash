@@ -17,6 +17,10 @@ import sys
 import multiprocessing as mp
 import os
 from glob import glob
+from sklearn.neighbors import BallTree
+import satpy.modifiers.parallax as plax
+from pyproj import Proj
+from pyresample import SwathDefinition, kd_tree
 
 #====================================================================
 # GENERAL USE FUNCTIONS
@@ -115,6 +119,7 @@ def time_list_creator(f_datetime):
 
     return file_timestamp, file_times_abi, file_times_mrms
 
+
 def df_creator(grid_lats, grid_lons, file_timestamp, case):
     '''
     Creates a dataframe for all unique timestamps with the available grid lats and lons
@@ -157,6 +162,15 @@ def df_saver(df, output_loc, case, fsave_str):
         os.makedirs(save_loc)
     df.to_csv(save_loc+fsave_str)
 
+
+def idx_finder(t_lat, t_lon, d_lats, d_lons):
+    dx = 0.1
+    idx = np.where((d_lats>=t_lat-dx)&
+             (d_lats<t_lat+dx)&
+             (d_lons>=t_lon-dx)&
+             (d_lats<t_lat+dx))[0]
+    return idx
+
 #====================================================================
 # FIRST FLASH FUNCTIONS
 #====================================================================
@@ -191,14 +205,14 @@ def ff_driver(grid_df, case_df, file_timestamp):
                  (grid_df['lon']<cur_lon+dx))[0]
         
         if len(idx) == 0:
-            print ('ERROR: FIRST FLASH NOT PLACED ON GRID')
+            print ('GLM FF ERROR: FIRST FLASH NOT PLACED ON GRID')
             print ('---'+cur_fistart_flid+'---')
             continue
         elif len(idx) == 1:
             grid_df.loc[idx[0],'ff_point'] = 1
             grid_df.loc[idx[0],'ff_fistart_flid'] = cur_fistart_flid
         else:
-            print ('ERROR: MORE THAN ONE POINT COINCIDES WITH FIRST FLASH')
+            print ('GLM FF ERROR: MORE THAN ONE POINT COINCIDES WITH FIRST FLASH')
             print ('---'+cur_fistart_flid+'---')
             continue
     
@@ -208,6 +222,178 @@ def ff_driver(grid_df, case_df, file_timestamp):
 #====================================================================
 # ABI FUNCTIONS
 #====================================================================
+
+def abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons):
+    '''
+    Main function that transforms the data
+    PARAMS:
+        grid_df
+        file_timestamp
+        file_times_abi
+    RETURNS:
+        grid_df
+    '''
+    #Adding the columns to the dataframe
+    grid_df['abi_cmip_min'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+    grid_df['abi_cmip_p05'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+    grid_df['abi_acha_max'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+    grid_df['abi_acha_p95'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+
+    #Getting the unique timestamps for all first flashes
+    ts_unique = np.unique(file_timestamp)
+
+    #Looping through each available timestep
+    for ts in ts_unique:
+        #Subsetting the abi file times to get the current one
+        idx = np.where(file_timestamp==ts)[0]
+        cur_abi_ftime = file_times_abi[idx][0]
+
+        #If the CMIP and ACHA data are available then grab it! If not we'll skip it
+        if (acha_file != 'MISSING') and (cmip_file != 'MISSING'):
+            #Getting the file strings from the file time
+            acha_file, cmip_file = abi_file_hunter(cur_abi_ftime)
+            #Loading the files
+            cmip_lats, cmip_lons, acha_var, cmip_var = abi_file_loader_v2(acha_file, cmip_file)
+            #Taking the data and placing it into the grid
+            grid_df = abi_sampler(grid_df, ts, cmip_lats, cmip_lons, acha_var, cmip_var, grid_lats, grid_lons)
+
+
+
+
+# A function that finds the abi file based on its time string
+def abi_file_hunter(abi_time_str):
+    #Turning the time string into a datetime object so we can get the date of the file
+    abi_file_datetime = datetime.strptime(abi_time_str, 's%Y%j%H%M')
+    y, m, d, doy, hr, mi = datetime_converter(abi_file_datetime)
+    
+    #Creating the file strings we'll put through glob
+    acha_loc = '/localdata/first-flash/data/ABI16-ACHAC/'+y+m+d+ '/*' + abi_time_str + '*'
+    cmip_loc = '/localdata/first-flash/data/ABI16-CMIPC13/'+y+m+d+ '/*' + abi_time_str + '*'
+    
+    #Finding the product files via glob
+    acha_file = glob(acha_loc)
+    cmip_file = glob(cmip_loc)
+
+    #Tagging the times where data is missing for later
+    if len(acha_file)<1:
+        print ('ACHA DATA MISSING')
+        print (acha_loc)
+        acha_file = ['MISSING']
+    if len(cmip_file)<1:
+        print ('CMIP DATA MISSING')
+        print (cmip_loc)
+        cmip_file = ['MISSING']     
+        
+    return acha_file[0], cmip_file[0]
+
+
+def abi_file_loader_v2(acha_file,cmip_file):
+
+    #loading the cmip13 data
+    cmip_x, cmip_y, cmip_var, cmip_lons, cmip_lats = abi_importer(cmip_file, 'CMI', np.nan)
+    
+    #loading the acha data
+    acha_x, acha_y, acha_var, acha_lons, acha_lats = abi_importer(acha_file, 'HT', np.nan)        
+    
+    #If the CMIP and ACHA data are there, resampling the ACHA data to the CMIP 2km grid and use as a clear sky mask
+    #Resampling the ACHA the CMIP grid
+    acha_var = resample(acha_var, acha_lats, acha_lons, cmip_lats, cmip_lons)
+    #Appling a mask to the cmip data based on the acha data
+    cmip_var[np.isnan(acha_var)] = np.nan
+    #Flattening the arrays for the output
+    cmip_var = cmip_var[acha_var>0]
+    cmip_lats = cmip_lats[acha_var>0]
+    cmip_lons = cmip_lons[acha_var>0]
+    acha_var = acha_var[acha_var>0]
+        
+    return cmip_lats, cmip_lons, acha_var, cmip_var
+
+
+#Short function to shorten abi_file_loader
+def abi_importer(file, var, fill_val):
+    dset = nc.Dataset(file, 'r')
+    x = dset.variables['x'][:]
+    y = dset.variables['y'][:]
+    var = np.ma.filled(dset.variables[var][:,:], fill_value=fill_val)
+    lons, lats = latlon(dset)
+    return x, y, var, lons, lats
+
+
+def resample(field, orig_lats, orig_lons, target_lats, target_lons):
+
+    #Creating the swath definitions
+    target_swath = SwathDefinition(lons=target_lons,lats=target_lats)
+    orig_swath = SwathDefinition(lons=orig_lons,lats=orig_lats)
+
+    #Resampling using a KD-tree to fit the data to a grid
+    output = kd_tree.resample_nearest(source_geo_def=orig_swath,
+                            data=field,
+                            target_geo_def=target_swath,
+                            radius_of_influence=4e4)
+    
+    output[output==0.] = np.nan
+    
+    return output
+
+
+#A function that takes in a netCDF Dataset and returns its x/y coordinates as as lon/lat
+def latlon(data):    
+    #Getting our variables from the netcdf file
+    sat_h = data.variables['goes_imager_projection'].perspective_point_height
+    sat_lon = data.variables['goes_imager_projection'].longitude_of_projection_origin
+    sat_sweep = data.variables['goes_imager_projection'].sweep_angle_axis
+    
+    X = data.variables['x'][:] * sat_h
+    Y = data.variables['y'][:] * sat_h
+
+    #Setting up our projections
+    p = Proj(proj='geos', h=sat_h, lon_0=sat_lon, sweep=sat_sweep)
+    YY, XX = np.meshgrid(Y, X)
+    lons, lats = p(XX, YY, inverse=True)
+    
+    #Cleaning up the data
+    lons[lons > 10000] = np.nan
+    lats[lats > 10000] = np.nan
+    lons[lons>180] = lons[lons>180] - 360
+    
+    return lons.T, lats.T
+
+def abi_sampler(grid_df, ts, cmip_lats, cmip_lons, acha_var, cmip_var, grid_lats, grid_lons):
+    #Looping through each lat/lon on the target grid
+    for t_lat, t_lon in zip(grid_lats, grid_lons):
+        #Getting the index
+        idx = idx_finder(t_lat, t_lon, cmip_lats, cmip_lons)
+        
+        #Fiding the index in the gridded dataset
+        idx_grid =  np.where((grid_df['lat']==t_lat) & (grid_df['lon']==t_lon) & (grid_df['timestamp']==ts))[0]
+        if len(idx_grid) == 0:
+            print('ABI ERROR: NO GRID POINT FOUND')
+            print (t_lat, t_lon)
+            continue
+        elif len(idx_grid) >1:
+            print('ABI ERROR: MILTIPLE GRID POINTS FOUND')
+            print (t_lat, t_lon)
+            continue
+        else:
+            idx_grid = idx_grid[0]
+
+        #If there's data sample it    
+        if len(idx)==0:
+            #Getting the appropriate samples and placing them into the dataset
+            grid_df.loc[idx_grid, 'abi_acha_max'] = np.nanmax(acha_var[idx])
+            grid_df.loc[idx_grid, 'abi_acha_p95'] = np.nanpercentile(a=acha_var[idx], q=95)
+            grid_df.loc[idx_grid, 'abi_cmip_min'] = np.nanmax(cmip_var[idx])
+            grid_df.loc[idx_grid, 'abi_cmip_p05'] = np.nanpercentile(a=cmip_var[idx], q=5)
+        #If there's no clouds in the scene, we'll return np.nan for now...
+        else:
+            grid_df.loc[idx_grid, 'abi_acha_max'] = np.nan
+            grid_df.loc[idx_grid, 'abi_acha_p95'] = np.nan
+            grid_df.loc[idx_grid, 'abi_cmip_min'] = np.nan
+            grid_df.loc[idx_grid, 'abi_cmip_p05'] = np.nan
+            
+    return grid_df
+
+
 
 
 #====================================================================
