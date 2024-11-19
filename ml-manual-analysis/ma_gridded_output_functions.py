@@ -438,9 +438,7 @@ def mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, 
             else:
                 grid_df = mrms_sampler(grid_df, ts, lat_data, lon_data, data, grid_lats, grid_lons, var)
 
-
-
-
+    return grid_df
 
 def mrms_data_loader(cur_mrms_ftime ,var):
     
@@ -520,6 +518,8 @@ def mrms_sampler(grid_df, ts, lat_data, lon_data, data, grid_lats, grid_lons, va
         else:
             grid_df.loc[idx_grid, var+'_max'] = 0.
             grid_df.loc[idx_grid, var+'_p95'] = 0.
+
+    return grid_df
         
 
 #====================================================================
