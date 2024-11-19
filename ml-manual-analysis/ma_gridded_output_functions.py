@@ -49,7 +49,8 @@ def grid_maker(case, sfile, dx):
 
     #Finding the grid points within the case domains and subsetting the flattened arrays
     idx = np.where((lats_flat>=sfile[case]['lr_lat'])&(lats_flat<=sfile[case]['ul_lat'])&
-                   (lons_flat>=sfile[case]['lr_lon'])&(lons_flat<=sfile[case]['ul_lon']))[0]
+                   (lons_flat<=sfile[case]['lr_lon'])&(lons_flat>=sfile[case]['ul_lon']))[0]
+
     lats_output = lats_flat[idx]
     lons_output = lons_flat[idx]
 
@@ -114,7 +115,7 @@ def time_list_creator(f_datetime):
 
     return file_timestamp, file_times_abi, file_times_mrms
 
-def df_creator(grid_lats, grid_lons, file_timestamp, case_df):
+def df_creator(grid_lats, grid_lons, file_timestamp, case):
     '''
     Creates a dataframe for all unique timestamps with the available grid lats and lons
     PARAMS:
@@ -129,15 +130,12 @@ def df_creator(grid_lats, grid_lons, file_timestamp, case_df):
     ts_unique = np.unique(file_timestamp)
 
     #Creating looped versions of the lats/lons and case names for each unique timestamp
-    grid_lats_looped = [grid_lats for i in range(len(ts_unique))]
-    grid_lons_looped = [grid_lons for i in range(len(ts_unique))]
-    case_looped = [case_df['case'].to_list() for i in range(len(ts_unique))]
+    grid_lats_looped = [grid_lats[i] for j in ts_unique for i in range(len(grid_lats))]
+    grid_lons_looped = [grid_lons[i] for j in ts_unique for i in range(len(grid_lons))]
+    case_looped = [case for j in ts_unique for i in range(len(grid_lons))]
 
     #Creating looped versions of the timestamps that match each lat/lon combination
-    ts_looped = []
-    for ts in ts_unique:
-        ts_new_loop = [ts for i in range(len(grid_lats))]
-        ts_looped.append(ts_new_loop)
+    ts_looped = [ts for ts in ts_unique for i in grid_lats]
 
     #Creating the dataframe which will hold the gridded data
     d = {
@@ -180,7 +178,6 @@ def ff_driver(grid_df, case_df, file_timestamp):
 
     #Looping through the first flashes in the case and placing them into the dataframe
     for index, row in case_df.iterrows():
-        print (index)
         cur_tstamp = file_timestamp[index]
         cur_lat = row['lat']
         cur_lon = row['lon']
@@ -198,8 +195,8 @@ def ff_driver(grid_df, case_df, file_timestamp):
             print ('---'+cur_fistart_flid+'---')
             continue
         elif len(idx) == 1:
-            grid_df[idx[0],'ff_point'] = 1
-            grid_df[idx[0],'ff_fistart_flid'] = cur_fistart_flid
+            grid_df.loc[idx[0],'ff_point'] = 1
+            grid_df.loc[idx[0],'ff_fistart_flid'] = cur_fistart_flid
         else:
             print ('ERROR: MORE THAN ONE POINT COINCIDES WITH FIRST FLASH')
             print ('---'+cur_fistart_flid+'---')

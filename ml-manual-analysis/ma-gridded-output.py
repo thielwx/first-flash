@@ -69,7 +69,7 @@ def driver_function(case):
     grid_lats, grid_lons = mgr.grid_maker(case, sfile, 0.2)
 
     #Creating the gridded output dataframe that we'll fill with the ABI and MRMS data
-    grid_df = mgr.df_creator(grid_lats, grid_lons, file_timestamp, case_df)
+    grid_df = mgr.df_creator(grid_lats, grid_lons, file_timestamp, case)
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
 
     #Placing the first flashes on the grid
