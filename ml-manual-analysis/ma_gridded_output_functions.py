@@ -21,6 +21,7 @@ from sklearn.neighbors import BallTree
 import satpy.modifiers.parallax as plax
 from pyproj import Proj
 from pyresample import SwathDefinition, kd_tree
+import gzip
 
 #====================================================================
 # GENERAL USE FUNCTIONS
@@ -115,7 +116,7 @@ def time_list_creator(f_datetime):
     dt_int_new = dt_int[idx] % 6
     dt_int[dt_int>=6] = dt_int_new
     #Getting the target file times from the most recent MRMS file
-    file_times_mrms = [(f_datetime[i] - timedelta(minutes=int(dt_int[i]))).strftime('s%Y%j%H%M') for i in range(len(f_datetime))]
+    file_times_mrms = [(f_datetime[i] - timedelta(minutes=int(dt_int[i]))).strftime('%Y%m%d-%H%M') for i in range(len(f_datetime))]
 
     return file_timestamp, file_times_abi, file_times_mrms
 
@@ -230,6 +231,8 @@ def abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons):
         grid_df
         file_timestamp
         file_times_abi
+        grid_lats
+        grid_lons
     RETURNS:
         grid_df
     '''
@@ -366,6 +369,10 @@ def latlon(data):
 def abi_sampler(grid_df, ts, cmip_lats, cmip_lons, acha_var, cmip_var, grid_lats, grid_lons):
     #Looping through each lat/lon on the target grid
     for t_lat, t_lon in zip(grid_lats, grid_lons):
+        #Applying parallax correction
+        cmip_lons, cmip_lats = plax.get_parallax_corrected_lonlats(sat_lon=-75.0, sat_lat=0.0, sat_alt=35786023.0,
+                                                lon=cmip_lons, lat=cmip_lats, height=acha_var)
+
         #Getting the index
         idx = idx_finder(t_lat, t_lon, cmip_lats, cmip_lons)
         
@@ -404,8 +411,116 @@ def abi_sampler(grid_df, ts, cmip_lats, cmip_lons, acha_var, cmip_var, grid_lats
 #====================================================================
 # MRMS FUNCTIONS
 #====================================================================
-def mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons):
+def mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, mrms_vars):
+    #Looping through each mrms variable
+    for var in mrms_vars:
+        #Creating the columns that we'll fill with data
+        grid_df[var+'_max'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+        grid_df[var+'_p95'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+        
+        #Getting the unique timestamps for all first flashes
+        ts_unique = np.unique(file_timestamp)
+
+        #Looping through each available timestep
+        for ts in ts_unique[:1]:
+            #Subsetting the mrms file times to get the current one
+            idx = np.where(np.array(file_timestamp)==ts)[0]
+            idx = idx[0]
+            cur_mrms_ftime = file_times_mrms[idx]
+
+            #Loading the MRMS data
+            lat_data, lon_data, data = mrms_data_loader(cur_mrms_ftime, var)
+
+            #If the file isn't found skip it
+            if data[0]==-999:
+                continue
+            #If not then fit to the grid
+            else:
+                grid_df = mrms_sampler(grid_df, ts, lat_data, lon_data, data, grid_lats, grid_lons, var)
+
+
+
+
+
+def mrms_data_loader(cur_mrms_ftime ,var):
     
+    #Using the current time and variable to get the MRMS file we need
+    fstring_start = '/raid/swat_archive/vmrms/CONUS/'+cur_mrms_ftime[:8]+'/multi/'
+    file_str = fstring_start+var+'/00.50/'+cur_mrms_ftime+'*.netcdf.gz'
+    
+    #Searching for the file
+    file_locs = glob(file_str)
+    if len(file_locs)==0:
+        print ('MRMS ERROR: File not found '+var)
+        print (file_str)
+        lat_data = [-999]
+        lon_data = [-999]
+        data = [-999]
+    elif len(file_locs)>1:
+        print ('MRMS ERROR: More than one file found '+var)
+        lat_data = [-999]
+        lon_data = [-999]
+        data = [-999]
+    else:
+        #This is what I call a 'pro-gamer' move...loading the netcdfs while zipped on another machine
+        with gzip.open(file_locs[0]) as gz:
+            with nc.Dataset('dummy', mode='r', memory=gz.read()) as dset:
+                #loading in the data from the MRMS netcdf file
+                x_pix = dset.variables['pixel_x'][:] #Pixel locations (indicies) for LATITUDE
+                y_pix = dset.variables['pixel_y'][:] #Pixel locations (indicies) for LONGITUDE
+                data = dset.variables[var][:]
+
+                u_lat = dset.Latitude #Upper-most latitude
+                l_lon = dset.Longitude #Left-most longitude
+
+                #Creating the arrays for the lat and lon coordinates
+                y = dset.dimensions['Lat'].size #3500
+                x = dset.dimensions['Lon'].size #7000
+                lat = np.arange(u_lat, u_lat-(y*0.01),-0.01) #Going from upper to lower
+                lon = np.arange(l_lon, l_lon+(x*0.01),0.01) #Going from left to right
+
+                #Using the pixel indicides to get the pixel latitudes and longitudes
+                lat_data = lat[x_pix] #Remember x_pixel represents LATITUDE
+                lon_data = lon[y_pix] #Remember y_pixel represent LONGITUDE
+                
+                #Removing any false data (less data to process)
+                locs = np.where((data>0))[0]
+                lon_data = lon_data[locs]
+                lat_data = lat_data[locs]
+                data = data[locs]
+
+    return lat_data, lon_data, data       
+
+def mrms_sampler(grid_df, ts, lat_data, lon_data, data, grid_lats, grid_lons, var):
+    #Looping through each lat/lon on the target grid
+    for t_lat, t_lon in zip(grid_lats, grid_lons):
+        #Getting the index
+        idx = idx_finder(t_lat, t_lon, lat_data, lon_data)
+        
+        #Fiding the index in the gridded dataset
+        idx_grid =  np.where((grid_df['lat']==t_lat) & (grid_df['lon']==t_lon) & (grid_df['timestamp']==ts))[0]
+        if len(idx_grid) == 0:
+            print('MRMS ERROR: NO GRID POINT FOUND')
+            print (t_lat, t_lon)
+            continue
+        elif len(idx_grid) >1:
+            print('MRMS ERROR: MILTIPLE GRID POINTS FOUND')
+            print (t_lat, t_lon)
+            continue
+        else:
+            idx_grid = idx_grid[0]
+
+        #If there's data sample it    
+        if len(idx)>0:
+            #Getting the appropriate samples and placing them into the dataset
+            grid_df.loc[idx_grid, var+'_max'] = np.nanmax(data[idx])
+            grid_df.loc[idx_grid, var+'_p95'] = np.nanpercentile(a=data[idx], q=95)
+
+        #If there's no data in the scene, we'll return 0. for now...
+        else:
+            grid_df.loc[idx_grid, var+'_max'] = 0.
+            grid_df.loc[idx_grid, var+'_p95'] = 0.
+        
 
 #====================================================================
 # GLM FUNCTIONS

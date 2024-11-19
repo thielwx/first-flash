@@ -79,12 +79,16 @@ def driver_function(case):
     print (str(case)+': First Flashes Collected')
 
     #Calling the functions that process the data for each step
+    #abi_driver
     grid_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
     print (str(case)+': ABI Data Collected')
 
     #mrms_driver()
-    mgr.mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons)
+    grid_df = mgr.mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, mrms_variables)
+    mgr.df_saver(grid_df, output_loc, case, fsave_str)
+    print (str(case)+': MRMS Data Collected')
+
     #glm_driver()
 
 
