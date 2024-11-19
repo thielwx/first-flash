@@ -168,7 +168,7 @@ def idx_finder(t_lat, t_lon, d_lats, d_lons):
     idx = np.where((d_lats>=t_lat-dx)&
              (d_lats<t_lat+dx)&
              (d_lons>=t_lon-dx)&
-             (d_lats<t_lat+dx))[0]
+             (d_lons<t_lon+dx))[0]
     return idx
 
 #====================================================================
@@ -243,19 +243,23 @@ def abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons):
     ts_unique = np.unique(file_timestamp)
 
     #Looping through each available timestep
-    for ts in ts_unique:
+    for ts in ts_unique[:1]:
         #Subsetting the abi file times to get the current one
-        idx = np.where(file_timestamp==ts)[0]
-        cur_abi_ftime = file_times_abi[idx][0]
+        idx = np.where(np.array(file_timestamp)==ts)[0]
+        idx = idx[0]
+        cur_abi_ftime = file_times_abi[idx]
+        
+        #Getting the file strings from the file time
+        acha_file, cmip_file = abi_file_hunter(cur_abi_ftime)
 
         #If the CMIP and ACHA data are available then grab it! If not we'll skip it
         if (acha_file != 'MISSING') and (cmip_file != 'MISSING'):
-            #Getting the file strings from the file time
-            acha_file, cmip_file = abi_file_hunter(cur_abi_ftime)
             #Loading the files
             cmip_lats, cmip_lons, acha_var, cmip_var = abi_file_loader_v2(acha_file, cmip_file)
             #Taking the data and placing it into the grid
             grid_df = abi_sampler(grid_df, ts, cmip_lats, cmip_lons, acha_var, cmip_var, grid_lats, grid_lons)
+    
+    return grid_df
 
 
 
@@ -316,6 +320,7 @@ def abi_importer(file, var, fill_val):
     y = dset.variables['y'][:]
     var = np.ma.filled(dset.variables[var][:,:], fill_value=fill_val)
     lons, lats = latlon(dset)
+    dset.close()
     return x, y, var, lons, lats
 
 
@@ -378,7 +383,7 @@ def abi_sampler(grid_df, ts, cmip_lats, cmip_lons, acha_var, cmip_var, grid_lats
             idx_grid = idx_grid[0]
 
         #If there's data sample it    
-        if len(idx)==0:
+        if len(idx)>0:
             #Getting the appropriate samples and placing them into the dataset
             grid_df.loc[idx_grid, 'abi_acha_max'] = np.nanmax(acha_var[idx])
             grid_df.loc[idx_grid, 'abi_acha_p95'] = np.nanpercentile(a=acha_var[idx], q=95)
@@ -399,7 +404,8 @@ def abi_sampler(grid_df, ts, cmip_lats, cmip_lons, acha_var, cmip_var, grid_lats
 #====================================================================
 # MRMS FUNCTIONS
 #====================================================================
-
+def mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons):
+    
 
 #====================================================================
 # GLM FUNCTIONS

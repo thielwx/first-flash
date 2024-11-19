@@ -39,7 +39,8 @@ ma_variables = ['ma_category', 'ma_convective_core']
 glm_variables = ['num_glm16_flashes']
 
 #Getting the file save time
-y, m, d, doy, hr, mi = mgr.datetime_converter(datetime.now())
+dt_now = datetime.now()
+y, m, d, doy, hr, mi = mgr.datetime_converter(dt_now)
 fsave_str = 'ma-grids-v1-ABI-MRMS-GLM-'+y+m+d+hr+mi+'.csv'
 
 #Loading in the yaml file with the case settings
@@ -75,13 +76,15 @@ def driver_function(case):
     #Placing the first flashes on the grid
     grid_df = mgr.ff_driver(grid_df, case_df, file_timestamp) 
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
-    
+    print (str(case)+': First Flashes Collected')
+
     #Calling the functions that process the data for each step
-    case_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
+    grid_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
+    print (str(case)+': ABI Data Collected')
 
     #mrms_driver()
-
+    mgr.mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons)
     #glm_driver()
 
 
@@ -92,4 +95,5 @@ if __name__ == "__main__":
         p.close()
         p.join()
 
+print ('Total Runtime: '+ str(datetime.now()-dt_now))
 
