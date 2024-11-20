@@ -526,3 +526,81 @@ def mrms_sampler(grid_df, ts, lat_data, lon_data, data, grid_lats, grid_lons, va
 #====================================================================
 # GLM FUNCTIONS
 #====================================================================
+
+def glm_driver(grid_df, file_timestamp, grid_lats, grid_lons, all_flash_file):
+    '''
+    Getting the number of GLM flashes that occurred within the grid cell in the previous 20 minutes
+    PARAMS:
+        grid_df
+        file_timestamp
+        grid_lats
+        grid_lons
+        all_flash_file
+    RETURNS:
+        grid_df
+    '''
+    #Reading in the cases all flash file
+    all_flash_df = read_all_flash_file(all_flash_file)
+
+    #Adding the number of GLM flashes as a variable
+    grid_df['glm_number_flashes_pre20'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+    grid_df['glm_number_flashes_pre05'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+
+    #Getting the unique timestamps for all first flashes
+    ts_unique = np.unique(file_timestamp)
+
+    #Looping through each available timestep
+    for ts in ts_unique[:]:
+        #Turning the current timestep into a datetime object
+        ts_datetime = datetime.strptime(ts,'%Y%m%d-%H%M')
+
+        #Putting the glm flash counts into the grid
+        grid_df = glm_sampler(grid_df, all_flash_df, grid_lats, grid_lons, ts_datetime, ts)
+
+    return grid_df
+
+
+def read_all_flash_file(all_flash_file):
+    #Reading in the first flash data
+    file_loc = '/localdata/first-flash/data/GLM16-cases-allflash/'
+    all_flash_df = pd.read_csv(file_loc+all_flash_file, index_col=0)
+    #Converting the start time to a datetime object
+    all_flash_df['start_time'] = pd.to_datetime(all_flash_df['start_time'])
+
+    return all_flash_df
+
+
+def glm_sampler(grid_df, all_flash_df, grid_lats, grid_lons, ts_datetime, ts):
+    #Setting the timedeltas
+    dt_20 = timedelta(minutes=20)
+    dt_05 = timedelta(minutes=5)
+
+    #Subsetting the all flash dataframes for the previous 20 and 5 minutes
+    all_flash_df_pre05 = all_flash_df.loc[(all_flash_df['start_time']>=ts_datetime-dt_05)&(all_flash_df['start_time']<ts_datetime)]
+    all_flash_df_pre20 = all_flash_df.loc[(all_flash_df['start_time']>=ts_datetime-dt_20)&(all_flash_df['start_time']<ts_datetime)]
+
+    #Looping through each lat/lon on the target grid
+    for t_lat, t_lon in zip(grid_lats, grid_lons):
+
+        #Fiding the index in the gridded dataset
+        idx_grid =  np.where((grid_df['lat']==t_lat) & (grid_df['lon']==t_lon) & (grid_df['timestamp']==ts))[0]
+        if len(idx_grid) == 0:
+            print('GLM ERROR: NO GRID POINT FOUND')
+            print (t_lat, t_lon)
+            continue
+        elif len(idx_grid) >1:
+            print('GLM ERROR: MILTIPLE GRID POINTS FOUND')
+            print (t_lat, t_lon)
+            continue
+        else:
+            idx_grid = idx_grid[0]
+
+        #Getting the index for the values in the last 5 and 20 minutes
+        idx_pre20 = idx_finder(t_lat, t_lon, all_flash_df_pre20['lat'].to_list(), all_flash_df_pre20['lon'].to_list())
+        idx_pre05 = idx_finder(t_lat, t_lon, all_flash_df_pre05['lat'].to_list(), all_flash_df_pre05['lon'].to_list())
+
+        #Getting the number of GLM flashes and placing them into the grid
+        grid_df.loc[idx_grid,'glm_number_flashes_pre20'] = len(idx_pre20)
+        grid_df.loc[idx_grid,'glm_number_flashes_pre05'] = len(idx_pre05)
+
+    return grid_df

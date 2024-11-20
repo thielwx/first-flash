@@ -79,8 +79,8 @@ def driver_function(case):
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
     print (str(case)+': First Flashes Collected')
 
-    # #Calling the functions that process the data for each step
-    # #abi_driver
+    #Calling the functions that process the data for each step
+    #abi_driver
     grid_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
     print (str(case)+': ABI Data Collected')
@@ -91,12 +91,15 @@ def driver_function(case):
     print (str(case)+': MRMS Data Collected')
 
     #glm_driver()
+    grid_df = mgr.glm_driver(grid_df, file_timestamp, grid_lats, grid_lons, sfile[case]['glm16_all'])
+    mgr.df_saver(grid_df, output_loc, case, fsave_str)
+    print (str(case)+': GLM Data Collected')
 
 
 #Starting the multiprocessing by calling the driver function for each case
 if __name__ == "__main__":
     with mp.Pool(12) as p:
-        p.starmap(driver_function,zip(cases[0:1]))
+        p.starmap(driver_function,zip(cases[:]))
         p.close()
         p.join()
 
