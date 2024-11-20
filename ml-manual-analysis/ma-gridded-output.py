@@ -64,8 +64,9 @@ def driver_function(case):
     case_df = df.loc[df['case']==case]
 
     #Creating a list of times per first flash to use for a dataframe
-    file_timestamp, file_times_abi, file_times_mrms = mgr.time_list_creator(df['file_datetime'].to_list())
-    
+    file_timestamp, file_times_abi, file_times_mrms = mgr.time_list_creator(case_df['file_datetime'].to_list())
+    case_df['file_timestamp'] = file_timestamp
+
     #Creating the lat/lon grid for the case
     grid_lats, grid_lons = mgr.grid_maker(case, sfile, 0.2)
 
@@ -78,13 +79,13 @@ def driver_function(case):
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
     print (str(case)+': First Flashes Collected')
 
-    #Calling the functions that process the data for each step
-    #abi_driver
+    # #Calling the functions that process the data for each step
+    # #abi_driver
     grid_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
     print (str(case)+': ABI Data Collected')
 
-    #mrms_driver()
+    # #mrms_driver()
     grid_df = mgr.mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, mrms_variables)
     mgr.df_saver(grid_df, output_loc, case, fsave_str)
     print (str(case)+': MRMS Data Collected')

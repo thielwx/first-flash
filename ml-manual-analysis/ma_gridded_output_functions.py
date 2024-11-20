@@ -98,7 +98,7 @@ def time_list_creator(f_datetime):
     #Getting the time difference from the 0 and 5 ones place
     dt_int = np.array([int(t.strftime('%M'))%5 for t in f_datetime])
     #Getting the target file times from the most recent ABI file
-    file_timestamp = [(f_datetime[i] - timedelta(minutes=int(dt_int[i]))).strftime('s%Y%j%H%M') for i in range(len(f_datetime))]
+    file_timestamp = [(f_datetime[i] - timedelta(minutes=int(dt_int[i]))).strftime('%Y%m%d-%H%M') for i in range(len(f_datetime))]
 
     #==== ABI ====
     #Getting the time difference from the 0 and 5 ones place
@@ -193,7 +193,7 @@ def ff_driver(grid_df, case_df, file_timestamp):
 
     #Looping through the first flashes in the case and placing them into the dataframe
     for index, row in case_df.iterrows():
-        cur_tstamp = file_timestamp[index]
+        cur_tstamp = row['file_timestamp']
         cur_lat = row['lat']
         cur_lon = row['lon']
         cur_fistart_flid = row['fistart_flid']
@@ -246,7 +246,7 @@ def abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons):
     ts_unique = np.unique(file_timestamp)
 
     #Looping through each available timestep
-    for ts in ts_unique[:1]:
+    for ts in ts_unique[:]:
         #Subsetting the abi file times to get the current one
         idx = np.where(np.array(file_timestamp)==ts)[0]
         idx = idx[0]
@@ -367,11 +367,11 @@ def latlon(data):
     return lons.T, lats.T
 
 def abi_sampler(grid_df, ts, cmip_lats, cmip_lons, acha_var, cmip_var, grid_lats, grid_lons):
+    #Applying parallax correction
+    cmip_lons, cmip_lats = plax.get_parallax_corrected_lonlats(sat_lon=-75.0, sat_lat=0.0, sat_alt=35786023.0,
+                                            lon=cmip_lons, lat=cmip_lats, height=acha_var)
     #Looping through each lat/lon on the target grid
     for t_lat, t_lon in zip(grid_lats, grid_lons):
-        #Applying parallax correction
-        cmip_lons, cmip_lats = plax.get_parallax_corrected_lonlats(sat_lon=-75.0, sat_lat=0.0, sat_alt=35786023.0,
-                                                lon=cmip_lons, lat=cmip_lats, height=acha_var)
 
         #Getting the index
         idx = idx_finder(t_lat, t_lon, cmip_lats, cmip_lons)
@@ -422,7 +422,7 @@ def mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, 
         ts_unique = np.unique(file_timestamp)
 
         #Looping through each available timestep
-        for ts in ts_unique[:1]:
+        for ts in ts_unique[:]:
             #Subsetting the mrms file times to get the current one
             idx = np.where(np.array(file_timestamp)==ts)[0]
             idx = idx[0]
@@ -518,6 +518,7 @@ def mrms_sampler(grid_df, ts, lat_data, lon_data, data, grid_lats, grid_lons, va
         else:
             grid_df.loc[idx_grid, var+'_max'] = 0.
             grid_df.loc[idx_grid, var+'_p95'] = 0.
+
 
     return grid_df
         
