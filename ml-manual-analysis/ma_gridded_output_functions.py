@@ -220,6 +220,9 @@ def ff_driver(grid_df, case_df, file_timestamp):
     return grid_df
 
 
+    
+
+
 #====================================================================
 # ABI FUNCTIONS
 #====================================================================
@@ -264,7 +267,49 @@ def abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons):
     
     return grid_df
 
+def ff_driver_v2(grid_df, case_df, file_timestamp, dx):
+    '''
+    Takes all of the first flashes and places them on the target grid
+    PARAMS:
+        grid_df
+        case_df
+        file_timestamp
+    RETURNS:
+        grid_df
+    '''
+    dx /= 2.
+    #Adding new column to grid dataframe
+    grid_df['ff_point'] = pd.Series(data=(np.ones(grid_df.shape[0]) * 0), dtype=int)
+    grid_df['ff_fistart_flid'] = pd.Series(dtype=str)
 
+    #Looping through the first flashes in the case and placing them into the dataframe
+    for index, row in case_df.iterrows():
+        cur_tstamp = row['file_timestamp']
+        cur_lat = row['lat']
+        cur_lon = row['lon']
+        cur_fistart_flid = row['fistart_flid']
+        cur_tstamp_dt = row['file_timestamp_dt']
+
+        #Finding which index has a matching timestamp and is closest to the current point. 
+        idx = np.where((grid_df['timestamp']==cur_tstamp) &
+                 (grid_df['lat']>=cur_lat-dx) &
+                 (grid_df['lat']<cur_lat+dx) &
+                 (grid_df['lon']>=cur_lon-dx) &
+                 (grid_df['lon']<cur_lon+dx))[0]
+        
+        if len(idx) == 0:
+            print ('GLM FF ERROR: FIRST FLASH NOT PLACED ON GRID')
+            print ('---'+cur_fistart_flid+'---')
+            continue
+        elif len(idx) == 1:
+            grid_df.loc[idx[0],'ff_point'] = 1
+            grid_df.loc[idx[0],'ff_fistart_flid'] = cur_fistart_flid
+        else:
+            print ('GLM FF ERROR: MORE THAN ONE POINT COINCIDES WITH FIRST FLASH')
+            print ('---'+cur_fistart_flid+'---')
+            continue
+    
+    return grid_df
 
 
 # A function that finds the abi file based on its time string
