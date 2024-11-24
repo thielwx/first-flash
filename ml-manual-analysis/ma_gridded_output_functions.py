@@ -219,8 +219,75 @@ def ff_driver(grid_df, case_df, file_timestamp):
     
     return grid_df
 
+def tstamp_converter(cur_tstamp):
+    '''
+    Taking the current tstamp (str) and getting the previous 15 mintues of timestamps
+    PARAMS:
+        cur_tstamp (str)
+    RETURNS:
+        tstamps (list of strings)
+    '''
+    #List of ints to interate through as a timedelta
+    dt_int = np.arange(5,20,5)
 
+    #Creating the list we'll append to
+    tstamps = [cur_tstamp]
+
+    for t in dt_int:
+        dt = timedelta(minutes=t)
+        cur_dt = datetime.strptime(cur_tstamp, '%Y%m%d-%H%M')
+        new_tstamp = datetime.strftime(cur_dt-dt, '%Y%m%d-%H%M')
+        tstamps = np.append(tstamps,new_tstamp)
+
+    return tstamps
+
+def ff_driver_v2(grid_df, case_df, file_timestamp):
+    '''
+    Takes all of the first flashes and places them on the target grid
+    PARAMS:
+        grid_df
+        case_df
+        file_timestamp
+    RETURNS:
+        grid_df
+    '''
+    dx = 0.1
+    #Adding new column to grid dataframe
+    grid_df['ff_point'] = pd.Series(data=(np.ones(grid_df.shape[0]) * 0), dtype=int)
+    grid_df['ff_fistart_flid'] = pd.Series(dtype=str)
+
+    #Looping through the first flashes in the case and placing them into the dataframe
+    for index, row in case_df.iterrows():
+        cur_tstamp = row['file_timestamp']
+        cur_lat = row['lat']
+        cur_lon = row['lon']
+        cur_fistart_flid = row['fistart_flid']
+
+        #Taking the current timestamp and getting the timestamps 5, 10, and 15 minutes before
+        tstamps = tstamp_converter(cur_tstamp)
+
+        #Finding which index has a matching timestamp and is closest to the current point. 
+        idx = np.where(((grid_df['timestamp']==tstamps[0])|(grid_df['timestamp']==tstamps[1])|(grid_df['timestamp']==tstamps[2])|(grid_df['timestamp']==tstamps[3])) &
+                 (grid_df['lat']>=cur_lat-dx) &
+                 (grid_df['lat']<cur_lat+dx) &
+                 (grid_df['lon']>=cur_lon-dx) &
+                 (grid_df['lon']<cur_lon+dx))[0]
+        
+        if len(idx) < 3:
+            print ('GLM FF ERROR: FIRST FLASHES NOT PLACED ON GRID')
+            print ('---'+cur_fistart_flid+'---')
+            continue
+        elif len(idx) == 3:
+            for i in idx:
+                grid_df.loc[idx[i],'ff_point'] = 1
+                grid_df.loc[idx[i],'ff_fistart_flid'] = cur_fistart_flid
+        else:
+            print ('GLM FF ERROR: MORE THAN THREE POINTS COINCIDES WITH FIRST FLASH')
+            print ('---'+cur_fistart_flid+'---')
+            continue
     
+    return grid_df
+
 
 
 #====================================================================
