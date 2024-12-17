@@ -6,6 +6,7 @@
 # ABI, MRMS, GLM, and mesoA (eventaully) added
 # Author: Kevin Thiel
 # Created: November 2024
+# 20241216: Update made to include next twenty minutes of GLM flashes
 # ====================================================
 
 # Process:
@@ -41,7 +42,7 @@ glm_variables = ['num_glm16_flashes']
 #Getting the file save time
 dt_now = datetime.now()
 y, m, d, doy, hr, mi = mgr.datetime_converter(dt_now)
-fsave_str = 'ma-grids-v1-ABI-MRMS-GLM-'+y+m+d+hr+mi+'.csv'
+fsave_str = 'ma-grids-v3-ABI-MRMS-GLM-'+y+m+d+hr+mi+'.csv'
 
 #Loading in the yaml file with the case settings
 with open(yaml_file, 'r') as f:
@@ -82,34 +83,34 @@ def driver_function(case):
 
     #Creating the gridded output dataframe that we'll fill with the ABI and MRMS data
     grid_df = mgr.df_creator(grid_lats, grid_lons, file_timestamp, case)
-    mgr.df_saver(grid_df, output_loc, case, fsave_str)
+    mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
 
-    #Placing the first flashes on the grid
-    grid_df = mgr.ff_driver_v2(grid_df, case_df, file_timestamp) 
-    mgr.df_saver(grid_df, output_loc, case, fsave_str)
-    print (str(case)+': First Flashes Collected')
+    # #Placing the first flashes on the grid
+    # grid_df = mgr.ff_driver_v2(grid_df, case_df, file_timestamp) 
+    # mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
+    # print (str(case)+': First Flashes Collected')
 
-    #Calling the functions that process the data for each step
-    #abi_driver
-    grid_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
-    mgr.df_saver(grid_df, output_loc, case, fsave_str)
-    print (str(case)+': ABI Data Collected')
+    # #Calling the functions that process the data for each step
+    # #abi_driver
+    # grid_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
+    # mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
+    # print (str(case)+': ABI Data Collected')
 
-    #mrms_driver()
-    grid_df = mgr.mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, mrms_variables)
-    mgr.df_saver(grid_df, output_loc, case, fsave_str)
-    print (str(case)+': MRMS Data Collected')
+    # #mrms_driver()
+    # grid_df = mgr.mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, mrms_variables)
+    # mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
+    # print (str(case)+': MRMS Data Collected')
 
     #glm_driver()
     grid_df = mgr.glm_driver(grid_df, file_timestamp, grid_lats, grid_lons, sfile[case]['glm16_all'])
-    mgr.df_saver(grid_df, output_loc, case, fsave_str)
+    mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
     print (str(case)+': GLM Data Collected')
 
 
 #Starting the multiprocessing by calling the driver function for each case
 if __name__ == "__main__":
     with mp.Pool(12) as p:
-        p.starmap(driver_function,zip(cases[:]))
+        p.starmap(driver_function,zip(cases[:1]))
         p.close()
         p.join()
 

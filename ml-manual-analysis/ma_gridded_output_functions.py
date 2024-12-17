@@ -612,6 +612,7 @@ def glm_driver(grid_df, file_timestamp, grid_lats, grid_lons, all_flash_file):
     #Adding the number of GLM flashes as a variable
     grid_df['glm_number_flashes_pre20'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
     grid_df['glm_number_flashes_pre05'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
+    grid_df['glm_number_flashes_next20'] = pd.Series(data=(np.ones(grid_df.shape[0]) * -999.), dtype=float)
 
     #Getting the unique timestamps for all first flashes
     ts_unique = np.unique(file_timestamp)
@@ -645,6 +646,7 @@ def glm_sampler(grid_df, all_flash_df, grid_lats, grid_lons, ts_datetime, ts):
     #Subsetting the all flash dataframes for the previous 20 and 5 minutes
     all_flash_df_pre05 = all_flash_df.loc[(all_flash_df['start_time']>=ts_datetime-dt_05)&(all_flash_df['start_time']<ts_datetime)]
     all_flash_df_pre20 = all_flash_df.loc[(all_flash_df['start_time']>=ts_datetime-dt_20)&(all_flash_df['start_time']<ts_datetime)]
+    all_flash_df_next20 = all_flash_df.loc[(all_flash_df['start_time']>=ts_datetime)&(all_flash_df['start_time']<ts_datetime+dt_20)]
 
     #Looping through each lat/lon on the target grid
     for t_lat, t_lon in zip(grid_lats, grid_lons):
@@ -665,9 +667,12 @@ def glm_sampler(grid_df, all_flash_df, grid_lats, grid_lons, ts_datetime, ts):
         #Getting the index for the values in the last 5 and 20 minutes
         idx_pre20 = idx_finder(t_lat, t_lon, all_flash_df_pre20['lat'].to_list(), all_flash_df_pre20['lon'].to_list())
         idx_pre05 = idx_finder(t_lat, t_lon, all_flash_df_pre05['lat'].to_list(), all_flash_df_pre05['lon'].to_list())
+        idx_next20 = idx_finder(t_lat, t_lon, all_flash_df_next20['lat'].to_list(), all_flash_df_next20['lon'].to_list())
+        
 
         #Getting the number of GLM flashes and placing them into the grid
         grid_df.loc[idx_grid,'glm_number_flashes_pre20'] = len(idx_pre20)
         grid_df.loc[idx_grid,'glm_number_flashes_pre05'] = len(idx_pre05)
+        grid_df.loc[idx_grid,'glm_number_flashes_next20'] = len(idx_next20)
 
     return grid_df
