@@ -85,21 +85,21 @@ def driver_function(case):
     grid_df = mgr.df_creator(grid_lats, grid_lons, file_timestamp, case)
     mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
 
-    # #Placing the first flashes on the grid
-    # grid_df = mgr.ff_driver_v2(grid_df, case_df, file_timestamp) 
-    # mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
-    # print (str(case)+': First Flashes Collected')
+    #Placing the first flashes on the grid
+    grid_df = mgr.ff_driver_v2(grid_df, case_df, file_timestamp) 
+    mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
+    print (str(case)+': First Flashes Collected')
 
-    # #Calling the functions that process the data for each step
-    # #abi_driver
-    # grid_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
-    # mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
-    # print (str(case)+': ABI Data Collected')
+    #Calling the functions that process the data for each step
+    #abi_driver
+    grid_df = mgr.abi_driver(grid_df, file_timestamp, file_times_abi, grid_lats, grid_lons)
+    mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
+    print (str(case)+': ABI Data Collected')
 
-    # #mrms_driver()
-    # grid_df = mgr.mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, mrms_variables)
-    # mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
-    # print (str(case)+': MRMS Data Collected')
+    #mrms_driver()
+    grid_df = mgr.mrms_driver(grid_df, file_timestamp, file_times_mrms, grid_lats, grid_lons, mrms_variables)
+    mgr.df_saver(grid_df, output_loc, case, case+'-'+fsave_str)
+    print (str(case)+': MRMS Data Collected')
 
     #glm_driver()
     grid_df = mgr.glm_driver(grid_df, file_timestamp, grid_lats, grid_lons, sfile[case]['glm16_all'])
@@ -110,7 +110,7 @@ def driver_function(case):
 #Starting the multiprocessing by calling the driver function for each case
 if __name__ == "__main__":
     with mp.Pool(12) as p:
-        p.starmap(driver_function,zip(cases[:1]))
+        p.starmap(driver_function,zip(cases[:]))
         p.close()
         p.join()
 
