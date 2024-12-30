@@ -9,10 +9,11 @@
 # statistically robust sample.
 # 
 # Change log:
-#  
+#  20241230: Added test case for machine learning application 
 #=====================================================
 
-cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut', '20220625-tn', '20220322-al']
+#cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut', '20220625-tn', '20220322-al']
+cases: ['20220514-test-conus']
 
 20220423-ok:
   case_name: '20220423 Oklahoma Supercell Case'
@@ -104,3 +105,18 @@ cases: ['20220423-ok', '20220504-tx', '20220612-co', '20220614-ne', '20220921-ut
   lr_lon: -87.43
 
   glm16_all: 'GLM16allflashes_v1_s202203221600_s202203230800_c202402131406.csv'
+
+
+#Special test case for the machine learning case
+20220514-test-conus:
+  case_name: '20220514 CONUS Test Case'
+
+  start_time: '20220514-1500'
+  end_time: '20220515-0300'
+
+  ul_lat: 43.00
+  ul_lon: -104.00
+  lr_lat: 32.00
+  lr_lon: -77.00
+
+  glm16_all: 'GLM16allflashes_v1_s202205141400_e202205150400_c202412301730.csv'
