@@ -56,7 +56,7 @@ contour_levels = [2,5,10,20,30,40,50,75]
 trf_loc = '/localdata/first-flash/data/ml-manual-analysis/'
 #trf_loc = '../../local-data/20220504-mltest/' #DEVMODE
 
-trf = pd.read_csv(trf_loc+'20220514-test-conus-ma-grids-v3-ABI-MRMS-GLM-202412301805-output-trf102.csv', index_col=0)
+trf = pd.read_csv(trf_loc+'20220514-test-conus-ma-grids-v3-ABI-MRMS-GLM-202412301805-output.csv', index_col=0)
 
 
 # In[4]:
@@ -218,7 +218,7 @@ def plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, r
     
     #Rolling through each of the four panels on the plot
     for i in range(4):
-        #print (i)
+        print (i)
         #Upper left - trf1
         ax = fig.add_subplot(gs[d['plty_min'][i]:d['plty_max'][i],d['pltx_min'][i]:d['pltx_max'][i]], projection=crs)
 
@@ -257,7 +257,7 @@ def plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, r
 
 
 #looping through each time step
-for t in t_list[:]:
+for t in t_list[72:73]:
     print (t)
     y, m, d, doy, hr, mi = datetime_converter(t)
     t_string = y+m+d+'-'+hr+mi
@@ -281,4 +281,5 @@ for t in t_list[:]:
     #Plotting the data
     plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 37.5, -99.5, 2., 'SW Kansas', 'swks', t, t_plot, t_string)
     plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 41.5, -84.5, 2., 'NW Ohio', 'nwoh', t, t_plot, t_string)
+    plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 35.5, -93.5, 2., 'NW Arkansas', 'nwar', t, t_plot, t_string)
 
