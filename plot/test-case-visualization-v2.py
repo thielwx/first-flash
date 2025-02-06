@@ -46,7 +46,7 @@ glm16_all =  'GLM16allflashes_v1_s202205141400_e202205150400_c202412301730.csv'
 g16 = pd.read_csv(glm16_all_loc+glm16_all, index_col=0)
 g16['time64'] = [np.datetime64(i) for i in g16['start_time'].values]
 
-contour_levels = [2,5,10,20,30,40,50,75]
+contour_levels = [2,5,10,25,50,75]
 
 
 # In[3]:
@@ -56,7 +56,7 @@ contour_levels = [2,5,10,20,30,40,50,75]
 trf_loc = '/localdata/first-flash/data/ml-manual-analysis/'
 #trf_loc = '../../local-data/20220504-mltest/' #DEVMODE
 
-trf = pd.read_csv(trf_loc+'20220514-test-conus-ma-grids-v3-ABI-MRMS-GLM-202412301805-output.csv', index_col=0)
+trf = pd.read_csv(trf_loc+'20220514-test-conus-ma-grids-v3-ABI-MRMS-GLM-202412301805-output-trf105-binary.csv', index_col=0)
 
 
 # In[4]:
@@ -171,25 +171,22 @@ def fmt(x):
 # In[6]:
 
 
-def plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, clat, clon, dx, title, fname, t, t_plot, t_string):
+def plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, clat, clon, dx, title, fname, t, t_plot, t_string):
     global g16
     title_size = 16
     tick_size = 12
     pt_size = 4
     trf_extent = [np.min(lon_grid),np.max(lon_grid),np.min(lat_grid),np.max(lat_grid)]
     trf1_grid_cut = trf1_grid.copy()
-    trf2o_grid_cut = trf2o_grid.copy()
-    trf2w_grid_cut = trf2w_grid.copy()
-    trf2s_grid_cut = trf2s_grid.copy()
+    trf2_pgrid_cut = trf2_pgrid.copy()
+    trf2_cgrid_cut = trf2_cgrid.copy()
     refl10C_cut = refl10C.copy()
-
 
     #Preparing the trf data
     trf_truth = ((lon_grid>=clon-dx)&(lon_grid<=clon+dx)&(lat_grid>=clat-dx)&(lat_grid<=clat+dx))
     trf1_grid_cut[~trf_truth] = np.nan
-    trf2o_grid_cut[~trf_truth] = np.nan
-    trf2w_grid_cut[~trf_truth] = np.nan
-    trf2s_grid_cut[~trf_truth] = np.nan
+    trf2_pgrid_cut[~trf_truth] = np.nan
+    trf2_cgrid_cut[~trf_truth] = np.nan
     
     #Preparing the MRMS data
     if refl10C[0][0]!=-999:
@@ -202,28 +199,28 @@ def plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, r
     
     #Compiling some data to simplify the plotting (I promise I'm not crazy...yet)
     d = {
-        'var':['a) TRF1 p(ltg 20min)', 'b) TRF2 p(Strong)', 'c) TRF2 p(Weak)', 'd) TRF2 p(Other)'],
-        'pltx_min':[0,6,0,6],
-        'pltx_max':[6,12,6,12],
-        'plty_min':[0,0,9,9],
-        'plty_max':[7,7,16,16],
-        'cmap':['plasma','plasma','plasma','plasma']
+        'var':['a) TRF1 p(ltg 20min)', 'b) TRF2 c(Strong/Weak Convection)'],
+        'pltx_min':[0,6],
+        'pltx_max':[6,12],
+        'plty_min':[0,0],
+        'plty_max':[7,7],
+        'cmap':['plasma','PuOr_r']
     }
-    trf_data = [trf1_grid_cut, trf2s_grid_cut, trf2w_grid_cut, trf2o_grid_cut]
+    trf_data = [trf1_grid_cut, trf2_cgrid_cut]
     
     
     #Time to plot!
     crs = ccrs.PlateCarree()
     plot_extent = [clon-dx, clon+dx, clat-dx, clat+dx]
     
-    fig = plt.figure(figsize=(16,12))
+    fig = plt.figure(figsize=(16,8))
     fig.patch.set_facecolor('white')
     
-    gs = fig.add_gridspec(nrows=16,ncols=12)
+    gs = fig.add_gridspec(nrows=8,ncols=12)
     fig.suptitle('Case: '+title+'  -  '+t_plot, fontsize=title_size)
     
     #Rolling through each of the four panels on the plot
-    for i in range(4):
+    for i in range(2):
         #print (i)
         #Upper left - trf1
         ax = fig.add_subplot(gs[d['plty_min'][i]:d['plty_max'][i],d['pltx_min'][i]:d['pltx_max'][i]], projection=crs)
@@ -248,10 +245,10 @@ def plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, r
 
         #Plotting the TRFdata
         if i == 0:
-            a = ax.contour(lon_grid, lat_grid, trf_data[i], levels=[2,10,20,30,50,75], cmap=d['cmap'][i], transform=crs)
-            ax.clabel(a, a.levels, fmt=fmt, fontsize=4)
+            a = ax.contour(lon_grid, lat_grid, trf_data[i], levels=[2,5,10,25,50,75], cmap=d['cmap'][i], transform=crs)
+            ax.clabel(a, a.levels, fmt=fmt, fontsize=6)
         else:
-            c = ax.imshow(trf_data[i][:,::-1].T, extent=trf_extent, transform=crs, cmap=d['cmap'][i],vmin=2, vmax=100, zorder=10, alpha=0.8)
+            c = ax.imshow(trf_data[i][:,::-1].T, extent=trf_extent, transform=crs, cmap=d['cmap'][i], alpha=0.8)
         
         ax.legend(loc='lower right', fontsize=tick_size)
         ax.set_title(d['var'][i], fontsize=title_size, loc='left')
@@ -263,7 +260,7 @@ def plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, r
 
 
 #looping through each time step
-for t in t_list[:]: #72:73
+for t in t_list[72:84]: #72:73
     print (t)
     y, m, d, doy, hr, mi = datetime_converter(t)
     t_string = y+m+d+'-'+hr+mi
@@ -274,10 +271,9 @@ for t in t_list[:]: #72:73
     
     #Getting the grids from trf_cut for the ML probabilities and the lats/lons
     trf1_grid = np.reshape(trf_cut['trf1_p'].values, (len(lon_list),len(lat_list)))*100
-    trf2o_grid = np.reshape(trf_cut['trf2_p_other'].values, (len(lon_list),len(lat_list)))*100
-    trf2w_grid = np.reshape(trf_cut['trf2_p_weak'].values, (len(lon_list),len(lat_list)))*100
-    trf2s_grid = np.reshape(trf_cut['trf2_p_strong'].values, (len(lon_list),len(lat_list)))*100
-    
+    trf2_pgrid = np.reshape(trf_cut['trf2_p'].values, (len(lon_list),len(lat_list)))*100
+    trf2_cgrid = np.reshape(trf_cut['trf2_c'].values, (len(lon_list),len(lat_list)))*100
+
     lon_grid = np.reshape(trf_cut['lon'].values, (len(lon_list),len(lat_list)))
     lat_grid = np.reshape(trf_cut['lat'].values, (len(lon_list),len(lat_list)))
     
@@ -285,7 +281,7 @@ for t in t_list[:]: #72:73
     refl10C, extent_mrms, mlon_grid, mlat_grid = mrms_puller(t)
     
     #Plotting the data
-    #plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 37.5, -99.5, 2., 'SW Kansas', 'swks', t, t_plot, t_string)
-    plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 41.5, -84.5, 2., 'NW Ohio', 'nwoh', t, t_plot, t_string)
-    plotter(trf1_grid, trf2o_grid, trf2w_grid, trf2s_grid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 35.5, -93.5, 2., 'NW Arkansas', 'nwar', t, t_plot, t_string)
+    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 37.5, -99.5, 2., 'SW Kansas', 'swks-v2', t, t_plot, t_string)
+    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 41.5, -84.5, 2., 'NW Ohio', 'nwoh-v2', t, t_plot, t_string)
+    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 35.5, -93.5, 2., 'NW Arkansas', 'nwar-v2', t, t_plot, t_string)
 
