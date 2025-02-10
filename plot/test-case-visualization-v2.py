@@ -57,7 +57,9 @@ trf_loc = '/localdata/first-flash/data/ml-manual-analysis/'
 #trf_loc = '../../local-data/20220504-mltest/' #DEVMODE
 
 trf = pd.read_csv(trf_loc+'20220514-test-conus-ma-grids-v3-ABI-MRMS-GLM-202412301805-output-trf105-binary.csv', index_col=0)
-
+trf2_pthresh = 0.35
+trf.loc[trf['trf2_p'] >= trf2_pthresh, 'trf2_c_custom'] = 1.0
+trf.loc[trf['trf2_p'] < trf2_pthresh, 'trf2_c_custom'] = 0.0
 
 # In[4]:
 
@@ -260,7 +262,7 @@ def plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, exte
 
 
 #looping through each time step
-for t in t_list[72:84]: #72:73
+for t in t_list[72:73]: #72:73 = 2100 UTC
     print (t)
     y, m, d, doy, hr, mi = datetime_converter(t)
     t_string = y+m+d+'-'+hr+mi
@@ -272,7 +274,8 @@ for t in t_list[72:84]: #72:73
     #Getting the grids from trf_cut for the ML probabilities and the lats/lons
     trf1_grid = np.reshape(trf_cut['trf1_p'].values, (len(lon_list),len(lat_list)))*100
     trf2_pgrid = np.reshape(trf_cut['trf2_p'].values, (len(lon_list),len(lat_list)))*100
-    trf2_cgrid = np.reshape(trf_cut['trf2_c'].values, (len(lon_list),len(lat_list)))*100
+    #trf2_cgrid = np.reshape(trf_cut['trf2_c'].values, (len(lon_list),len(lat_list))) * 100 #v2 (50% threshold)
+    trf2_cgrid = np.reshape(trf_cut['trf2_c_custom'].values, (len(lon_list),len(lat_list))) *100 #v3 (custom threshold)
 
     lon_grid = np.reshape(trf_cut['lon'].values, (len(lon_list),len(lat_list)))
     lat_grid = np.reshape(trf_cut['lat'].values, (len(lon_list),len(lat_list)))
@@ -281,7 +284,7 @@ for t in t_list[72:84]: #72:73
     refl10C, extent_mrms, mlon_grid, mlat_grid = mrms_puller(t)
     
     #Plotting the data
-    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 37.5, -99.5, 2., 'SW Kansas', 'swks-v2', t, t_plot, t_string)
-    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 41.5, -84.5, 2., 'NW Ohio', 'nwoh-v2', t, t_plot, t_string)
-    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 35.5, -93.5, 2., 'NW Arkansas', 'nwar-v2', t, t_plot, t_string)
+    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 37.5, -99.5, 2., 'SW Kansas', 'swks-v3', t, t_plot, t_string)
+    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 41.0, -84.5, 2., 'NW Ohio', 'nwoh-v3', t, t_plot, t_string)
+    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 35.5, -93.5, 2., 'NW Arkansas', 'nwar-v3', t, t_plot, t_string)
 
