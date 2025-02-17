@@ -7,6 +7,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from matplotlib.patches import Patch
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import gzip
@@ -146,7 +147,7 @@ def mrms_puller(t):
                 output = kd_tree.resample_nearest(source_geo_def=MRMS_point_swath,
                                         data=data,
                                         target_geo_def=MRMS_grid_swath,
-                                        radius_of_influence=1e3)
+                                        radius_of_influence=2e3)
                 
                 extent_mrms = [np.min(lon), np.max(lon), np.min(lat), np.max(lat)] 
                 
@@ -201,7 +202,7 @@ def plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, exte
     
     #Compiling some data to simplify the plotting (I promise I'm not crazy...yet)
     d = {
-        'var':['a) TRF1 p(ltg 20min)', 'b) TRF2 c(Strong/Weak Convection)'],
+        'var':['   TRF1 p(ltg 20min)', '   TRF2 c(Strong/Weak Convection)'],
         'pltx_min':[0,6],
         'pltx_max':[6,12],
         'plty_min':[0,0],
@@ -228,8 +229,9 @@ def plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, exte
         ax = fig.add_subplot(gs[d['plty_min'][i]:d['plty_max'][i],d['pltx_min'][i]:d['pltx_max'][i]], projection=crs)
 
         ax.coastlines()
-        ax.add_feature(cfeature.STATES, edgecolor ='r',linewidth=1.5, zorder=0)
         ax.add_feature(USCOUNTIES, edgecolor='g', zorder=0)
+        ax.add_feature(cfeature.STATES, edgecolor ='r',linewidth=2., zorder=0)
+        
         ax.set_extent(plot_extent, crs=crs)
 
         #Plotting the GLM16 data
@@ -243,16 +245,21 @@ def plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, exte
         else:
             b = ax.imshow([[0]], extent=[-1,1,-1,1], transform=crs,cmap=plt.get_cmap('turbo', 30), vmin=10, vmax=60, zorder=0, alpha=1.0)
             b.set_visible(False)
-        plt.colorbar(b)
+        cbar = plt.colorbar(b)
+        cbar.set_label('MRMS -10$^\circ$C Reflectvity (dBZ)', fontsize=tick_size)
+        cbar.ax.tick_params(labelsize=tick_size)
 
         #Plotting the TRFdata
         if i == 0:
             a = ax.contour(lon_grid, lat_grid, trf_data[i], levels=[2,5,10,25,50,75], cmap=d['cmap'][i], transform=crs)
-            ax.clabel(a, a.levels, fmt=fmt, fontsize=6)
+            ax.clabel(a, a.levels, fmt=fmt, fontsize=8)
+            ax.legend(loc='lower right', fontsize=tick_size, facecolor='white', framealpha=1)
         else:
             c = ax.imshow(trf_data[i][:,::-1].T, extent=trf_extent, transform=crs, cmap=d['cmap'][i], alpha=0.8)
+            legend_elements = [Patch(facecolor='darkorange', edgecolor='black', alpha=0.8, label='Strong Convection'), Patch(facecolor='indigo', edgecolor='black', alpha=0.8, label='Weak Convection')]
+            ax.legend(handles=legend_elements, loc='lower right', fontsize=tick_size, facecolor='white', framealpha=1)
         
-        ax.legend(loc='lower right', fontsize=tick_size)
+        
         ax.set_title(d['var'][i], fontsize=title_size, loc='left')
     plt.savefig('/localdata/first-flash/figures/ml-trf-output/'+fname+'/'+fname+'_'+t_string+'.png')
     plt.close()
@@ -262,7 +269,7 @@ def plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, exte
 
 
 #looping through each time step
-for t in t_list[72:73]: #72:73 = 2100 UTC
+for t in t_list[:]: #72:73 = 2100 UTC
     print (t)
     y, m, d, doy, hr, mi = datetime_converter(t)
     t_string = y+m+d+'-'+hr+mi
@@ -287,4 +294,6 @@ for t in t_list[72:73]: #72:73 = 2100 UTC
     plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 37.5, -99.5, 2., 'SW Kansas', 'swks-v3', t, t_plot, t_string)
     plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 41.0, -84.5, 2., 'NW Ohio', 'nwoh-v3', t, t_plot, t_string)
     plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 35.5, -93.5, 2., 'NW Arkansas', 'nwar-v3', t, t_plot, t_string)
+    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 34.69, -94.27, .6, 'Mena, Arkansas Thunderstorm', 'mear-v3', t, t_plot, t_string)
+    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 36.06, -94.31, .6, 'Fayetteville, Arkansas Thunderstorm', 'faar-v3', t, t_plot, t_string)
 
