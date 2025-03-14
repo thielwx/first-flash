@@ -27,15 +27,21 @@ from metpy.plots import USCOUNTIES
 
 #Constants
 start_time = '20220514-1500'
-end_time = '20220515-0300'
+end_time = '20220515-0400'
 dt = '5min'
 
 t_list = pd.date_range(start=start_time, end=end_time, freq=dt)
 
-ul_lat = 43.00
-ul_lon = -104.00
-lr_lat = 32.00
-lr_lon = -77.00
+#ul_lat = 43.00
+#ul_lon = -104.00
+#lr_lat = 32.00
+#lr_lon = -77.00
+#For NWAR case
+ul_lat = 38.00
+ul_lon = -96.00
+lr_lat = 33.00
+lr_lon = -90.00
+
 dx = 0.2
 lat_list = np.arange(lr_lat+dx,ul_lat+dx,dx)
 lon_list = np.arange(ul_lon,lr_lon,dx)
@@ -57,7 +63,8 @@ contour_levels = [2,5,10,25,50,75]
 trf_loc = '/localdata/first-flash/data/ml-manual-analysis/'
 #trf_loc = '../../local-data/20220504-mltest/' #DEVMODE
 
-trf = pd.read_csv(trf_loc+'20220514-test-conus-ma-grids-v3-ABI-MRMS-GLM-202412301805-output-trf105-binary.csv', index_col=0)
+#trf = pd.read_csv(trf_loc+'20220514-test-conus-ma-grids-v3-ABI-MRMS-GLM-202412301805-output-trf105-binary.csv', index_col=0)
+trf = pd.read_csv(trf_loc+'20220514-test-nwar-ma-grids-v3-ABI-MRMS-GLM-202502211232-output.csv', index_col=0) #Short term for NWAR case
 trf2_pthresh = 0.35
 trf.loc[trf['trf2_p'] >= trf2_pthresh, 'trf2_c_custom'] = 1.0
 trf.loc[trf['trf2_p'] < trf2_pthresh, 'trf2_c_custom'] = 0.0
@@ -291,8 +298,8 @@ for t in t_list[:]: #72:73 = 2100 UTC
     refl10C, extent_mrms, mlon_grid, mlat_grid = mrms_puller(t)
     
     #Plotting the data
-    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 37.5, -99.5, 2., 'SW Kansas', 'swks-v3', t, t_plot, t_string)
-    plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 41.0, -84.5, 2., 'NW Ohio', 'nwoh-v3', t, t_plot, t_string)
+    #plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 37.5, -99.5, 2., 'SW Kansas', 'swks-v3', t, t_plot, t_string)
+    #plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 41.0, -84.5, 2., 'NW Ohio', 'nwoh-v3', t, t_plot, t_string)
     plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 35.5, -93.5, 2., 'NW Arkansas', 'nwar-v3', t, t_plot, t_string)
     plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 34.69, -94.27, .6, 'Mena, Arkansas Thunderstorm', 'mear-v3', t, t_plot, t_string)
     plotter(trf1_grid, trf2_pgrid, trf2_cgrid, lon_grid, lat_grid, refl10C, extent_mrms, mlon_grid, mlat_grid, 36.06, -94.31, .6, 'Fayetteville, Arkansas Thunderstorm', 'faar-v3', t, t_plot, t_string)

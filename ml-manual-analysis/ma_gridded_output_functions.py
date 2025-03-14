@@ -112,9 +112,9 @@ def time_list_creator(f_datetime):
     #Getting the time difference from the 10s place
     dt_int = np.array([int(t.strftime('%M'))%10 for t in f_datetime])
     #Changing those minutes greater than 5 so they default to 6 rather than 0
-    idx = np.where(dt_int>=6)[0]
-    dt_int_new = dt_int[idx] % 6
-    dt_int[dt_int>=6] = dt_int_new
+    idx = np.where(dt_int>=5)[0]
+    dt_int_new = dt_int[idx] % 5 - 1
+    dt_int[dt_int>=5] = dt_int_new
     #Getting the target file times from the most recent MRMS file
     file_times_mrms = [(f_datetime[i] - timedelta(minutes=int(dt_int[i]))).strftime('%Y%m%d-%H%M') for i in range(len(f_datetime))]
 

@@ -34,8 +34,8 @@ output_loc = '/localdata/first-flash/data/ml-manual-analysis/gridded/'
 
 abi_variables = ['CMIP','ACHA']
 abi_variables_output = ['CMIP_min', 'CMIP_05', 'ACHA_max', 'ACHA_95']
-mrms_variables = ['MergedReflectivityQCComposite','Reflectivity_-10C','ReflectivityAtLowestAltitude']
-mrms_variables_output = ['MergedReflectivityQCComposite_max','MergedReflectivityQCComposite_95','Reflectivity_-10C_max','Reflectivity_-10C_95','ReflectivityAtLowestAltitude_max','ReflectivityAtLowestAltitude_95']
+mrms_variables = ['MergedReflectivityQCComposite','Reflectivity_-10C','ReflectivityAtLowestAltitude','MESH']
+mrms_variables_output = ['MergedReflectivityQCComposite_max','MergedReflectivityQCComposite_95','Reflectivity_-10C_max','Reflectivity_-10C_95','ReflectivityAtLowestAltitude_max','ReflectivityAtLowestAltitude_95','MESH_max','MESH_95']
 ma_variables = ['ma_category', 'ma_convective_core']
 glm_variables = ['num_glm16_flashes']
 
@@ -49,7 +49,7 @@ with open(yaml_file, 'r') as f:
     sfile = yaml.safe_load(f)
 
 #Getting the list of cases
-cases = sfile['cases']
+cases = sfile['cases'][:]
 
 #Reading in the manually analyzed first flash dataset 
 df = pd.read_csv(source_file)
