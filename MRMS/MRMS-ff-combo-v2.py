@@ -187,6 +187,7 @@ def MRMS_data_loader(time, fstring_start ,var, pre_truth):
         lat_data = [-999]
         lon_data = [-999]
         data = [-999]
+
     else:
         #This is what I call a pro-'gramer' move...loading the netcdfs while zipped on another machine
         with gzip.open(file_locs[0]) as gz:
@@ -214,6 +215,13 @@ def MRMS_data_loader(time, fstring_start ,var, pre_truth):
                 lon_data = lon_data[locs]
                 lat_data = lat_data[locs]
                 data = data[locs]
+    #Final check that we didn't open an empty file
+    if len(lat_data)<1:
+        print ('ERROR: Empty MRMS file')
+        print (file_str)
+        lat_data = [-999]
+        lon_data = [-999]
+        data = [-999]
 
     return lat_data, lon_data, data
 
