@@ -1,5 +1,7 @@
 #================================================
 # This script uses first flash locations and find sfcOA data
+# Parts of this script came from the MRMS/MRMS-ff-combo-v2.py
+#
 # Created: October 2025
 # Author: Kevin Thiel (kevin.thiel@ou.edu)
 #================================================
@@ -9,14 +11,23 @@ import pandas as pd
 import sys
 import os
 from glob import glob
-
+from datetime import datetime
+from datetime import timedelta
+import multiprocessing as mp
+from sklearn.neighbors import BallTree
+import os
+import gempakio as gpk
+import warnings
+warnings.filterwarnings('ignore') 
 
 #Constants
 version = 1
-oa_variables = []
-oa_variables_output = []
-oa_file_loc = '/localdata/first-flash/data/sfcOA-local/
+oa_files_loc = '/localdata/first-flash/data/sfcOA-local/
+ff_combo_loc = '/localdata/first-flash/data/GLM-ff-east-west-combined/'
 
+oa_vars_df = pd.read_csv('ff-sfcoa-vars.csv') #A csv of the variables we'll be pulling from in the sfcoaruc files
+oa_vars_input = oa_vars_df['FIELD'].values
+oa_vars_output = np.array([[var+'_T0', var+'_T1', var+'_T2', var+'_T3'] for var in oa_vars_input], dtype='str').flatten() #Adding the time lag subsets(T0,T1,T2,T3)
 
 #Function land
 def datetime_converter(time):
@@ -42,6 +53,100 @@ def datetime_converter(time):
     return y, m, d, doy, hr, mi
 
 
+#This function takes in a file start time and the first/last event times to create a list of datetime objects
+def GLM_LCFA_times_postprocess(file_times, times):
+    '''
+    Creates a list of datetime objects from the LCFA L2 file times, and the start time of the file
+    PARAMS:
+        file_times: listed times on the LCFA L2 file (str)
+        times: times (seconds) from the LCFA L2 file (float)
+    RETURNS
+        flash_datetime: a list of datetimes based on the flash/group/event times in the LCFA L2 file down to ns (datetime)
+    '''
+    
+    #Converting to nanoseconds to use for timedelta
+    nanosecond_times = times*(10**9)
+    
+    #Creating datetime object for the file time
+    flash_file_datetime = [np.datetime64(datetime.strptime(file_times[i], 's%Y%j%H%M%S0')) for i in range(len(file_times))]
+    
+    #Creating timedetla objects from our array
+    flash_timedelta = [np.timedelta64(int(val), 'ns') for val in nanosecond_times]
+    
+    #Creating an array of datetime objects with the (more) exact times down to the microsecond
+    #flash_datetime = [flash_file_datetime+dt for dt in flash_timedelta]
+    flash_datetime = [flash_file_datetime[i] + flash_timedelta[i] for i in range(len(flash_timedelta))]
+
+    return (flash_datetime)
+
+
+#The driver function for starmap that processes the data in two hour chunks
+def sfcoa_driver(t_start, t_end):
+    #Loading in the other data to the function
+    global oa_vars_input
+    global oa_vars_output
+    global version
+    global fstring_start
+    global f_time
+    global fistart_flid
+    global f_lat
+    global f_lon
+
+    f_time = np.array(f_time)
+
+    #Getting the 2-hour segment 
+    df_locs = np.where((f_time>=np.datetime64(t_start)) & (f_time<np.datetime64(t_end)))[0]	
+
+    #If there's first flash data lets run stuff. If not then don't!
+    if len(df_locs)>0:
+
+        #Creating an empty dataframe to fill
+        fistart_flid_cutdown = fistart_flid[df_locs]
+        df = pd.DataFrame(index=fistart_flid_cutdown, columns=abi_variables_output)
+
 
 # WORK ZONE
+
+#Getting the user inputs
+args = sys.argv
+s_time_str = args[1] #Start date YYYYMMDD (inclusive)
+e_time_str = args[2] #End date YYYYMMDD (non-inclusive)
+ff_combo_file_str = args[3] #netCDF file of the glm first flash combo data (v32)
+
+#Getting the necessary information from the netCDF file
+nc_dset = nc.Dataset(ff_combo_loc+ff_combo_file_str,'r')
+
+#Setting up the time range
+start_time = datetime.strptime(s_time_str, '%Y%m%d')
+#start_time = datetime.strptime('2022-01-19 00:00:00', '%Y-%m-%d %H:%M:%S') #DEVMODE
+end_time = datetime.strptime(e_time_str, '%Y%m%d')
+time_list_days = pd.date_range(start=start_time, end=end_time, freq='1D') #Daily list to loop through
+
+#Getting the flash ids, lats, and lons for searching later...
+fistart_flid = nc_dset.variables['flash_fistart_flid'][:]
+f_lat = nc_dset.variables['flash_lat'][:]
+f_lon = nc_dset.variables['flash_lon'][:]
+
+#Getting the flash times for seraching later...
+fistart_str = [i[0:15] for i in nc_dset.variables['flash_fistart_flid'][:]]
+f_time = GLM_LCFA_times_postprocess(fistart_str, nc_dset.variables['flash_time_offset_of_first_event'][:])
+
+#Looping through on a daily basis (and then two hour chunks to leverage multi-threading...)
+for i in range(len(time_list_days)-1):
+	
+    t_range_start = time_list_days[i]
+    t_range_end = time_list_days[i+1]
+    
+    #Breaking the day into 12, 2-hour chunks
+    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='2H')
+
+	#Sending the file string to the sfcoa_driver function that takes over from here...
+    if __name__ == "__main__":
+        with mp.Pool(12) as p:
+            p.starmap(sfcoa_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
+            p.close()
+            p.join()
+
+
+
 

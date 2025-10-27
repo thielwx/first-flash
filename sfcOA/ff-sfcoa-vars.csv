@@ -1,0 +1,47 @@
+FIELD,DESC,UNITS
+SBCP,Surface-based CAPE,J/kg
+SBCN,Surface-based CINH,J/kg
+MUCP,"MUCAPE, lowest 400 mb",J/kg
+MUCN,"MUCAPE, lowest 400 mb CINH",J/kg
+MM05,"Best CAPE, 0 to -5degC",J/kg
+MM10,"Best CAPE, -5 to -10degC",J/kg
+MM15,"Best CAPE, -10 to -15degC",J/kg
+MM20,"Best CAPE, -15 to -20degC",J/kg
+MM25,"Best CAPE, -20 to -25degC",J/kg
+MM30,"Best CAPE, -25 to -30degC",J/kg
+MM35,"Best CAPE, -30 to -35degC",J/kg
+MM40,"Best CAPE, -35 to -40degC",J/kg
+M1CP,100 mb Mean Mixed CAPE,J/kg
+M1CN,100 mb Mean Mixed CINH,J/kg
+MLCP,LCL Pressure,mb
+MLCH,LCL Height,m
+MLFP,LFC Pressure,mb
+MLFH,LFC Height,m
+MELP,EL Pressure,mb
+MELH,EL Height,m
+FZLH,Freezing Level Height,m
+MH10,Height of -10degC Isotherm,m
+MH20,Height of -20degC Isotherm,m
+SRH1,Sfc-1km Storm-relative Helicity,m**2/s**2
+SRH3,Sfc-3km Storm-relative Helicity,m**2/s**2
+U3SV,U Sfc-3km Shear Vector,kt
+V3SV,V Sfc-3km Shear Vector,kt
+U6SV,U Sfc-6km Shear Vector,kt
+V6SV,V Sfc-6km Shear Vector,kt
+U38S,U 3-8km Shear Vector,kt
+V38S,V 3-8km Shear Vector,kt
+LLLR,Sfc-3km AGL Lapse Rate,degC/km
+LR36,3-6km AGL Lapse Rate,K/km
+LR75,Lapse Rate from 700 to 500 mb,C km-1
+RH80,800mb Relative Humidity,%
+RH70,700mb Relative Humidity,%
+RH60,600mb Relative Humidity,%
+BRNS,Bulk Richardson Number Shear,m**2/s**2
+INPW,Precipitable Water,in
+FRNT,Surface frontogenesis,K m-1 s-1
+TMPC,Surface temperature,Deg C
+DWPC,Surface Dew point,Deg C
+UWND,Surface U wind component,kt
+VWND,Surface V wind component,kt
+PMSL,Sea Level Pressure,mb
+SMXR,Surface mixing ratio,g kg-1
