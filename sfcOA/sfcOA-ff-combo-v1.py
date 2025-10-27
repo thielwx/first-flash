@@ -102,7 +102,7 @@ def sfcoa_driver(t_start, t_end):
 
         #Creating an empty dataframe to fill
         fistart_flid_cutdown = fistart_flid[df_locs]
-        df = pd.DataFrame(index=fistart_flid_cutdown, columns=abi_variables_output)
+        df = pd.DataFrame(index=fistart_flid_cutdown, columns=oa_vars_output)
 
 
 # WORK ZONE
