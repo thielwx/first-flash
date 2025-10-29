@@ -92,10 +92,16 @@ def sfc_oa_file_times(f_time):
 
     return oa_times_t0, oa_times_t1, oa_times_t2, oa_times_t3
     
-#Allows us to open one file at a time to fill the dataframe
+#Allows us to open one sfcOA file at a time to fill the dataframe
 def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid, f_lat, f_lon):
-	x=1
-	return 0
+	#Looping through each variable so we only have to extract them once
+	for var in oa_vars_input:
+		#Loading the variable from the gempak grid
+		var_data = oa_data.gdxarray(parameter=var)[0].values[0][0]
+
+		if len(t0_locs>0):
+			for loc in t0_locs:
+				df.loc[fistart_flid[loc],var+'_T0'] = oa_file_parser()#STOP POINT
 	
 
 
@@ -146,26 +152,24 @@ def sfcoa_driver(t_start, t_end):
 			t3_locs = np.where(np.array(oa_times_t3) == cur_oa_file)[0]
 			t_lens = [len(t0_locs), len(t1_locs), len(t2_locs), len(t3_locs)]
 			print (t_lens)
-			#If no file exists, put the data in as dummy variables			
+			#If no file exists, skip and there will be nans		
 			if (file_truther == False):
 				print ('ERROR: NO FILE EXISTS - '+cur_oa_file)
-				oa_lats = [-999]
-				oa_lons = [-999]
-				oa_data = [-999]
+				continue
 			#If the oa data file isn't needed then skip in the loop
 			elif (np.sum(t_lens)==0):
-				print ('DONG! NO OA DATA NEEDED')
+				#print ('DONG! NO OA DATA NEEDED')
 				continue
 			#If data exists, open the file!
 			else:
 				oa_data = gpk.GempakGrid(oa_files_loc+cur_oa_file)
 				oa_lats = oa_data.lat
 				oa_lons = oa_data.lon
-				print ('DING!')
+				#print ('DING!')
 				print (cur_oa_file+' read')
 			
 			#Shipping all this stuff off to sample and fill the dataframe
-			#df = oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid[df_locs], f_lat[df_locs], f_lon[df_locs])
+			df = oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid[df_locs], f_lat[df_locs], f_lon[df_locs])
 				
 
 # WORK ZONE
