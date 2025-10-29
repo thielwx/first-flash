@@ -102,18 +102,18 @@ def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, 
 #The driver function for starmap that processes the data in two hour chunks
 #====================================================
 def sfcoa_driver(t_start, t_end):
-    #Loading in the other data to the function
-    global oa_vars_input
-    global oa_vars_output
+	#Loading in the other data to the function
+	global oa_vars_input
+	global oa_vars_output
 	global oa_files_loc
-    global version
-    global fstring_start
-    global f_time
-    global fistart_flid
-    global f_lat
-    global f_lon
+	global version
+	global fstring_start
+	global f_time
+	global fistart_flid
+	global f_lat
+	global f_lon
 
-    f_time = np.array(f_time)
+	f_time = np.array(f_time)
 
     #Getting the 2-hour segment 
     df_locs = np.where((f_time>=np.datetime64(t_start)) & (f_time<np.datetime64(t_end)))[0]	
