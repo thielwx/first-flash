@@ -146,7 +146,7 @@ def sfcoa_driver(t_start, t_end):
 			t2_locs = np.where(np.array(oa_times_t2) == cur_oa_file)[0]
 			t3_locs = np.where(np.array(oa_times_t3) == cur_oa_file)[0]
 			t_lens = [len(t0_locs), len(t1_locs), len(t2_locs), len(t3_locs)]
-
+			print (t_lens)
 			#If no file exists, put the data in as dummy variables			
 			if (file_truther == False):
 				print ('ERROR: NO FILE EXISTS - '+cur_oa_file)
@@ -155,6 +155,7 @@ def sfcoa_driver(t_start, t_end):
 				oa_data = [-999]
 			#If the oa data file isn't needed then skip in the loop
 			elif (np.sum(t_lens)==0):
+				print ('DONG! NO OA DATA NEEDED')
 				continue
 			#If data exists, open the file!
 			else:
