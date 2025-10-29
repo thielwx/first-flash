@@ -134,6 +134,7 @@ def sfcoa_driver(t_start, t_end):
 
 		#Looping through each potneital file that we need to pull from
 		for cur_oa_file in oa_file_loop_list:
+			print (cur_oa_file)
 
 			#checking that the path exists
 			file_truther = os.path.exists(oa_files_loc+cur_oa_file)
