@@ -142,9 +142,9 @@ def sfcoa_driver(t_start, t_end):
 
 			#Finding where we need to sample for each time lag
 			t0_locs = np.where(np.array(oa_times_t0) == cur_oa_file)[0]
-			t1_locs = np.where(oa_times_t1 == cur_oa_file)[0]
-			t2_locs = np.where(oa_times_t2 == cur_oa_file)[0]
-			t3_locs = np.where(oa_times_t3 == cur_oa_file)[0]
+			t1_locs = np.where(np.array(oa_times_t1) == cur_oa_file)[0]
+			t2_locs = np.where(np.array(oa_times_t2) == cur_oa_file)[0]
+			t3_locs = np.where(np.array(oa_times_t3) == cur_oa_file)[0]
 			t_lens = [len(t0_locs), len(t1_locs), len(t2_locs), len(t3_locs)]
 
 			#If no file exists, put the data in as dummy variables			
