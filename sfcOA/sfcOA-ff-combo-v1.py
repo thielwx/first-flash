@@ -129,7 +129,7 @@ def sfcoa_driver(t_start, t_end):
 		oa_times_t0, oa_times_t1, oa_times_t2, oa_times_t3 = sfc_oa_file_times(f_time[df_locs])
 
 		#Making list of files we need to loop through
-		oa_file_loop_list = [t.strftime('sfcoaruc_%y%m%d%H') for t in pd.date_range(start=t_start-timedelta(minutes=180, end=t_end, freq='1h')]
+		oa_file_loop_list = [t.strftime('sfcoaruc_%y%m%d%H') for t in pd.date_range(start=t_start-timedelta(minutes=180), end=t_end, freq='1h')]
 
 		#Looping through each potneital file that we need to pull from
 		for cur_oa_file in oa_file_loop_list:
