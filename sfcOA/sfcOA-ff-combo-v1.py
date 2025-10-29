@@ -93,6 +93,8 @@ def sfc_oa_file_times(f_time):
     
 #Allows us to open one file at a time to fill the dataframe
 def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid, f_lat, f_lon):
+	x=1
+	return 0
 	
 
 
