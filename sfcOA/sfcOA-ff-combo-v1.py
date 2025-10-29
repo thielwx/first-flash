@@ -8,6 +8,7 @@
 
 import numpy as np
 import pandas as pd
+import netCDF4 as nc
 import sys
 import os
 from glob import glob
