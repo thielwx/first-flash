@@ -115,20 +115,20 @@ def sfcoa_driver(t_start, t_end):
 
 	f_time = np.array(f_time)
 
-    #Getting the 2-hour segment 
-    df_locs = np.where((f_time>=np.datetime64(t_start)) & (f_time<np.datetime64(t_end)))[0]	
+	#Getting the 2-hour segment 
+	df_locs = np.where((f_time>=np.datetime64(t_start)) & (f_time<np.datetime64(t_end)))[0]	
 
-    #If there's first flash data lets run stuff. If not then don't!
-    if len(df_locs)>0:
+	#If there's first flash data lets run stuff. If not then don't!
+	if len(df_locs)>0:
 
-        #Creating an empty dataframe to fill
-        fistart_flid_cutdown = fistart_flid[df_locs]
-        df = pd.DataFrame(index=fistart_flid_cutdown, columns=oa_vars_output)
+		#Creating an empty dataframe to fill
+		fistart_flid_cutdown = fistart_flid[df_locs]
+		df = pd.DataFrame(index=fistart_flid_cutdown, columns=oa_vars_output)
 
-        #Getting the list of file names needed based on the first flash times for T0 T1 T2 T3
-        oa_times_t0, oa_times_t1, oa_times_t2, oa_times_t3 = sfc_oa_file_times(f_time[df_locs])
+		#Getting the list of file names needed based on the first flash times for T0 T1 T2 T3
+		oa_times_t0, oa_times_t1, oa_times_t2, oa_times_t3 = sfc_oa_file_times(f_time[df_locs])
 
-        #Making list of files we need to loop through
+		#Making list of files we need to loop through
 		oa_file_loop_list = [t.strftime('sfcoaruc_%y%m%d%H') for t in pd.date_range(start=t_start-timedelta(minutes=180, end=t_end, freq='1h')]
 
 		#Looping through each potneital file that we need to pull from
