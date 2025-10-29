@@ -5,7 +5,7 @@
 # Created: October 2025
 # Author: Kevin Thiel (kevin.thiel@ou.edu)
 #================================================
-# Test
+
 import numpy as np
 import pandas as pd
 import sys
@@ -79,8 +79,23 @@ def GLM_LCFA_times_postprocess(file_times, times):
 
     return (flash_datetime)
 
+# Takes in the glm ff times and gets the corresponding sfcOA file start times (T0, T1, T2, T3)
+def sfc_oa_file_times(f_time):
+    f_time2 = [pd.to_datetime(t) for t in f_time]
 
+    #Creating list from first flash times
+    oa_times_t0 = [t.strftime('sfcoaruc_%y%m%d%H') for t in f_time2]
+    oa_times_t1 = [(t-timedelta(minutes=60)).strftime('sfcoaruc_%y%m%d%H') for t in f_time2]
+    oa_times_t2 = [(t-timedelta(minutes=120)).strftime('sfcoaruc_%y%m%d%H') for t in f_time2]
+    oa_times_t3 = [(t-timedelta(minutes=180)).strftime('sfcoaruc_%y%m%d%H') for t in f_time2]
+
+    return oa_times_t0, oa_times_t1, oa_times_t2, oa_times_t3
+    
+
+
+#====================================================
 #The driver function for starmap that processes the data in two hour chunks
+#====================================================
 def sfcoa_driver(t_start, t_end):
     #Loading in the other data to the function
     global oa_vars_input
@@ -104,6 +119,10 @@ def sfcoa_driver(t_start, t_end):
         fistart_flid_cutdown = fistart_flid[df_locs]
         df = pd.DataFrame(index=fistart_flid_cutdown, columns=oa_vars_output)
 
+        #Getting the list of file names needed based on the first flash times for T0 T1 T2 T3
+        oa_times_t0, oa_times_t1, oa_times_t2, oa_times_t3 = sfc_oa_file_times(f_time[df_locs])
+
+        #STOP POINT
 
 # WORK ZONE
 
