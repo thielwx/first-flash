@@ -23,7 +23,7 @@ warnings.filterwarnings('ignore')
 #Constants
 version = 1
 oa_files_loc = '/localdata/first-flash/data/sfcOA-local/
-ff_combo_loc = '/localdata/first-flash/data/GLM-ff-east-west-combined/'
+ff_combo_loc = '/localdata/first-flash/data/GLM-ff-east-west-combined/GLM-East-West_first-flash-data_v32_s202201010000_e202301010000_c202410071459.nc'
 
 oa_vars_df = pd.read_csv('ff-sfcoa-vars.csv') #A csv of the variables we'll be pulling from in the sfcoaruc files
 oa_vars_input = oa_vars_df['FIELD'].values
@@ -169,10 +169,9 @@ def sfcoa_driver(t_start, t_end):
 args = sys.argv
 s_time_str = args[1] #Start date YYYYMMDD (inclusive)
 e_time_str = args[2] #End date YYYYMMDD (non-inclusive)
-ff_combo_file_str = args[3] #netCDF file of the glm first flash combo data (v32)
 
 #Getting the necessary information from the netCDF file
-nc_dset = nc.Dataset(ff_combo_loc+ff_combo_file_str,'r')
+nc_dset = nc.Dataset(ff_combo_loc,'r')
 
 #Setting up the time range
 start_time = datetime.strptime(s_time_str, '%Y%m%d')
