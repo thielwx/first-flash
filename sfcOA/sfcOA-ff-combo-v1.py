@@ -259,7 +259,7 @@ def sfcoa_driver(t_start, t_end):
 
 			#Getting the indicies for each first flash location in the OA data
 			oa_flat_idx = np.arange(0,len(oa_lats.flatten('C')),1)
-			oa_ff_locs = oa_ff_finder(f_lat, f_lon, oa_lats.flatten('C'), oa_lons.flatten('C'), fistart_flid, oa_flat_idx)
+			oa_ff_locs = oa_ff_finder(f_lat[df_locs], f_lon[df_locs], oa_lats.flatten('C'), oa_lons.flatten('C'), fistart_flid, oa_flat_idx)
 
 			#Shipping all this stuff off to sample and fill the dataframe
 			df = oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid[df_locs], f_lat[df_locs], f_lon[df_locs], oa_ff_locs)
