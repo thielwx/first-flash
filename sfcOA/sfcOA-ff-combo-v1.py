@@ -138,29 +138,34 @@ def oa_ff_finder(f_lat, f_lon, oa_lats, oa_lons, fistart_flid, oa_flat_idx):
 def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs, t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid, f_lat, f_lon, oa_ff_locs):
 	#Looping through each variable so we only have to extract them once
 	for var in oa_vars_input:
+		print (var)
 		#Loading the variable from the gempak grid
 		var_data = oa_data.gdxarray(parameter=var)[0].values[0][0]
 
 		#If there's t0 data that exists, loop through the t0 points in the dataframe
 		#and sample the nearest sfcOA point for the current variable
+		print ('t0')
 		if len(t0_locs>0):
 			for loc in t0_locs:
 				#Getting the index to sample on the oa grid
 				oa_loc = oa_ff_locs[loc]
 				#Sampling the sfc oa data and placing the value in the dataframe
 				df.loc[fistart_flid[loc],var+'_T0'] = oa_data.flatten('C')[oa_loc]
+		print ('t1')
 		if len(t1_locs>0):
 			for loc in t1_locs:
 				#Getting the index to sample on the oa grid
 				oa_loc = oa_ff_locs[loc]
 				#Sampling the sfc oa data and placing the value in the dataframe
 				df.loc[fistart_flid[loc],var+'_T1'] = oa_data.flatten('C')[oa_loc]
+		print ('t2')
 		if len(t2_locs>0):
 			for loc in t2_locs:
 				#Getting the index to sample on the oa grid
 				oa_loc = oa_ff_locs[loc]
 				#Sampling the sfc oa data and placing the value in the dataframe
 				df.loc[fistart_flid[loc],var+'_T2'] = oa_data.flatten('C')[oa_loc]
+		print ('t3')
 		if len(t3_locs>0):
 			for loc in t3_locs:
 				#Getting the index to sample on the oa grid
@@ -293,12 +298,13 @@ for i in range(len(time_list_days)-1):
     t_range_end = time_list_days[i+1]
     
     #Breaking the day into 12, 2-hour chunks
-    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='24H') #DEVMODE Change to '2H'
+    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='2H') #DEVMODE Change to '2H'
 
 	#Sending the file string to the sfcoa_driver function that takes over from here...
-    if __name__ == "__main__":
-        with mp.Pool(12) as p:
-            p.starmap(sfcoa_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
+	if __name__ == "__main__":
+		with mp.Pool(12) as p:
+			#p.starmap(sfcoa_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
+			p.starmap(sfcoa_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2]))
             p.close()
             p.join()
 
