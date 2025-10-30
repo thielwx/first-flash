@@ -126,7 +126,7 @@ def oa_ff_finder(f_lat, f_lon, oa_lats, oa_lons, fistart_flid, oa_flat_idx):
 		#Implement a Ball Tree to capture the closest point
 		btree = BallTree(oa_latlons, leaf_size=2, metric='haversine')
 		distances, indices = btree.query(ff_latlons, k=1)
-		closest_index = indices[0][0]
+		closest_idx = indices[0][0]
 
 		#Placing the oa index that is the closest to the first flash (using the full sfcOA grid)
 		oa_ff_locs[i] = oa_flat_idx_search[closest_idx]
