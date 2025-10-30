@@ -92,17 +92,104 @@ def sfc_oa_file_times(f_time):
 
     return oa_times_t0, oa_times_t1, oa_times_t2, oa_times_t3
     
+#Takes in the sfcoa lats/lons and the first flash lat/lon and gives the index of the closest point
+# on the OA grid
+def oa_ff_finder(f_lat, f_lon, oa_lats, oa_lons, fistart_flid, oa_flat_idx):
+	max_range = 50 #Range in km to search
+    R = 6371.0087714 #Earths radius in km
+    dx = 0.5 #Search range in degrees (to cut down the amount of MRMS data we're searching)
+
+	#Converting to radians for the ball tree
+	oa_lats = oa_lats * (np.pi/180)
+	oa_lons = oa_lons * (np.pi/180)
+	fl_lat_rad = f_lat * (np.pi/180)
+	fl_lon_rad = f_lon * (np.pi/180)
+
+	#Creating an empty array to fill
+	#If a first flash is off the sfcOA grid, the index given will be ZERO (which should be a NaN...I think...)
+	oa_ff_locs = np.ones(len(f_lat)) * 0
+
+	#Looping through each first flash to find their position in the surface oa grid
+	for i in range(len(f_lat)):
+		cur_fl_lat = fl_lat_rad[i]
+		cur_fl_lon = fl_lon_rad[i]
+
+		#Cutting down the searchable area to make the BallTrees smaller/faster
+		oa_cutdown_locs = np.where((oa_lons>=cur_fl_lon-dx) & (oa_lons<=cur_fl_lon+dx) & (oa_lats<=cur_fl_lat+dx) & (oa_lats>=cur_fl_lat-dx))[0]
+		if len(oa_cutdown_locs)==0:
+			continue
+		oa_flat_idx_search = oa_flat_idx[oa_cutdown_locs]
+		oa_lats_search = oa_lats[oa_cutdown_locs]
+		oa_lons_search = oa_lons[oa_cutdown_locs]
+
+		#Preparing the data for the ball tree
+		oa_latlons = np.vstack((oa_lats_search, oa_lons_search)).T
+		ff_latlons = np.reshape([cur_fl_lat, cur_fl_lon], (-1, 2))
+
+        #Implement a Ball Tree to capture the closest point
+        btree = BallTree(oa_latlons, leaf_size=2, metric='haversine')
+        distances, indices = btree.query(ff_latlons, k=1)
+		closest_index = indices[0][0]
+
+		#Placing the oa index that is the closest to the first flash (using the full sfcOA grid)
+		oa_ff_locs[i] = oa_flat_idx_search[closest_idx]
+
+	return oa_ff_locs
+
+
 #Allows us to open one sfcOA file at a time to fill the dataframe
-def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid, f_lat, f_lon):
+def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs, t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid, f_lat, f_lon, oa_ff_locs):
 	#Looping through each variable so we only have to extract them once
 	for var in oa_vars_input:
 		#Loading the variable from the gempak grid
 		var_data = oa_data.gdxarray(parameter=var)[0].values[0][0]
 
+		#If there's t0 data that exists, loop through the t0 points in the dataframe
+		#and sample the nearest sfcOA point for the current variable
 		if len(t0_locs>0):
 			for loc in t0_locs:
-				df.loc[fistart_flid[loc],var+'_T0'] = oa_file_parser()#STOP POINT
-	
+				#Getting the index to sample on the oa grid
+				oa_loc = oa_ff_locs[loc]
+				#Sampling the sfc oa data and placing the value in the dataframe
+				df.loc[fistart_flid[loc],var+'_T0'] = oa_data.flatten('C')[oa_loc]
+		if len(t1_locs>0):
+			for loc in t1_locs:
+				#Getting the index to sample on the oa grid
+				oa_loc = oa_ff_locs[loc]
+				#Sampling the sfc oa data and placing the value in the dataframe
+				df.loc[fistart_flid[loc],var+'_T1'] = oa_data.flatten('C')[oa_loc]
+		if len(t2_locs>0):
+			for loc in t2_locs:
+				#Getting the index to sample on the oa grid
+				oa_loc = oa_ff_locs[loc]
+				#Sampling the sfc oa data and placing the value in the dataframe
+				df.loc[fistart_flid[loc],var+'_T2'] = oa_data.flatten('C')[oa_loc]
+		if len(t3_locs>0):
+			for loc in t3_locs:
+				#Getting the index to sample on the oa grid
+				oa_loc = oa_ff_locs[loc]
+				#Sampling the sfc oa data and placing the value in the dataframe
+				df.loc[fistart_flid[loc],var+'_T3'] = oa_data.flatten('C')[oa_loc]
+
+	return df
+
+#Saving the oa	
+def oa_data_saver(df, t_start, t_end, version):
+
+    y, m, d, doy, hr, mi = datetime_converter(t_start)
+    output_folder = y+m+d
+    start_time_str = 's'+y+m+d+hr+mi
+    y, m, d, doy, hr, mi = datetime_converter(t_end)
+    end_time_str = 'e'+y+m+d+hr+mi
+    y, m, d, doy, hr, mi = datetime_converter(datetime.now())
+    cur_time_str = 'c'+y+m+d+hr+mi
+    
+    output_loc = '/localdata/first-flash/data/sfcOA-processed-v'+str(version)+'/'+output_folder +'/'
+    output_file = 'sfcOA-ff-v'+str(version)+'-'+start_time_str+'-'+end_time_str+'-'+cur_time_str+'.csv'
+    if not os.path.exists(output_loc):
+        os.makedirs(output_loc, exist_ok=True)
+    df.to_csv(output_loc+output_file)
+    print (output_loc+output_file)
 
 
 #====================================================
@@ -138,7 +225,7 @@ def sfcoa_driver(t_start, t_end):
 		#Making list of files we need to loop through
 		oa_file_loop_list = [t.strftime('sfcoaruc_%y%m%d%H') for t in pd.date_range(start=t_start-timedelta(minutes=180), end=t_end-timedelta(minutes=60), freq='1h')]
 
-		#Looping through each potneital file that we need to pull from
+		#Looping through each potential file that we need to pull from
 		for cur_oa_file in oa_file_loop_list:
 			print (cur_oa_file)
 
@@ -161,16 +248,21 @@ def sfcoa_driver(t_start, t_end):
 				#print ('DONG! NO OA DATA NEEDED')
 				continue
 			#If data exists, open the file!
-			else:
-				oa_data = gpk.GempakGrid(oa_files_loc+cur_oa_file)
-				oa_lats = oa_data.lat
-				oa_lons = oa_data.lon
-				#print ('DING!')
-				print (cur_oa_file+' read')
-			
+			oa_data = gpk.GempakGrid(oa_files_loc+cur_oa_file)
+			oa_lats = oa_data.lat
+			oa_lons = oa_data.lon
+			#print ('DING!')
+			print (cur_oa_file+' read')
+
+			#Getting the indicies for each first flash location in the OA data
+			oa_flat_idx = np.arange(0,len(oa_lats.flatten('C'),1))
+			oa_ff_locs = oa_ff_finder(f_lat, f_lon, oa_lats.flatten('C'), oa_lons.flatten('C'), fistart_flid, oa_flat_idx)
+
 			#Shipping all this stuff off to sample and fill the dataframe
-			df = oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid[df_locs], f_lat[df_locs], f_lon[df_locs])
-				
+			df = oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs,  t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid[df_locs], f_lat[df_locs], f_lon[df_locs], oa_ff_locs)
+		
+		#Saving the dataframe out
+		oa_data_saver(df, t_start, t_end, version)
 
 # WORK ZONE
 
@@ -204,7 +296,7 @@ for i in range(len(time_list_days)-1):
     t_range_end = time_list_days[i+1]
     
     #Breaking the day into 12, 2-hour chunks
-    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='24H')
+    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='24H') #DEVMODE Change to '2H'
 
 	#Sending the file string to the sfcoa_driver function that takes over from here...
     if __name__ == "__main__":
