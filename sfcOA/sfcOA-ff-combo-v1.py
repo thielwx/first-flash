@@ -305,8 +305,8 @@ for i in range(len(time_list_days)-1):
 		with mp.Pool(12) as p:
 			#p.starmap(sfcoa_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
 			p.starmap(sfcoa_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2]))
-            p.close()
-            p.join()
+			p.close()
+			p.join()
 
 
 
