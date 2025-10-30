@@ -95,6 +95,7 @@ def sfc_oa_file_times(f_time):
 #Takes in the sfcoa lats/lons and the first flash lat/lon and gives the index of the closest point
 # on the OA grid
 def oa_ff_finder(f_lat, f_lon, oa_lats, oa_lons, fistart_flid, oa_flat_idx):
+	dx = 0.5	
 	#Converting to radians for the ball tree
 	oa_lats = oa_lats * (np.pi/180)
 	oa_lons = oa_lons * (np.pi/180)
