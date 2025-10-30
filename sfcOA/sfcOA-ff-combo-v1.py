@@ -294,11 +294,11 @@ f_time = GLM_LCFA_times_postprocess(fistart_str, nc_dset.variables['flash_time_o
 #Looping through on a daily basis (and then two hour chunks to leverage multi-threading...)
 for i in range(len(time_list_days)-1):
 	
-    t_range_start = time_list_days[i]
-    t_range_end = time_list_days[i+1]
+	t_range_start = time_list_days[i]
+	t_range_end = time_list_days[i+1]
     
-    #Breaking the day into 12, 2-hour chunks
-    tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='2H') #DEVMODE Change to '2H'
+	#Breaking the day into 12, 2-hour chunks
+	tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='2H') #DEVMODE Change to '2H'
 
 	#Sending the file string to the sfcoa_driver function that takes over from here...
 	if __name__ == "__main__":
