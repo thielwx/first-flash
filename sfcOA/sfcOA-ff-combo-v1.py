@@ -303,8 +303,8 @@ for i in range(len(time_list_days)-1):
 	#Sending the file string to the sfcoa_driver function that takes over from here...
 	if __name__ == "__main__":
 		with mp.Pool(12) as p:
-			#p.starmap(sfcoa_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
-			p.starmap(sfcoa_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2]))
+			p.starmap(sfcoa_driver, zip(tlist_starmap[:-1], tlist_starmap[1:]))
+			#p.starmap(sfcoa_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2])) #DEVMODE
 			p.close()
 			p.join()
 
