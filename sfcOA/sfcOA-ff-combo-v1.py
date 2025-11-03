@@ -130,7 +130,6 @@ def oa_ff_finder(f_lat, f_lon, oa_lats, oa_lons, fistart_flid, oa_flat_idx):
 
 		#Placing the oa index that is the closest to the first flash (using the full sfcOA grid)
 		oa_ff_locs[i] = oa_flat_idx_search[closest_idx]
-		print (i)
 
 	return oa_ff_locs
 
@@ -172,6 +171,7 @@ def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs, t2_locs, t
 				#Getting the index to sample on the oa grid
 				oa_loc = int(oa_ff_locs[loc])
 				print (oa_loc)
+				print ('OA Data Shape: '+ str(np.array(oa_data.flatten('C'))
 				#Sampling the sfc oa data and placing the value in the dataframe
 				df.loc[fistart_flid[loc],var+'_T3'] = np.array(oa_data).flatten('C')[oa_loc]
 
