@@ -171,6 +171,7 @@ def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs, t2_locs, t
 			for loc in t3_locs:
 				#Getting the index to sample on the oa grid
 				oa_loc = oa_ff_locs[loc]
+				print (oa_loc)
 				#Sampling the sfc oa data and placing the value in the dataframe
 				df.loc[fistart_flid[loc],var+'_T3'] = np.array(oa_data).flatten('C')[oa_loc]
 
