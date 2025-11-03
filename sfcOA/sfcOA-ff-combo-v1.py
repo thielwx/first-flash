@@ -25,6 +25,7 @@ warnings.filterwarnings('ignore')
 version = 1
 oa_files_loc = '/localdata/first-flash/data/sfcOA-local/'
 ff_combo_loc = '/localdata/first-flash/data/GLM-ff-east-west-combined/GLM-East-West_first-flash-data_v32_s202201010000_e202301010000_c202410071459.nc'
+dt_start_job = datetime.now()
 
 oa_vars_df = pd.read_csv('ff-sfcoa-vars.csv') #A csv of the variables we'll be pulling from in the sfcoaruc files
 oa_vars_input = oa_vars_df['FIELD'].values
@@ -296,6 +297,7 @@ for i in range(len(time_list_days)-1):
 	
 	t_range_start = time_list_days[i]
 	t_range_end = time_list_days[i+1]
+	print (t_range_start)
     
 	#Breaking the day into 12, 2-hour chunks
 	tlist_starmap = pd.date_range(start=t_range_start, end=t_range_end, freq='2H') #DEVMODE Change to '2H'
@@ -307,6 +309,9 @@ for i in range(len(time_list_days)-1):
 			#p.starmap(sfcoa_driver, zip(tlist_starmap[0:1], tlist_starmap[1:2])) #DEVMODE
 			p.close()
 			p.join()
+
+print ('Total Run Time:')
+print (datetime.now()-dt_start_job)
 
 
 
