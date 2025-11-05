@@ -320,7 +320,7 @@ if (g16_dset.land_flashes_only != g17_dset.land_flashes_only):
 
 #Getting the strings to put into the output file
 s_time_str = datetime.strptime(g16_dset.time_coverage_start, '%Y-%m-%d %H:%M:%S').strftime('s%Y%m%d%H%M')
-e_time_strGLM17_first-flash-data-all_v32_s202201010000_e202301010000_c202409052049.nc = datetime.strptime(g16_dset.time_coverage_end, '%Y-%m-%d %H:%M:%S').strftime('e%Y%m%d%H%M')
+e_time_str = datetime.strptime(g16_dset.time_coverage_end, '%Y-%m-%d %H:%M:%S').strftime('e%Y%m%d%H%M')
 cur_time = datetime.now()
 c_time_str = cur_time.strftime('c%Y%m%d%H%M')
 
