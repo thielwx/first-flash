@@ -225,8 +225,8 @@ def combo_data_loader(fistart_flid_list, loc16, loc17):
 
     #Parsing the dataframe by the index
     df_cut = df_combo.loc[fistart_flid_list,:]
-	print (df_cut.shape[0])
-	print (len(fistart_flid_list))
+    print (df_cut.shape[0])
+    print (len(fistart_flid_list))
 
     return df_cut
 
