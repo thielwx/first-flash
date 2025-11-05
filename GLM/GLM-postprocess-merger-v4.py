@@ -223,6 +223,8 @@ def combo_data_loader(fistart_flid_list, loc16, loc17):
     df_combo = pd.concat((df16,df17),axis=0)
     df_combo.set_index('flash_fistart_flid', inplace=True)
 
+    df_combo = df_combo.loc[~df_combo.index.duplicated(keep='first'), :]#Removing duplicates in case of double counting
+
     #Parsing the dataframe by the index
     df_cut = df_combo.loc[fistart_flid_list,:]
     print (df_cut.shape[0])
