@@ -137,44 +137,48 @@ def oa_ff_finder(f_lat, f_lon, oa_lats, oa_lons, fistart_flid, oa_flat_idx):
 
 #Allows us to open one sfcOA file at a time to fill the dataframe
 def oa_df_filler(df, oa_vars_input, oa_vars_output, t0_locs, t1_locs, t2_locs, t3_locs, oa_lats, oa_lons, oa_data, fistart_flid, f_lat, f_lon, oa_ff_locs):
-	#Looping through each variable so we only have to extract them once
-	for var in oa_vars_input:
-		#print (var)
-		#Loading the variable from the gempak grid
-		var_data = oa_data.gdxarray(parameter=var)[0].values[0][0]
+    #Looping through each variable so we only have to extract them once
+    for var in oa_vars_input:
+        #print (var)
+        #Loading the variable from the gempak grid
+        if var=='TMPC': #Exception since the sfc and 500mb Temps are the save variable but different levels
+            var_data = oa_data.gdxarray(parameter=var)[1].values[0][0]
+        else:
+            var_data = oa_data.gdxarray(parameter=var)[0].values[0][0]
 
-		#If there's t0 data that exists, loop through the t0 points in the dataframe
-		#and sample the nearest sfcOA point for the current variable
-		#print ('t0')
-		if len(t0_locs>0):
-			for loc in t0_locs:
-				#Getting the index to sample on the oa grid
-				oa_loc = int(oa_ff_locs[loc])
-				#Sampling the sfc oa data and placing the value in the dataframe
-				df.loc[fistart_flid[loc],var+'_T0'] = var_data.flatten('C')[oa_loc]
-		#print ('t1')
-		if len(t1_locs>0):
-			for loc in t1_locs:
-				#Getting the index to sample on the oa grid
-				oa_loc = int(oa_ff_locs[loc])
-				#Sampling the sfc oa data and placing the value in the dataframe
-				df.loc[fistart_flid[loc],var+'_T1'] = var_data.flatten('C')[oa_loc]
-		#print ('t2')
-		if len(t2_locs>0):
-			for loc in t2_locs:
-				#Getting the index to sample on the oa grid
-				oa_loc = int(oa_ff_locs[loc])
-				#Sampling the sfc oa data and placing the value in the dataframe
-				df.loc[fistart_flid[loc],var+'_T2'] = var_data.flatten('C')[oa_loc]
-		#print ('t3')
-		if len(t3_locs>0):
-			for loc in t3_locs:
-				#Getting the index to sample on the oa grid
-				oa_loc = int(oa_ff_locs[loc])
-				#Sampling the sfc oa data and placing the value in the dataframe
-				df.loc[fistart_flid[loc],var+'_T3'] = var_data.flatten('C')[oa_loc]
 
-	return df
+        #If there's t0 data that exists, loop through the t0 points in the dataframe
+        #and sample the nearest sfcOA point for the current variable
+        #print ('t0')
+        if len(t0_locs>0):
+            for loc in t0_locs:
+                #Getting the index to sample on the oa grid
+                oa_loc = int(oa_ff_locs[loc])
+                #Sampling the sfc oa data and placing the value in the dataframe
+                df.loc[fistart_flid[loc],var+'_T0'] = var_data.flatten('C')[oa_loc]
+        #print ('t1')
+        if len(t1_locs>0):
+            for loc in t1_locs:
+                #Getting the index to sample on the oa grid
+                oa_loc = int(oa_ff_locs[loc])
+                #Sampling the sfc oa data and placing the value in the dataframe
+                df.loc[fistart_flid[loc],var+'_T1'] = var_data.flatten('C')[oa_loc]
+        #print ('t2')
+        if len(t2_locs>0):
+            for loc in t2_locs:
+                #Getting the index to sample on the oa grid
+                oa_loc = int(oa_ff_locs[loc])
+                #Sampling the sfc oa data and placing the value in the dataframe
+                df.loc[fistart_flid[loc],var+'_T2'] = var_data.flatten('C')[oa_loc]
+        #print ('t3')
+        if len(t3_locs>0):
+            for loc in t3_locs:
+                #Getting the index to sample on the oa grid
+                oa_loc = int(oa_ff_locs[loc])
+                #Sampling the sfc oa data and placing the value in the dataframe
+                df.loc[fistart_flid[loc],var+'_T3'] = var_data.flatten('C')[oa_loc]
+
+    return df
 
 #Saving the oa	
 def oa_data_saver(df, t_start, t_end, version):
