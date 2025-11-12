@@ -22,7 +22,7 @@ import warnings
 warnings.filterwarnings('ignore') 
 
 #Constants
-version = 2
+version = 1
 oa_files_loc = '/localdata/first-flash/data/sfcOA-local/'
 ff_combo_loc = '/localdata/first-flash/data/GLM-ff-east-west-combined/GLM-East-West_first-flash-data_v32_s202201010000_e202301010000_c202410071459.nc'
 dt_start_job = datetime.now()

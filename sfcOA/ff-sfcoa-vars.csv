@@ -45,3 +45,7 @@ UWND,Surface U wind component,kt
 VWND,Surface V wind component,kt
 PMSL,Sea Level Pressure,mb
 SMXR,Surface mixing ratio,g kg-1
+WDIV,Surface wind divergence,s-1
+H5HT,500 mb height field,m
+PVOR,Potential Vorticity,PV Unit
+M7LI,700 mb Lifted Index,C
